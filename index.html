@@ -2,9 +2,11 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>ByMO Tech - Suite Cambista</title>
     <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+
         :root {
             --bg-color: #f4f4f9;
             --container-bg: #ffffff;
@@ -32,25 +34,25 @@
             }
         }
 
-        body { font-family: 'Segoe UI', Arial, sans-serif; padding: 0; background-color: var(--bg-color); color: var(--text-color); margin: 0; padding-bottom: 70px; }
-        .container { max-width: 450px; margin: 0 auto; background: var(--container-bg); min-height: 100vh; padding: 15px; box-sizing: border-box; }
+        body { font-family: 'Segoe UI', Arial, sans-serif; background-color: var(--bg-color); color: var(--text-color); padding-bottom: 70px; }
+        .container { max-width: 450px; margin: 0 auto; background: var(--container-bg); min-height: 100vh; padding: 15px; width: 100%; overflow-x: hidden; }
         
-        /* Header Simplificado */
+        /* Header */
         .header { text-align: center; padding-bottom: 10px; border-bottom: 1px solid var(--input-border); margin-bottom: 15px; }
         .logo-simple { font-size: 40px; margin-bottom: 5px; }
 
-        /* Dashboard de Ganancia */
+        /* Dashboard */
         .dashboard { background: var(--card-bg); padding: 15px; border-radius: 12px; text-align: center; margin-bottom: 20px; border: 1px solid var(--input-border); }
-        .dashboard p { margin: 0; font-size: 12px; text-transform: uppercase; font-weight: bold; opacity: 0.7; }
-        .dashboard h1 { margin: 5px 0 0 0; font-size: 28px; color: var(--green-text); }
+        .dashboard p { font-size: 12px; text-transform: uppercase; font-weight: bold; opacity: 0.7; }
+        .dashboard h1 { margin-top: 5px; font-size: 28px; color: var(--green-text); }
 
-        /* Navegación Inferior Estilo App */
+        /* Navegación Inferior */
         .nav-bar { position: fixed; bottom: 0; left: 0; width: 100%; background: var(--container-bg); display: flex; border-top: 1px solid var(--input-border); z-index: 100; }
         .nav-item { flex: 1; text-align: center; padding: 12px 5px; font-size: 10px; font-weight: bold; cursor: pointer; color: var(--text-color); opacity: 0.6; }
         .nav-item.active { opacity: 1; color: var(--brand-color); border-top: 3px solid var(--brand-color); }
         .nav-icon { font-size: 20px; display: block; margin-bottom: 2px; }
 
-        /* Estilos de Formulario */
+        /* Formularios */
         .section { display: none; }
         .section.active { display: block; }
         label { font-weight: bold; display: block; margin-top: 15px; font-size: 13px; }
@@ -66,7 +68,7 @@
         .op-title { font-weight: bold; font-size: 14px; margin: 2px 0; }
         .op-gain { font-weight: bold; font-size: 16px; text-align: right; }
 
-        .footer-tag { text-align: center; font-size: 9px; opacity: 0.4; margin-top: 30px; font-style: italic; }
+        .footer-tag { text-align: center; font-size: 9px; opacity: 0.4; margin-top: 30px; font-style: italic; padding-bottom: 20px; }
     </style>
 </head>
 <body>
@@ -74,7 +76,7 @@
 <div class="container">
     <div class="header">
         <div class="logo-simple">⚡</div>
-        <h2 style="font-size: 16px; margin: 0;">ByMO Tech Suite</h2>
+        <h2 style="font-size: 16px;">ByMO Tech Suite</h2>
     </div>
 
     <div id="sec-libro" class="section active">
@@ -82,12 +84,13 @@
             <p>Utilidad del Día</p>
             <h1 id="totalDay">0.00 USDT</h1>
         </div>
-        <h3 style="font-size: 14px;">Historial de Hoy</h3>
+        <h3 style="font-size: 14px; margin-bottom: 10px;">Historial de Hoy</h3>
         <div id="historyList"></div>
     </div>
 
     <div id="sec-operar" class="section">
         <h3 style="text-align: center;">Nueva Operación</h3>
+        
         <label>Concepto / Cliente:</label>
         <input type="text" id="opConcepto" placeholder="Ej: Cambio Juan Perez">
         
@@ -108,15 +111,19 @@
 
     <div id="sec-calc" class="section">
         <h3 style="text-align: center;">Calculadora de Precios</h3>
+        
         <label>Moneda Ref:</label>
         <select id="calcMoneda" onchange="updateCalcLabels()">
             <option value="USD">Dólar ($)</option>
             <option value="EUR">Euro (€)</option>
         </select>
+        
         <label>Precio en Etiqueta (<span id="refSym">$</span>):</label>
         <input type="number" id="calcPrice" placeholder="0.00" inputmode="decimal">
+        
         <label>Tasa BCV (Bs/<span id="refSym2">$</span>):</label>
         <input type="number" id="calcBcv" placeholder="0.00" inputmode="decimal">
+        
         <label>Tasa Binance (Bs/USDT):</label>
         <input type="number" id="calcBin" placeholder="0.00" inputmode="decimal">
         
@@ -125,35 +132,41 @@
             <h1 id="calcResVal">0.00 USDT</h1>
             <p id="calcResDiff" style="font-size: 10px; color: var(--green-text);"></p>
         </div>
+        
         <button class="btn-save" onclick="execCalc()">Calcular Precio</button>
     </div>
 
     <div id="sec-tasas" class="section">
-        <h3 style="text-align: center;">Configuración de Tasas</h3>
-        <p style="font-size: 11px; opacity:0.7;">Ajusta las tasas para los cálculos automáticos del día.</p>
+        <h3 style="text-align: center; margin-bottom: 10px;">Configuración de Tasas</h3>
         
         <label>💵 Tasa Efectivo (Bs/$):</label>
-        <input type="number" id="tEfBs" step="0.1" inputmode="decimal">
+        <input type="number" id="tEfBs" placeholder="Ej: 43.5" step="0.1" inputmode="decimal">
         
         <label>🟢 Tasa USDT (Bs/USDT):</label>
-        <input type="number" id="tUsdtBs" step="0.1" inputmode="decimal">
+        <input type="number" id="tUsdtBs" placeholder="Ej: 45.0" step="0.1" inputmode="decimal">
 
         <label>🇨🇴 Tasa Zelle ⮕ COP:</label>
-        <input type="number" id="tZelleCop" step="1" inputmode="decimal">
+        <input type="number" id="tZelleCop" placeholder="Ej: 3500" step="1" inputmode="decimal">
         
         <label>🇺🇸 Tasa Zelle ⮕ Efectivo (% Comisión):</label>
-        <input type="number" id="tZelleEf" step="0.1" inputmode="decimal">
+        <input type="number" id="tZelleEf" placeholder="Ej: 3" step="0.1" inputmode="decimal">
+
+        <label>💵 Tasa Efectivo ⮕ USDT (Bs Ref):</label>
+        <input type="number" id="tEfUsdtBsRef" placeholder="Precio referencia" step="0.1" inputmode="decimal">
+        
+        <label>💵 Comisión Efectivo ⮕ USDT (%):</label>
+        <input type="number" id="tEfUsdtCom" placeholder="Ej: 2" step="0.1" inputmode="decimal">
 
         <label>🏦 Tasas BCV (Dólar / Euro):</label>
         <div style="display:flex; gap:10px;">
-            <input type="number" id="tBcvUsd" placeholder="USD" inputmode="decimal">
-            <input type="number" id="tBcvEur" placeholder="EUR" inputmode="decimal">
+            <input type="number" id="tBcvUsd" placeholder="USD" step="0.01" inputmode="decimal">
+            <input type="number" id="tBcvEur" placeholder="EUR" step="0.01" inputmode="decimal">
         </div>
 
         <button class="btn-save" onclick="saveTasas()">Guardar Tasas</button>
     </div>
 
-    <div class="footer-tag">desarrollado por Bymo Technology</div>
+    <div class="footer-tag">desarrollado por ByMO Technology</div>
 </div>
 
 <div class="nav-bar">
@@ -179,14 +192,14 @@
     }
 
     function loadTasas() {
-        const fields = ['tEfBs', 'tUsdtBs', 'tZelleCop', 'tZelleEf', 'tBcvUsd', 'tBcvEur'];
+        const fields = ['tEfBs', 'tUsdtBs', 'tZelleCop', 'tZelleEf', 'tBcvUsd', 'tBcvEur', 'tEfUsdtBsRef', 'tEfUsdtCom'];
         fields.forEach(f => {
             if(localStorage.getItem(f)) document.getElementById(f).value = localStorage.getItem(f);
         });
     }
 
     function saveTasas() {
-        const fields = ['tEfBs', 'tUsdtBs', 'tZelleCop', 'tZelleEf', 'tBcvUsd', 'tBcvEur'];
+        const fields = ['tEfBs', 'tUsdtBs', 'tZelleCop', 'tZelleEf', 'tBcvUsd', 'tBcvEur', 'tEfUsdtBsRef', 'tEfUsdtCom'];
         fields.forEach(f => localStorage.setItem(f, document.getElementById(f).value));
         alert("Tasas Guardadas ✅");
     }
@@ -214,7 +227,8 @@
         let concepto = document.getElementById('opConcepto').value || "Varios";
         let tipo = document.getElementById('opTipo').value;
         let monto = parseFloat(document.getElementById('opMonto').value) || 0;
-        if(monto <= 0) return alert("Ingresa un monto");
+        
+        if(monto <= 0) return alert("Ingresa un monto válido");
 
         let gain = 0;
         let tUsdt = parseFloat(localStorage.getItem('tUsdtBs')) || 1;
@@ -224,11 +238,14 @@
             let com = parseFloat(localStorage.getItem('tZelleEf')) || 0;
             gain = monto * (com / 100);
         } else if(tipo === 'ef_usdt') {
-            gain = (monto * tEf / tUsdt) - monto;
+            // Lógica con la nueva comisión de Efectivo a USDT
+            let comEfUsdt = parseFloat(localStorage.getItem('tEfUsdtCom')) || 0;
+            gain = monto * (comEfUsdt / 100); 
+            // Si quieres usar la tasa ref, ajustas esta fórmula
         } else if(tipo === 'bs_ef') {
-            gain = (monto / tEf) - (monto / tUsdt); // Arbitraje simple
+            gain = (monto / tEf) - (monto / tUsdt); 
         } else if(tipo === 'zelle_cop') {
-            gain = monto * 0.02; // Asumiendo 2% de margen por defecto
+            gain = monto * 0.02; // Margen base de ejemplo
         }
 
         let newOp = {
@@ -241,7 +258,11 @@
 
         ops.unshift(newOp);
         localStorage.setItem('bymo_ops', JSON.stringify(ops));
+        
+        // Limpiar los campos para la próxima operación
+        document.getElementById('opConcepto').value = "";
         document.getElementById('opMonto').value = "";
+        
         renderLibro();
         nav('libro');
     }
@@ -250,6 +271,11 @@
         let list = document.getElementById('historyList');
         list.innerHTML = "";
         let total = 0;
+        
+        if (ops.length === 0) {
+            list.innerHTML = "<p style='font-size:12px; text-align:center; opacity:0.6;'>No hay operaciones registradas.</p>";
+        }
+
         ops.forEach(o => {
             total += o.gain;
             list.innerHTML += `
@@ -257,7 +283,7 @@
                     <div>
                         <div class="op-meta">${o.time} - ${o.concepto}</div>
                         <div class="op-title">${o.tipo}</div>
-                        <button onclick="borrar(${o.id})" style="width:auto; padding:2px 5px; margin:0; font-size:9px; background:red;">X</button>
+                        <button onclick="borrar(${o.id})" style="width:auto; padding:3px 8px; margin:5px 0 0 0; font-size:10px; background:var(--red-text); border:none; border-radius:4px; color:white; cursor:pointer;">Borrar</button>
                     </div>
                     <div class="op-gain" style="color:${o.gain < 0 ? 'var(--red-text)' : 'var(--green-text)'}">
                         ${o.gain >= 0 ? '+' : ''}${o.gain.toFixed(2)}
