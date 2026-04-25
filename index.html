@@ -77,7 +77,6 @@
 
         .footer-tag { text-align: center; font-size: 9px; opacity: 0.4; margin-top: 30px; font-style: italic; padding-bottom: 20px; }
 
-        /* Estilos para el Conversor Rápido */
         .conv-row { display: flex; justify-content: space-between; border-bottom: 1px solid var(--input-border); padding: 8px 0; font-size: 14px; }
         .conv-row:last-child { border-bottom: none; }
         .conv-val { font-weight: bold; color: var(--green-text); font-size: 16px; }
@@ -134,7 +133,6 @@
     </div>
 
     <div id="sec-calc" class="section">
-        
         <h3 style="text-align: center; margin-bottom: 5px;">Conversor Rápido</h3>
         <p style="font-size: 10px; text-align:center; opacity:0.6; margin-bottom:15px;">Calcula equivalencias en tiempo real.</p>
         
@@ -293,7 +291,7 @@
     window.onload = () => {
         loadTasas();
         renderLibro();
-        calcularConversor(); // Para que inicie en 0.00
+        calcularConversor();
     };
 
     function nav(id) {
@@ -310,7 +308,6 @@
         }
     }
 
-    // LÓGICA DEL CONVERSOR RÁPIDO
     function calcularConversor() {
         let monto = parseFloat(document.getElementById('convMonto').value) || 0;
         let modo = document.getElementById('convModo').value;
@@ -320,19 +317,16 @@
         let tUsdt = parseFloat(document.getElementById('tUsdtBs').value) || 1;
 
         if (modo === 'div_bs') {
-            // Multiplica la divisa por la tasa para dar Bs
             document.getElementById('resConvBcv').innerText = (monto * tBcvUsd).toLocaleString('es-VE', {minimumFractionDigits: 2, maximumFractionDigits: 2}) + " Bs";
             document.getElementById('resConvEur').innerText = (monto * tBcvEur).toLocaleString('es-VE', {minimumFractionDigits: 2, maximumFractionDigits: 2}) + " Bs";
             document.getElementById('resConvUsdt').innerText = (monto * tUsdt).toLocaleString('es-VE', {minimumFractionDigits: 2, maximumFractionDigits: 2}) + " Bs";
         } else {
-            // Divide los Bs entre la tasa para dar la divisa
             document.getElementById('resConvBcv').innerText = (monto / tBcvUsd).toLocaleString('es-VE', {minimumFractionDigits: 2, maximumFractionDigits: 2}) + " $";
             document.getElementById('resConvEur').innerText = (monto / tBcvEur).toLocaleString('es-VE', {minimumFractionDigits: 2, maximumFractionDigits: 2}) + " €";
             document.getElementById('resConvUsdt').innerText = (monto / tUsdt).toLocaleString('es-VE', {minimumFractionDigits: 2, maximumFractionDigits: 2}) + " USDT";
         }
     }
 
-    // AUTOMATIZACIÓN DE TASAS VÍA DOLARAPI
     async function sincronizarTasasAPI() {
         const btn = document.getElementById('btnSync');
         const originalText = btn.innerText;
@@ -363,7 +357,7 @@
             }
 
             saveTasas(true); 
-            calcularConversor(); // Actualiza el conversor con las nuevas tasas al sincronizar
+            calcularConversor();
             alert("✅ Tasas sincronizadas y guardadas con éxito.");
 
         } catch (error) {
@@ -396,7 +390,7 @@
             'tDolarElecBs', 'comBancoElec', 'comBinanceElec'
         ];
         fields.forEach(f => localStorage.setItem(f, document.getElementById(f).value));
-        calcularConversor(); // Refresca el conversor si guarda manual
+        calcularConversor(); 
         if(!silent) alert("Tasas Guardadas ✅");
     }
 
@@ -568,5 +562,7 @@
         }
     }
 </script>
+
+<script defer src="/_vercel/insights/script.js"></script>
 </body>
 </html>
