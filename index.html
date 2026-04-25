@@ -274,7 +274,7 @@
         }
     }
 
-    // AUTOMATIZACIÓN DE TASAS (NUEVO)
+    // AUTOMATIZACIÓN DE TASAS VÍA DOLARAPI
     async function sincronizarTasasAPI() {
         const btn = document.getElementById('btnSync');
         const originalText = btn.innerText;
@@ -282,36 +282,36 @@
         btn.disabled = true;
 
         try {
-            // Extraer de API pública pyDolarVenezuela
-            let resBcv = await fetch('https://pydolarvenezuela-api.vercel.app/api/v1/dollar?page=bcv');
+            // Extraer de DolarAPI (Estable y veloz)
+            let resBcv = await fetch('https://ve.dolarapi.com/v1/dolares/oficial');
             let dataBcv = await resBcv.json();
 
-            let resBin = await fetch('https://pydolarvenezuela-api.vercel.app/api/v1/dollar?page=binance');
-            let dataBin = await resBin.json();
+            let resEur = await fetch('https://ve.dolarapi.com/v1/euros/oficial');
+            let dataEur = await resEur.json();
 
-            if (dataBcv && dataBcv.monitors) {
-                if (dataBcv.monitors.usd) {
-                    document.getElementById('tBcvUsd').value = dataBcv.monitors.usd.price;
-                    document.getElementById('tDolarElecBs').value = dataBcv.monitors.usd.price;
-                    // También se actualiza la calculadora
-                    document.getElementById('calcBcv').value = dataBcv.monitors.usd.price;
-                }
-                if (dataBcv.monitors.eur) {
-                    document.getElementById('tBcvEur').value = dataBcv.monitors.eur.price;
-                }
+            // Usamos la tasa del Paralelo como referencia más cercana a Binance
+            let resParalelo = await fetch('https://ve.dolarapi.com/v1/dolares/paralelo');
+            let dataParalelo = await resParalelo.json();
+
+            if (dataBcv && dataBcv.promedio) {
+                document.getElementById('tBcvUsd').value = dataBcv.promedio;
+                document.getElementById('tDolarElecBs').value = dataBcv.promedio;
+                document.getElementById('calcBcv').value = dataBcv.promedio;
+            }
+            if (dataEur && dataEur.promedio) {
+                document.getElementById('tBcvEur').value = dataEur.promedio;
+            }
+            if (dataParalelo && dataParalelo.promedio) {
+                document.getElementById('tUsdtBs').value = dataParalelo.promedio;
+                document.getElementById('calcBin').value = dataParalelo.promedio;
             }
 
-            if (dataBin && dataBin.monitors && dataBin.monitors.binance) {
-                document.getElementById('tUsdtBs').value = dataBin.monitors.binance.price;
-                document.getElementById('calcBin').value = dataBin.monitors.binance.price;
-            }
-
-            saveTasas(true); // Guardar silenciosamente
+            saveTasas(true); // Guardar silenciosamente en el almacenamiento local
             alert("✅ Tasas sincronizadas y guardadas con éxito.");
 
         } catch (error) {
             console.error("Error al obtener tasas:", error);
-            alert("❌ Hubo un error de conexión con el servidor. Verifica tu internet o ingresa las tasas de forma manual.");
+            alert("❌ Hubo un error de conexión. Verifica tu internet o ingresa las tasas de forma manual.");
         }
 
         btn.innerText = originalText;
@@ -366,150 +366,4 @@
 
         document.getElementById('calcRes').style.display = 'block';
         document.getElementById('calcResVal').innerText = usdt.toFixed(2) + " USDT";
-        document.getElementById('calcResDiff').innerText = "Ahorro Diferencial: " + diff.toFixed(2) + "%";
-    }
-
-    function registrar() {
-        let concepto = document.getElementById('opConcepto').value || "Varios";
-        let tipo = document.getElementById('opTipo').value;
-        let monto = parseFloat(document.getElementById('opMonto').value) || 0;
-        
-        if(monto <= 0) return alert("Ingresa un monto válido");
-
-        let gain = 0;
-        let tUsdt = parseFloat(localStorage.getItem('tUsdtBs')) || 1;
-        let tEf = parseFloat(localStorage.getItem('tEfBs')) || 1;
-        let tZelleBs = parseFloat(localStorage.getItem('tZelleBs')) || 1;
-
-        if(tipo === 'zelle_usdt' || tipo === 'zelle_ef') {
-            let com = parseFloat(localStorage.getItem('tZelleEf')) || 0;
-            gain = monto * (com / 100);
-        } else if (tipo === 'zelle_bs') {
-            gain = monto - ((monto * tZelleBs) / tUsdt);
-        } else if(tipo === 'ef_usdt') {
-            let comEfUsdt = parseFloat(localStorage.getItem('tEfUsdtCom')) || 0;
-            gain = monto * (comEfUsdt / 100); 
-        } else if(tipo === 'bs_ef') {
-            gain = (monto / tEf) - (monto / tUsdt); 
-        } else if(tipo === 'zelle_cop') {
-            gain = monto * 0.02;
-        } else if(tipo === 'ciclo_calle') {
-            let tBsEfCalle = parseFloat(localStorage.getItem('tBsEfCalle')) || 1;
-            let comEfUsdt = parseFloat(localStorage.getItem('tEfUsdtCom')) || 0;
-            
-            let bsInvertidos = monto * tBsEfCalle;
-            let usdtNetoRecibido = monto * (1 - (comEfUsdt / 100));
-            let bsRecuperados = usdtNetoRecibido * tUsdt;
-            
-            gain = (bsRecuperados - bsInvertidos) / tUsdt;
-        } else if (tipo === 'usdt_bcv_usdt') {
-            let tDolarElecBs = parseFloat(localStorage.getItem('tDolarElecBs')) || 1;
-            let comBancoElec = parseFloat(localStorage.getItem('comBancoElec')) || 0;
-            let comBinanceElec = parseFloat(localStorage.getItem('comBinanceElec')) || 0;
-
-            let bsObtenidos = monto * tUsdt; 
-            let costoPorUsdBanco = tDolarElecBs * (1 + (comBancoElec / 100));
-            let usdBancoComprados = bsObtenidos / costoPorUsdBanco;
-            let usdtFinal = usdBancoComprados * (1 - (comBinanceElec / 100));
-
-            gain = usdtFinal - monto;
-        }
-
-        let fechaHoy = new Date();
-        let anio = fechaHoy.getFullYear();
-        let mes = String(fechaHoy.getMonth() + 1).padStart(2, '0');
-        let dia = String(fechaHoy.getDate()).padStart(2, '0');
-        let stringFecha = `${anio}-${mes}-${dia}`;
-
-        let newOp = {
-            id: Date.now(),
-            date: stringFecha,
-            time: fechaHoy.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'}),
-            concepto: concepto,
-            tipo: document.getElementById('opTipo').options[document.getElementById('opTipo').selectedIndex].text,
-            monto: monto,
-            gain: gain
-        };
-
-        ops.unshift(newOp);
-        localStorage.setItem('bymo_ops', JSON.stringify(ops));
-        
-        document.getElementById('opConcepto').value = "";
-        document.getElementById('opMonto').value = "";
-        
-        renderLibro();
-        nav('libro');
-    }
-
-    function renderLibro() {
-        let list = document.getElementById('historyList');
-        let selectFecha = document.getElementById('filtroFecha');
-        
-        let fechaHoyObj = new Date();
-        let stringHoy = `${fechaHoyObj.getFullYear()}-${String(fechaHoyObj.getMonth() + 1).padStart(2, '0')}-${String(fechaHoyObj.getDate()).padStart(2, '0')}`;
-        
-        let huboCambio = false;
-        ops.forEach(o => {
-            if (!o.date) { o.date = stringHoy; huboCambio = true; }
-        });
-        if (huboCambio) localStorage.setItem('bymo_ops', JSON.stringify(ops));
-
-        let fechasUnicas = [...new Set(ops.map(o => o.date))];
-        if (!fechasUnicas.includes(stringHoy)) fechasUnicas.unshift(stringHoy);
-        
-        fechasUnicas.sort((a, b) => new Date(b) - new Date(a));
-
-        let fechaSeleccionada = selectFecha.value || stringHoy;
-
-        selectFecha.innerHTML = "";
-        fechasUnicas.forEach(f => {
-            let opt = document.createElement('option');
-            opt.value = f;
-            opt.innerText = (f === stringHoy) ? "📅 Hoy" : "📅 " + f;
-            if(f === fechaSeleccionada) opt.selected = true;
-            selectFecha.appendChild(opt);
-        });
-
-        fechaSeleccionada = selectFecha.value;
-        document.getElementById('tituloDashboard').innerText = (fechaSeleccionada === stringHoy) ? "Utilidad del Día" : "Utilidad de la Fecha";
-
-        let opsFiltradas = ops.filter(o => o.date === fechaSeleccionada);
-        
-        list.innerHTML = "";
-        let total = 0;
-        
-        if (opsFiltradas.length === 0) {
-            list.innerHTML = "<p style='font-size:12px; text-align:center; opacity:0.6;'>No hay operaciones en esta fecha.</p>";
-        }
-
-        opsFiltradas.forEach(o => {
-            total += o.gain;
-            let displayMonto = o.monto ? o.monto : 'N/A';
-            
-            list.innerHTML += `
-                <div class="card-op ${o.gain < 0 ? 'neg' : ''}">
-                    <div>
-                        <div class="op-meta">${o.time} - ${o.concepto}</div>
-                        <div class="op-title" style="font-size: 12px;">${o.tipo}</div>
-                        <div class="op-monto">Inv/Base: <b>${displayMonto}</b></div>
-                        <button onclick="borrar(${o.id})" style="width:auto; padding:3px 8px; margin:5px 0 0 0; font-size:10px; background:var(--red-text); border:none; border-radius:4px; color:white; cursor:pointer;">Borrar</button>
-                    </div>
-                    <div class="op-gain" style="color:${o.gain < 0 ? 'var(--red-text)' : 'var(--green-text)'}">
-                        ${o.gain >= 0 ? '+' : ''}${o.gain.toFixed(2)} USDT
-                    </div>
-                </div>
-            `;
-        });
-        document.getElementById('totalDay').innerText = total.toFixed(2) + " USDT";
-    }
-
-    function borrar(id) {
-        if(confirm("¿Eliminar registro?")) {
-            ops = ops.filter(o => o.id !== id);
-            localStorage.setItem('bymo_ops', JSON.stringify(ops));
-            renderLibro();
-        }
-    }
-</script>
-</body>
-</html>
+        document.getElementById('calc
