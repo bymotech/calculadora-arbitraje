@@ -336,42 +336,75 @@
         }
     }
 
+    // Sistema de Doble Verificación para Tasas
     async function sincronizarTasasAPI() {
         const btn = document.getElementById('btnSync');
         const originalText = btn.innerText;
         btn.innerText = "Sincronizando... ⏳";
         btn.disabled = true;
 
+        let bcvUsd = 0, bcvEur = 0, binanceUsdt = 0;
+
         try {
-            let resBcv = await fetch('https://ve.dolarapi.com/v1/dolares/oficial');
-            let dataBcv = await resBcv.json();
-
-            let resEur = await fetch('https://ve.dolarapi.com/v1/euros/oficial');
-            let dataEur = await resEur.json();
-
-            let resParalelo = await fetch('https://ve.dolarapi.com/v1/dolares/paralelo');
-            let dataParalelo = await resParalelo.json();
-
-            if (dataBcv && dataBcv.promedio) {
-                document.getElementById('tBcvUsd').value = dataBcv.promedio;
-                document.getElementById('tDolarElecBs').value = dataBcv.promedio;
-                document.getElementById('calcBcv').value = dataBcv.promedio;
+            // Intento 1: pyDolarVenezuela (Más directa)
+            let resBcv1 = await fetch('https://pydolarvenezuela-api.vercel.app/api/v1/dollar?page=bcv');
+            let dataBcv1 = await resBcv1.json();
+            if(dataBcv1 && dataBcv1.monitors && dataBcv1.monitors.usd) {
+                bcvUsd = dataBcv1.monitors.usd.price;
+                bcvEur = dataBcv1.monitors.eur.price;
             }
-            if (dataEur && dataEur.promedio) {
-                document.getElementById('tBcvEur').value = dataEur.promedio;
+        } catch (e) {
+            console.log("Fallo API 1 (BCV), saltando a respaldo...");
+            // Intento 2 (Respaldo): DolarAPI
+            try {
+                let resBcv2 = await fetch('https://ve.dolarapi.com/v1/dolares/oficial');
+                let dataBcv2 = await resBcv2.json();
+                bcvUsd = dataBcv2.promedio;
+                let resEur2 = await fetch('https://ve.dolarapi.com/v1/euros/oficial');
+                let dataEur2 = await resEur2.json();
+                bcvEur = dataEur2.promedio;
+            } catch (err2) {
+                console.error("Ambas APIs de BCV fallaron");
             }
-            if (dataParalelo && dataParalelo.promedio) {
-                document.getElementById('tUsdtBs').value = dataParalelo.promedio;
-                document.getElementById('calcBin').value = dataParalelo.promedio;
-            }
+        }
 
+        try {
+            // Intento 1: pyDolarVenezuela para Binance
+            let resBin1 = await fetch('https://pydolarvenezuela-api.vercel.app/api/v1/dollar?page=binance');
+            let dataBin1 = await resBin1.json();
+            if(dataBin1 && dataBin1.monitors && dataBin1.monitors.binance) {
+                binanceUsdt = dataBin1.monitors.binance.price;
+            }
+        } catch (e) {
+            console.log("Fallo API 1 (Binance), saltando a respaldo...");
+            // Intento 2 (Respaldo): DolarAPI (Paralelo como referencia)
+            try {
+                let resBin2 = await fetch('https://ve.dolarapi.com/v1/dolares/paralelo');
+                let dataBin2 = await resBin2.json();
+                binanceUsdt = dataBin2.promedio;
+            } catch (err2) {
+                console.error("Ambas APIs de Binance fallaron");
+            }
+        }
+
+        // Actualizar campos si conseguimos los datos
+        if(bcvUsd > 0) {
+            document.getElementById('tBcvUsd').value = bcvUsd;
+            document.getElementById('tDolarElecBs').value = bcvUsd;
+            document.getElementById('calcBcv').value = bcvUsd;
+        }
+        if(bcvEur > 0) document.getElementById('tBcvEur').value = bcvEur;
+        if(binanceUsdt > 0) {
+            document.getElementById('tUsdtBs').value = binanceUsdt;
+            document.getElementById('calcBin').value = binanceUsdt;
+        }
+
+        if(bcvUsd > 0 || binanceUsdt > 0) {
             saveTasas(true); 
             calcularConversor();
             alert("✅ Tasas sincronizadas y guardadas con éxito.");
-
-        } catch (error) {
-            console.error("Error al obtener tasas:", error);
-            alert("❌ Hubo un error de conexión. Verifica tu internet o ingresa las tasas de forma manual.");
+        } else {
+            alert("❌ Hubo un error de conexión con ambos servidores. Verifica tu internet o ingresa las tasas de forma manual.");
         }
 
         btn.innerText = originalText;
