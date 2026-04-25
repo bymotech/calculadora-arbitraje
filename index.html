@@ -38,7 +38,7 @@
         .container { max-width: 450px; margin: 0 auto; background: var(--container-bg); min-height: 100vh; padding: 15px; width: 100%; overflow-x: hidden; }
         
         .header { text-align: center; padding-bottom: 10px; border-bottom: 1px solid var(--input-border); margin-bottom: 15px; }
-        .logo-simple { font-size: 40px; margin-bottom: 5px; }
+        .logo-img { height: 50px; margin-bottom: 5px; filter: drop-shadow(0px 0px 2px rgba(0,0,0,0.2)); }
 
         .dashboard { background: var(--card-bg); padding: 15px; border-radius: 12px; text-align: center; margin-bottom: 20px; border: 1px solid var(--input-border); }
         .dashboard p { font-size: 12px; text-transform: uppercase; font-weight: bold; opacity: 0.7; }
@@ -61,6 +61,7 @@
         .card-op.neg { border-left-color: var(--red-text); }
         .op-meta { font-size: 11px; opacity: 0.6; }
         .op-title { font-weight: bold; font-size: 14px; margin: 2px 0; }
+        .op-monto { font-size: 12px; opacity: 0.8; margin-top: 3px; }
         .op-gain { font-weight: bold; font-size: 16px; text-align: right; }
 
         .footer-tag { text-align: center; font-size: 9px; opacity: 0.4; margin-top: 30px; font-style: italic; padding-bottom: 20px; }
@@ -70,7 +71,7 @@
 
 <div class="container">
     <div class="header">
-        <div class="logo-simple">⚡</div>
+        <img src="logo.png" alt="ByMO Tech Logo" class="logo-img" onerror="this.style.display='none'">
         <h2 style="font-size: 16px;">ByMO Tech Suite</h2>
     </div>
 
@@ -250,18 +251,15 @@
             let com = parseFloat(localStorage.getItem('tZelleEf')) || 0;
             gain = monto * (com / 100);
         } else if (tipo === 'zelle_bs') {
-            // Ganancia = (Valor real del Zelle en USDT) - (Lo que pagaste en Bs convertido a USDT)
             gain = monto - ((monto * tZelleBs) / tUsdt);
         } else if(tipo === 'ef_usdt') {
             let comEfUsdt = parseFloat(localStorage.getItem('tEfUsdtCom')) || 0;
             gain = monto * (comEfUsdt / 100); 
         } else if(tipo === 'bs_ef') {
-            // Compraste Bs y vendiste dólares (Venta normal)
             gain = (monto / tEf) - (monto / tUsdt); 
         } else if(tipo === 'zelle_cop') {
-            gain = monto * 0.02; // Margen base de ejemplo
+            gain = monto * 0.02;
         } else if(tipo === 'ciclo_calle') {
-            // El Ruleteo: Compras efectivo en calle, pasas a USDT cobrando %, vendes en Binance
             let tBsEfCalle = parseFloat(localStorage.getItem('tBsEfCalle')) || 1;
             let comEfUsdt = parseFloat(localStorage.getItem('tEfUsdtCom')) || 0;
             
@@ -269,7 +267,6 @@
             let usdtNetoRecibido = monto * (1 - (comEfUsdt / 100));
             let bsRecuperados = usdtNetoRecibido * tUsdt;
             
-            // Ganancia neta en USDT
             gain = (bsRecuperados - bsInvertidos) / tUsdt;
         }
 
@@ -278,6 +275,7 @@
             time: new Date().toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'}),
             concepto: concepto,
             tipo: document.getElementById('opTipo').options[document.getElementById('opTipo').selectedIndex].text,
+            monto: monto,
             gain: gain
         };
 
@@ -302,15 +300,18 @@
 
         ops.forEach(o => {
             total += o.gain;
+            let displayMonto = o.monto ? o.monto : 'N/A'; // Por si hay registros viejos sin monto
+            
             list.innerHTML += `
                 <div class="card-op ${o.gain < 0 ? 'neg' : ''}">
                     <div>
                         <div class="op-meta">${o.time} - ${o.concepto}</div>
                         <div class="op-title" style="font-size: 12px;">${o.tipo}</div>
+                        <div class="op-monto">Inv/Base: <b>${displayMonto}</b></div>
                         <button onclick="borrar(${o.id})" style="width:auto; padding:3px 8px; margin:5px 0 0 0; font-size:10px; background:var(--red-text); border:none; border-radius:4px; color:white; cursor:pointer;">Borrar</button>
                     </div>
                     <div class="op-gain" style="color:${o.gain < 0 ? 'var(--red-text)' : 'var(--green-text)'}">
-                        ${o.gain >= 0 ? '+' : ''}${o.gain.toFixed(2)}
+                        ${o.gain >= 0 ? '+' : ''}${o.gain.toFixed(2)} USDT
                     </div>
                 </div>
             `;
