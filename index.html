@@ -3,295 +3,463 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>ByMO Tech - Suite Cambista</title>
+    <title>ByMO Tech Suite</title>
     <style>
-        * { box-sizing: border-box; margin: 0; padding: 0; }
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; }
 
         :root {
-            --bg-color: #f4f4f9;
-            --container-bg: #ffffff;
-            --text-color: #333333;
-            --input-bg: #ffffff;
-            --input-border: #cccccc;
-            --card-bg: #f8f9fa;
-            --menu-bg: #e0e0e0;
-            --green-text: #28a745;
-            --red-text: #dc3545;
-            --brand-color: #ffcc00;
+            --bg-dark: #0f1115;
+            --card-bg: #1c1f26;
+            --card-border: #2a2d35;
+            --primary-green: #20c974;
+            --primary-green-hover: #1aa860;
+            --danger-red: #ff4d4f;
+            --text-main: #ffffff;
+            --text-muted: #8b92a5;
+            --input-bg: #13151a;
+            --nav-bg: #0f1115;
+            --brand-yellow: #ffcc00;
         }
 
-        @media (prefers-color-scheme: dark) {
-            :root {
-                --bg-color: #121212;
-                --container-bg: #1e1e1e;
-                --text-color: #e0e0e0;
-                --input-bg: #2c2c2c;
-                --input-border: #444444;
-                --card-bg: #2a2a2a;
-                --menu-bg: #333333;
-                --green-text: #4caf50;
-                --red-text: #ff5252;
-            }
-        }
-
-        body { font-family: 'Segoe UI', Arial, sans-serif; background-color: var(--bg-color); color: var(--text-color); padding-bottom: 70px; }
-        .container { max-width: 450px; margin: 0 auto; background: var(--container-bg); min-height: 100vh; padding: 15px; width: 100%; overflow-x: hidden; }
+        body { background-color: var(--bg-dark); color: var(--text-main); padding-bottom: 80px; overflow-x: hidden; }
+        .container { max-width: 500px; margin: 0 auto; padding: 15px; width: 100%; min-height: 100vh; position: relative; }
         
-        .header { text-align: center; padding-bottom: 10px; border-bottom: 1px solid var(--input-border); margin-bottom: 15px; }
-        .logo-img { height: 50px; margin-bottom: 5px; filter: drop-shadow(0px 0px 2px rgba(0,0,0,0.2)); }
+        /* Header */
+        .header { text-align: center; padding-top: 10px; margin-bottom: 20px; }
+        .header-logo { height: 35px; margin-bottom: 5px; }
+        .header-title { font-size: 16px; font-weight: 600; letter-spacing: 0.5px; }
 
-        .dashboard { background: var(--card-bg); padding: 15px; border-radius: 12px; text-align: center; margin-bottom: 20px; border: 1px solid var(--input-border); }
-        .dashboard p { font-size: 12px; text-transform: uppercase; font-weight: bold; opacity: 0.7; }
-        .dashboard h1 { margin-top: 5px; font-size: 28px; color: var(--green-text); }
+        /* Typography & Utilities */
+        h3 { font-size: 15px; font-weight: 600; margin-bottom: 12px; color: var(--text-main); }
+        .text-green { color: var(--primary-green) !important; }
+        .text-red { color: var(--danger-red) !important; }
+        .text-muted { color: var(--text-muted); font-size: 12px; }
 
-        .nav-bar { position: fixed; bottom: 0; left: 0; width: 100%; background: var(--container-bg); display: flex; border-top: 1px solid var(--input-border); z-index: 100; }
-        .nav-item { flex: 1; text-align: center; padding: 12px 5px; font-size: 10px; font-weight: bold; cursor: pointer; color: var(--text-color); opacity: 0.6; }
-        .nav-item.active { opacity: 1; color: var(--brand-color); border-top: 3px solid var(--brand-color); }
-        .nav-icon { font-size: 20px; display: block; margin-bottom: 2px; }
+        /* Cards */
+        .card { background: var(--card-bg); border: 1px solid var(--card-border); border-radius: 14px; padding: 15px; margin-bottom: 15px; }
+        
+        /* Grid Dashboard */
+        .dashboard-hero { text-align: center; padding: 20px 10px; }
+        .dashboard-hero .label { font-size: 11px; text-transform: uppercase; color: var(--text-muted); letter-spacing: 1px; margin-bottom: 5px; }
+        .dashboard-hero .amount { font-size: 34px; font-weight: bold; color: var(--primary-green); margin-bottom: 5px; }
+        .dashboard-hero .subtitle { font-size: 12px; color: var(--text-muted); }
+        
+        .metrics-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 25px; }
+        .metric-box { background: var(--card-bg); border: 1px solid var(--card-border); border-radius: 12px; padding: 12px; text-align: center; }
+        .metric-box .label { font-size: 10px; text-transform: uppercase; color: var(--text-muted); margin-bottom: 8px; }
+        .metric-box .val { font-size: 18px; font-weight: bold; color: var(--primary-green); }
+        .metric-box .val.neutral { color: var(--brand-yellow); }
+        .metric-box .sub { font-size: 10px; color: var(--text-muted); margin-top: 4px; }
 
-        .section { display: none; }
+        /* Form Inputs */
+        .input-group { margin-bottom: 15px; }
+        .input-group label { display: block; font-size: 13px; color: var(--text-muted); margin-bottom: 6px; }
+        input, select { width: 100%; background: var(--input-bg); border: 1px solid var(--card-border); color: var(--text-main); padding: 14px; border-radius: 10px; font-size: 15px; outline: none; transition: 0.2s; }
+        input:focus, select:focus { border-color: var(--primary-green); }
+        
+        /* Buttons */
+        .btn { width: 100%; background: var(--primary-green); color: #000; font-weight: bold; font-size: 16px; padding: 15px; border: none; border-radius: 10px; cursor: pointer; transition: 0.2s; }
+        .btn:active { background: var(--primary-green-hover); transform: scale(0.98); }
+        .btn-secondary { background: var(--card-border); color: var(--text-main); }
+        
+        /* FAB */
+        .fab { position: fixed; bottom: 90px; right: 20px; width: 56px; height: 56px; background: var(--primary-green); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 28px; color: #000; box-shadow: 0 4px 12px rgba(32,201,116,0.4); cursor: pointer; z-index: 90; transition: 0.2s; }
+        .fab:active { transform: scale(0.9); }
+
+        /* List of Operations */
+        .header-list { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; }
+        .header-list a { font-size: 12px; color: #5882ff; text-decoration: none; cursor: pointer; }
+        .op-item { display: flex; flex-direction: column; padding: 12px; border-bottom: 1px solid var(--card-border); }
+        .op-item:last-child { border-bottom: none; padding-bottom: 0; }
+        .op-top { display: flex; justify-content: space-between; font-size: 11px; color: var(--text-muted); margin-bottom: 6px; }
+        .op-mid { display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px; }
+        .op-title { font-size: 14px; font-weight: 600; display: flex; align-items: center; gap: 6px; }
+        .op-gain { font-size: 14px; font-weight: bold; }
+        .op-bot { font-size: 12px; color: var(--text-muted); display: flex; justify-content: space-between; }
+        
+        /* Preview Card (Operar) */
+        .preview-card { background: var(--card-border); padding: 15px; border-radius: 12px; text-align: center; margin-bottom: 15px; }
+        .preview-card .big-result { font-size: 28px; font-weight: bold; color: var(--primary-green); margin: 10px 0; }
+        .preview-row { display: flex; justify-content: space-between; font-size: 13px; margin-bottom: 8px; color: var(--text-muted); }
+        
+        /* Tabs */
+        .tabs-header { display: flex; background: var(--card-bg); border-radius: 10px; padding: 4px; margin-bottom: 20px; border: 1px solid var(--card-border); }
+        .tab-btn { flex: 1; text-align: center; padding: 10px; font-size: 13px; font-weight: 600; color: var(--text-muted); cursor: pointer; border-radius: 8px; transition: 0.3s; }
+        .tab-btn.active { background: var(--input-bg); color: var(--primary-green); border: 1px solid var(--card-border); }
+        .tab-content { display: none; }
+        .tab-content.active { display: block; }
+
+        /* Sections */
+        .section { display: none; animation: fadeIn 0.3s ease; }
         .section.active { display: block; }
-        label { font-weight: bold; display: block; margin-top: 15px; font-size: 13px; }
-        input, select { width: 100%; padding: 12px; margin-top: 5px; border: 1px solid var(--input-border); border-radius: 8px; background: var(--input-bg); color: var(--text-color); font-size: 15px; }
-        
-        button { width: 100%; padding: 14px; border: none; border-radius: 8px; margin-top: 20px; font-size: 16px; font-weight: bold; cursor: pointer; color: white; transition: 0.2s; }
-        button:disabled { opacity: 0.6; cursor: not-allowed; }
-        .btn-add { background: #28a745; }
-        .btn-save { background: #6c757d; }
-        .btn-sync { background: #007bff; margin-top: 0; margin-bottom: 20px; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
 
-        .card-op { background: var(--card-bg); padding: 12px; border-radius: 10px; margin-bottom: 10px; border-left: 5px solid var(--green-text); display: flex; justify-content: space-between; align-items: center; }
-        .card-op.neg { border-left-color: var(--red-text); }
-        .op-meta { font-size: 11px; opacity: 0.6; }
-        .op-title { font-weight: bold; font-size: 14px; margin: 2px 0; }
-        .op-monto { font-size: 12px; opacity: 0.8; margin-top: 3px; }
-        .op-gain { font-weight: bold; font-size: 16px; text-align: right; }
+        /* Bottom Nav */
+        .nav-bar { position: fixed; bottom: 0; left: 0; width: 100%; background: var(--nav-bg); display: flex; border-top: 1px solid var(--card-border); z-index: 100; padding-bottom: env(safe-area-inset-bottom); }
+        .nav-item { flex: 1; text-align: center; padding: 12px 0; font-size: 10px; font-weight: 600; cursor: pointer; color: var(--text-muted); display: flex; flex-direction: column; align-items: center; gap: 4px; transition: 0.2s; }
+        .nav-item svg { width: 20px; height: 20px; fill: currentColor; }
+        .nav-item.active { color: var(--primary-green); }
 
-        details { background: var(--card-bg); border-radius: 10px; margin-bottom: 12px; border: 1px solid var(--input-border); overflow: hidden; }
-        details summary { background: var(--menu-bg); color: var(--text-color); font-weight: bold; cursor: pointer; padding: 15px; outline: none; list-style: none; display: flex; justify-content: space-between; align-items: center; transition: 0.3s; font-size: 13px; }
-        details[open] summary { background: var(--brand-color); color: #000; }
-        details summary::after { content: "▼"; font-size: 12px; transition: 0.3s; }
-        details[open] summary::after { content: "▲"; }
-        .manual-content { padding: 15px; font-size: 13px; line-height: 1.6; color: var(--text-color); border-top: 1px solid var(--input-border); }
-        .manual-content b { color: var(--green-text); }
+        /* Manual Accordion */
+        details { background: var(--card-bg); border: 1px solid var(--card-border); border-radius: 12px; margin-bottom: 10px; overflow: hidden; }
+        summary { padding: 15px; font-size: 14px; font-weight: 600; display: flex; align-items: center; justify-content: space-between; cursor: pointer; list-style: none; outline: none; }
+        summary::-webkit-details-marker { display: none; }
+        summary::after { content: '+'; font-size: 18px; color: var(--primary-green); }
+        details[open] summary::after { content: '−'; }
+        .manual-body { padding: 0 15px 15px 15px; font-size: 13px; color: var(--text-muted); line-height: 1.5; border-top: 1px solid var(--card-border); margin-top: 5px; padding-top: 10px; }
 
-        .footer-tag { text-align: center; font-size: 9px; opacity: 0.4; margin-top: 30px; font-style: italic; padding-bottom: 20px; }
+        /* Top Header for sub-pages */
+        .page-header { display: flex; align-items: center; gap: 15px; margin-bottom: 20px; }
+        .back-btn { font-size: 20px; cursor: pointer; padding: 5px; }
 
-        .conv-row { display: flex; justify-content: space-between; border-bottom: 1px solid var(--input-border); padding: 8px 0; font-size: 14px; }
-        .conv-row:last-child { border-bottom: none; }
-        .conv-val { font-weight: bold; color: var(--green-text); font-size: 16px; }
     </style>
 </head>
 <body>
 
 <div class="container">
-    <div class="header">
-        <img src="logo.png" alt="ByMO Tech Logo" class="logo-img" onerror="this.style.display='none'">
-        <h2 style="font-size: 16px;">ByMO Tech Suite</h2>
+    
+    <div class="header" id="mainHeader">
+        <svg viewBox="0 0 100 100" class="header-logo" xmlns="http://www.w3.org/2000/svg">
+            <rect x="42" y="20" width="6" height="60" rx="3" fill="#ffffff" />
+            <rect x="25" y="35" width="6" height="30" rx="3" fill="#ffffff" />
+            <rect x="59" y="35" width="6" height="30" rx="3" fill="#ffffff" />
+            <circle cx="50" cy="40" r="5" fill="#ffffff" />
+            <circle cx="50" cy="60" r="5" fill="#ffffff" />
+            <path d="M50 40 L65 40 L65 55 L50 55" fill="none" stroke="#ffffff" stroke-width="5" stroke-linecap="round"/>
+        </svg>
+        <div class="header-title">ByMO Tech Suite</div>
     </div>
 
     <div id="sec-libro" class="section active">
-        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
-            <h3 style="font-size: 14px; margin: 0;">Consulta de Saldos</h3>
-            <select id="filtroFecha" onchange="renderLibro()" style="width: auto; padding: 4px; font-size: 12px; border-radius: 5px; border: 1px solid var(--input-border); background: var(--input-bg); color: var(--text-color); margin: 0;"></select>
+        <div class="card dashboard-hero">
+            <div class="label">UTILIDAD DEL DÍA</div>
+            <div class="amount" id="dashDayVal">+0.00 USDT</div>
+            <div class="subtitle" id="dashDayCount">0 operaciones</div>
         </div>
 
-        <div class="dashboard">
-            <p id="tituloDashboard">Utilidad del Día</p>
-            <h1 id="totalDay">0.00 USDT</h1>
+        <div class="metrics-grid">
+            <div class="metric-box">
+                <div class="label">UTILIDAD DEL MES</div>
+                <div class="val text-green" id="dashMonthVal">+0.00</div>
+                <div class="sub">USDT</div>
+            </div>
+            <div class="metric-box">
+                <div class="label">CAPITAL ACTUAL</div>
+                <div class="val neutral" id="dashCapVal">0.00</div>
+                <div class="sub">USDT</div>
+            </div>
+            <div class="metric-box">
+                <div class="label">VOLUMEN OPERADO</div>
+                <div class="val" id="dashVolVal" style="color:#ffffff;">0.00</div>
+                <div class="sub">USDT</div>
+            </div>
+            <div class="metric-box">
+                <div class="label">MARGEN PROMEDIO</div>
+                <div class="val text-green" id="dashMarginVal">0.00%</div>
+                <div class="sub">del capital</div>
+            </div>
+        </div>
+
+        <div class="header-list">
+            <h3>Últimas Operaciones</h3>
+            <a onclick="nav('historial')">Ver todas</a>
+        </div>
+        <div class="card" style="padding: 0;" id="recentOpsList">
+            </div>
+        
+        <div class="fab" onclick="nav('operar')">+</div>
+    </div>
+
+    <div id="sec-historial" class="section">
+        <div class="page-header">
+            <div class="back-btn" onclick="nav('libro')">←</div>
+            <h3 style="margin:0;">Historial de Operaciones</h3>
         </div>
         
-        <button class="btn-add" style="margin-top: 0; margin-bottom: 20px;" onclick="nav('operar')">➕ AGREGAR REGISTRO</button>
+        <div style="display: flex; justify-content: flex-end; margin-bottom: 15px;">
+            <select id="filtroFecha" onchange="renderHistorial()" style="width: auto; padding: 8px 12px; font-size: 13px;"></select>
+        </div>
 
-        <h3 style="font-size: 14px; margin-bottom: 10px;">Historial de Operaciones</h3>
-        <div id="historyList"></div>
+        <div class="metrics-grid">
+            <div class="metric-box">
+                <div class="label">Total Operaciones</div>
+                <div class="val" style="color:#fff;" id="histCount">0</div>
+            </div>
+            <div class="metric-box">
+                <div class="label">Utilidad Neta</div>
+                <div class="val text-green" id="histNet">+0.00 USDT</div>
+            </div>
+        </div>
+
+        <div id="fullOpsList"></div>
+        <div class="fab" onclick="nav('operar')">+</div>
     </div>
 
     <div id="sec-operar" class="section">
-        <h3 style="text-align: center;">Nueva Operación</h3>
+        <div class="page-header">
+            <h3 style="margin:0; text-align:center; width:100%;">Nueva Operación</h3>
+        </div>
         
-        <label>Concepto / Cliente:</label>
-        <input type="text" id="opConcepto" placeholder="Ej: Cambio Juan Perez">
-        
-        <label>Tipo de Cambio:</label>
-        <select id="opTipo">
-            <option value="zelle_usdt">🇺🇸 Zelle ⮕ 🟢 USDT</option>
-            <option value="zelle_ef">🇺🇸 Zelle ⮕ 💵 Efectivo</option>
-            <option value="zelle_cop">🇺🇸 Zelle ⮕ 🇨🇴 Pesos COP</option>
-            <option value="zelle_bs">🇺🇸 Zelle ⮕ 🇻🇪 Bolívares</option>
-            <option value="paypal_bs">🅿️ PayPal ⮕ 🇻🇪 Bolívares</option>
-            <option value="paypal_usdt">🅿️ PayPal ⮕ 🟢 USDT</option>
-            <option value="ef_usdt">💵 Efectivo ⮕ 🟢 USDT</option>
-            <option value="bs_ef">🇻🇪 Bolívares ⮕ 💵 Efectivo (Venta)</option>
-            <option value="ciclo_calle">🔄 Arbitraje Efectivo: Bs ⮕ Efec ⮕ USDT ⮕ Bs</option>
-            <option value="usdt_bcv_usdt">🏦 Arbitraje BCV: USDT ⮕ Bs ⮕ USD BCV ⮕ USDT</option>
-        </select>
+        <h3 style="font-size: 13px; color:var(--text-muted);">1. Información básica</h3>
+        <div class="card">
+            <div class="input-group">
+                <label>Cliente / Concepto</label>
+                <input type="text" id="opConcepto" placeholder="Ej: Cambio Juan Perez">
+            </div>
+            <div class="input-group">
+                <label>Tipo de cambio</label>
+                <select id="opTipo" onchange="updatePreview()">
+                    <option value="zelle_usdt">🇺🇸 Zelle ⮕ 🟢 USDT</option>
+                    <option value="zelle_ef">🇺🇸 Zelle ⮕ 💵 Efectivo</option>
+                    <option value="zelle_cop">🇺🇸 Zelle ⮕ 🇨🇴 Pesos COP</option>
+                    <option value="zelle_bs">🇺🇸 Zelle ⮕ 🇻🇪 Bolívares</option>
+                    <option value="paypal_bs">🅿️ PayPal ⮕ 🇻🇪 Bolívares</option>
+                    <option value="paypal_usdt">🅿️ PayPal ⮕ 🟢 USDT</option>
+                    <option value="ef_usdt">💵 Efectivo ⮕ 🟢 USDT</option>
+                    <option value="bs_ef">🇻🇪 Bolívares ⮕ 💵 Efectivo (Venta)</option>
+                    <option value="ciclo_calle">🔄 Arbitraje: Bs ⮕ Efec ⮕ USDT</option>
+                    <option value="usdt_bcv_usdt">🏦 Arbitraje BCV: USDT ⮕ Bs ⮕ USD ⮕ USDT</option>
+                </select>
+            </div>
+            <div class="input-group" style="margin-bottom: 0;">
+                <label>Monto principal (Divisa Base)</label>
+                <input type="number" id="opMonto" placeholder="Ej: 100" inputmode="decimal" oninput="updatePreview()">
+            </div>
+        </div>
 
-        <label>Monto Principal ($/USDT):</label>
-        <input type="number" id="opMonto" placeholder="Ej: 100" inputmode="decimal">
-        <p style="font-size: 10px; opacity: 0.6; margin-top: 5px;">*Anota la cantidad de la divisa inicial que recibes o con la que arrancas.</p>
+        <h3 style="font-size: 13px; color:var(--text-muted);">2. Cálculo automático</h3>
+        <div class="card">
+            <div class="preview-row">
+                <span>Tasa aplicada base</span>
+                <span id="prevTasa">0.00</span>
+            </div>
+            <div class="preview-row">
+                <span>Comisión / Diferencial</span>
+                <span id="prevCom">-0.00</span>
+            </div>
+            
+            <div class="preview-card">
+                <div class="text-muted">Cliente Recibirá (Aprox)</div>
+                <div class="big-result" id="prevRecibe">0.00</div>
+            </div>
+
+            <div class="preview-row" style="margin-bottom:0;">
+                <div style="display:flex; flex-direction:column; gap:4px;">
+                    <span>Ganancia estimada</span>
+                    <b class="text-green" id="prevGain">+0.00 USDT</b>
+                </div>
+                <div style="display:flex; flex-direction:column; align-items:flex-end; gap:4px;">
+                    <span>Margen</span>
+                    <b class="text-green" id="prevMargin">0.00%</b>
+                </div>
+            </div>
+        </div>
         
-        <button class="btn-add" onclick="registrar()">Registrar en Libro</button>
+        <button class="btn" onclick="registrar()">Registrar Operación</button>
     </div>
 
     <div id="sec-calc" class="section">
-        <h3 style="text-align: center; margin-bottom: 5px;">Conversor Rápido</h3>
-        <p style="font-size: 10px; text-align:center; opacity:0.6; margin-bottom:15px;">Calcula equivalencias en tiempo real.</p>
+        <div class="page-header"><h3 style="margin:0; text-align:center; width:100%;">Calculadora Rápida</h3></div>
         
-        <div style="display: flex; gap: 10px; margin-bottom: 15px;">
-            <input type="number" id="convMonto" placeholder="Ingresa monto..." inputmode="decimal" oninput="calcularConversor()" style="margin-top: 0; flex: 2;">
-            <select id="convModo" onchange="calcularConversor()" style="margin-top: 0; flex: 1;">
-                <option value="div_bs">Divisa ⮕ Bs</option>
-                <option value="bs_div">Bs ⮕ Divisa</option>
-            </select>
+        <div class="tabs-header">
+            <div class="tab-btn active" id="tab-btn-conv" onclick="switchCalcTab('conv')">Conversor</div>
+            <div class="tab-btn" id="tab-btn-ahorro" onclick="switchCalcTab('ahorro')">Calculadora de Ahorro</div>
         </div>
 
-        <div class="dashboard" style="text-align: left; padding: 12px; margin-bottom: 25px;">
-            <div class="conv-row">
-                <span>🇺🇸 Dólar BCV:</span>
-                <span class="conv-val" id="resConvBcv">0.00</span>
-            </div>
-            <div class="conv-row">
-                <span>🇪🇺 Euro BCV:</span>
-                <span class="conv-val" id="resConvEur">0.00</span>
-            </div>
-            <div class="conv-row">
-                <span>🟢 USDT Binance:</span>
-                <span class="conv-val" id="resConvUsdt">0.00</span>
+        <div id="calc-tab-conv" class="tab-content active">
+            <div class="card">
+                <div class="input-group">
+                    <label>Tú envías</label>
+                    <div style="display:flex; gap:10px;">
+                        <input type="number" id="convMonto" value="100" inputmode="decimal" oninput="calcularConversor()">
+                        <select id="convModo" onchange="calcularConversor()" style="width: 120px; background:var(--card-bg);">
+                            <option value="div_bs">🇺🇸 USD</option>
+                            <option value="bs_div">🇻🇪 Bs</option>
+                        </select>
+                    </div>
+                </div>
+                
+                <div class="input-group" style="margin-bottom:0;">
+                    <label>Equivalencias (Recibes)</label>
+                    <div style="background: var(--input-bg); padding: 15px; border-radius: 10px; border: 1px solid var(--card-border);">
+                        <div class="conv-row"><span>🇺🇸 Dólar BCV</span><span class="conv-val" id="resConvBcv">0.00 Bs</span></div>
+                        <div class="conv-row"><span>🇪🇺 Euro BCV</span><span class="conv-val" id="resConvEur">0.00 Bs</span></div>
+                        <div class="conv-row"><span>🟢 USDT Binance</span><span class="conv-val" id="resConvUsdt">0.00 Bs</span></div>
+                    </div>
+                </div>
             </div>
         </div>
 
-        <hr style="border: 0; border-top: 1px solid var(--input-border); margin-bottom: 20px;">
-
-        <h3 style="text-align: center;">Calculadora de Ahorro</h3>
-        
-        <label>Moneda Ref del Producto:</label>
-        <select id="calcMoneda" onchange="updateCalcLabels()">
-            <option value="USD">Dólar ($)</option>
-            <option value="EUR">Euro (€)</option>
-        </select>
-        
-        <label>Precio en Etiqueta (<span id="refSym">$</span>):</label>
-        <input type="number" id="calcPrice" placeholder="0.00" inputmode="decimal">
-        
-        <label>Tasa BCV (Bs/<span id="refSym2">$</span>):</label>
-        <input type="number" id="calcBcv" placeholder="0.00" inputmode="decimal">
-        
-        <label>Tasa Binance (Bs/USDT):</label>
-        <input type="number" id="calcBin" placeholder="0.00" inputmode="decimal">
-        
-        <div id="calcRes" class="dashboard" style="margin-top:20px; display:none;">
-            <p id="calcResTitle">Necesitas Cambiar</p>
-            <h1 id="calcResVal">0.00 USDT</h1>
-            <p id="calcResDiff" style="font-size: 10px; color: var(--green-text);"></p>
+        <div id="calc-tab-ahorro" class="tab-content">
+            <div class="card">
+                <div class="input-group">
+                    <label>Moneda del Producto</label>
+                    <select id="calcMoneda" onchange="updateCalcLabels()">
+                        <option value="USD">Dólar ($)</option>
+                        <option value="EUR">Euro (€)</option>
+                    </select>
+                </div>
+                <div class="input-group">
+                    <label>Precio en Etiqueta (<span id="refSym">$</span>)</label>
+                    <input type="number" id="calcPrice" placeholder="100" inputmode="decimal">
+                </div>
+                <div style="display:flex; gap:10px; margin-bottom:15px;">
+                    <div style="flex:1;">
+                        <label class="text-muted" style="font-size:11px;">Tasa BCV</label>
+                        <input type="number" id="calcBcv" placeholder="0.00" inputmode="decimal">
+                    </div>
+                    <div style="flex:1;">
+                        <label class="text-muted" style="font-size:11px;">Tasa USDT</label>
+                        <input type="number" id="calcBin" placeholder="0.00" inputmode="decimal">
+                    </div>
+                </div>
+                <div class="preview-card" style="margin-bottom:15px; display:none;" id="calcResCard">
+                    <div class="text-muted">Necesitas Cambiar</div>
+                    <div class="big-result" id="calcResVal">0.00 USDT</div>
+                    <div class="text-green" id="calcResDiff" style="font-weight:bold; font-size:14px;">+0.00 USDT (0.00%)</div>
+                </div>
+                <button class="btn btn-secondary" onclick="execCalc()">Calcular</button>
+            </div>
         </div>
-        
-        <button class="btn-save" onclick="execCalc()">Calcular Ahorro</button>
     </div>
 
     <div id="sec-tasas" class="section">
-        <h3 style="text-align: center; margin-bottom: 15px;">Configuración de Tasas</h3>
+        <div class="page-header"><h3 style="margin:0; text-align:center; width:100%;">Configuración de Tasas</h3></div>
         
-        <button id="btnSync" class="btn-sync" onclick="sincronizarTasasAPI()">🔄 Sincronizar BCV y Binance Automático</button>
-        <p style="font-size: 10px; text-align:center; opacity:0.6; margin-top:-10px; margin-bottom:15px;">Se conecta a internet para extraer las tasas oficiales del día.</p>
+        <button id="btnSync" class="btn" style="background:#007bff; color:#fff; margin-bottom:20px;" onclick="sincronizarTasasAPI()">🔄 Sincronizar Automático</button>
 
-        <label>🟢 Tasa Binance USDT (Bs/USDT):</label>
-        <input type="number" id="tUsdtBs" placeholder="Ej: 45.0" step="0.1" inputmode="decimal">
-
-        <label>🏦 Tasas BCV Generales (Dólar / Euro):</label>
-        <div style="display:flex; gap:10px;">
-            <input type="number" id="tBcvUsd" placeholder="USD" step="0.01" inputmode="decimal">
-            <input type="number" id="tBcvEur" placeholder="EUR" step="0.01" inputmode="decimal">
-        </div>
-
-        <label>🏦 Tasa Dólar Electrónico BCV (Bs/$):</label>
-        <input type="number" id="tDolarElecBs" placeholder="Ej: 36.5" step="0.01" inputmode="decimal">
-
-        <div style="display:flex; gap:10px;">
-            <div style="flex:1;">
-                <label>🏦 Com. Banco (%):</label>
-                <input type="number" id="comBancoElec" placeholder="Ej: 1" step="0.1" inputmode="decimal">
+        <div class="card">
+            <h3>Capital y Plataformas</h3>
+            <div class="input-group">
+                <label>🏦 Capital Base Operativo (USDT)</label>
+                <input type="number" id="tCapitalBase" placeholder="Ej: 5000" inputmode="decimal">
             </div>
-            <div style="flex:1;">
-                <label>🟡 Com. Binance (%):</label>
-                <input type="number" id="comBinanceElec" placeholder="Ej: 1" step="0.1" inputmode="decimal">
+            <div class="input-group">
+                <label>🟢 Binance USDT (Bs/USDT)</label>
+                <input type="number" id="tUsdtBs" step="0.1" inputmode="decimal">
+            </div>
+            <div style="display:flex; gap:10px;">
+                <div class="input-group" style="flex:1;">
+                    <label>🇺🇸 BCV USD</label>
+                    <input type="number" id="tBcvUsd" step="0.01" inputmode="decimal">
+                </div>
+                <div class="input-group" style="flex:1;">
+                    <label>🇪🇺 BCV EUR</label>
+                    <input type="number" id="tBcvEur" step="0.01" inputmode="decimal">
+                </div>
             </div>
         </div>
 
-        <label>🇺🇸 Tasa Zelle ⮕ Bs Ref:</label>
-        <input type="number" id="tZelleBs" placeholder="Ej: 44.5" step="0.1" inputmode="decimal">
+        <div class="card">
+            <h3>Dólares y Efectivo</h3>
+            <div class="input-group">
+                <label>💵 VENTA Efectivo Calle (Bs/$)</label>
+                <input type="number" id="tEfBs" step="0.1" inputmode="decimal">
+            </div>
+            <div class="input-group">
+                <label>💵 COMPRA Efectivo Calle (Bs/$)</label>
+                <input type="number" id="tBsEfCalle" step="0.1" inputmode="decimal">
+            </div>
+            <div class="input-group" style="margin-bottom:0;">
+                <label>💵 Comisión Efectivo ⮕ USDT (%)</label>
+                <input type="number" id="tEfUsdtCom" step="0.1" inputmode="decimal">
+            </div>
+        </div>
 
-        <label>🅿️ Tasa PayPal ⮕ Bs Ref (Manual):</label>
-        <input type="number" id="tPaypalBs" placeholder="Ej: 38.5" step="0.1" inputmode="decimal">
+        <div class="card">
+            <h3>Zelle, PayPal y Banco</h3>
+            <div class="input-group">
+                <label>🇺🇸 Zelle ⮕ Bs Ref</label>
+                <input type="number" id="tZelleBs" step="0.1" inputmode="decimal">
+            </div>
+            <div class="input-group">
+                <label>🇺🇸 Zelle ⮕ Efectivo (% Com)</label>
+                <input type="number" id="tZelleEf" step="0.1" inputmode="decimal">
+            </div>
+            <div class="input-group">
+                <label>🅿️ PayPal ⮕ Bs Ref</label>
+                <input type="number" id="tPaypalBs" step="0.1" inputmode="decimal">
+            </div>
+            <div class="input-group">
+                <label>🅿️ PayPal ⮕ USDT (% Com)</label>
+                <input type="number" id="tPaypalUsdtCom" step="0.1" inputmode="decimal">
+            </div>
+            <div class="input-group">
+                <label>🏦 Dólar Electrónico BCV (Bs/$)</label>
+                <input type="number" id="tDolarElecBs" step="0.01" inputmode="decimal">
+            </div>
+            <div style="display:flex; gap:10px; margin-bottom:0;">
+                <div class="input-group" style="flex:1; margin-bottom:0;">
+                    <label>🏦 Com Banco %</label>
+                    <input type="number" id="comBancoElec" step="0.1" inputmode="decimal">
+                </div>
+                <div class="input-group" style="flex:1; margin-bottom:0;">
+                    <label>🟡 Com Binance %</label>
+                    <input type="number" id="comBinanceElec" step="0.1" inputmode="decimal">
+                </div>
+            </div>
+        </div>
 
-        <label>🅿️ Comisión PayPal ⮕ USDT (%):</label>
-        <input type="number" id="tPaypalUsdtCom" placeholder="Ej: 12" step="0.1" inputmode="decimal">
-
-        <label>💵 Tasa VENTA Efectivo (Bs/$):</label>
-        <input type="number" id="tEfBs" placeholder="A cómo vendes el billete" step="0.1" inputmode="decimal">
-
-        <label>💵 Tasa COMPRA Efectivo Calle (Bs/$):</label>
-        <input type="number" id="tBsEfCalle" placeholder="A cómo compras en la calle" step="0.1" inputmode="decimal">
-
-        <label>💵 Comisión Efectivo ⮕ USDT (%):</label>
-        <input type="number" id="tEfUsdtCom" placeholder="Ej: 2" step="0.1" inputmode="decimal">
-
-        <label>🇨🇴 Tasa Zelle ⮕ COP:</label>
-        <input type="number" id="tZelleCop" placeholder="Ej: 3500" step="1" inputmode="decimal">
-        
-        <label>🇺🇸 Tasa Zelle ⮕ Efectivo (% Comisión):</label>
-        <input type="number" id="tZelleEf" placeholder="Ej: 3" step="0.1" inputmode="decimal">
-
-        <button class="btn-save" onclick="saveTasas()">Guardar Tasas Manual</button>
+        <button class="btn btn-secondary" onclick="saveTasas()">Guardar Cambios Manuales</button>
     </div>
 
     <div id="sec-manual" class="section">
-        <h3 style="text-align: center; margin-bottom: 15px;">Manual de Operaciones</h3>
+        <div class="page-header"><h3 style="margin:0; text-align:center; width:100%;">Manual de Operaciones</h3></div>
         
         <details>
-            <summary>1️⃣ PRIMER PASO: PONER LAS TASAS AL DÍA</summary>
-            <div class="manual-content">
-                Mano, esto es lo primero que tienes que hacer apenas te tomes el café en la mañana. Si las tasas están viejas, vas a terminar regalando el trabajo o cobrando de más.<br><br>
-                Ve a la pestaña <b>Tasas</b>. Ahora puedes simplemente presionar el botón azul <b>"Sincronizar BCV y Binance Automático"</b> para que la app busque las tasas en internet por ti. Las demás comisiones (como PayPal) y tasas de calle sí debes ajustarlas manualmente y darle a <b>"Guardar"</b>.
+            <summary><span style="display:flex; align-items:center; gap:10px;"><b style="background:var(--input-bg); padding:6px; border-radius:6px;">🔄</b> 1. Primer paso: tasas al día</span></summary>
+            <div class="manual-body">
+                Lo primero apenas arranques. Ve a <b>Tasas</b> y presiona "Sincronizar Automático" para que la app baje los datos del BCV y Binance. Las demás comisiones (como PayPal y efectivo) ajústalas tú mismo y dale Guardar.
             </div>
         </details>
 
         <details>
-            <summary>2️⃣ ENTENDIENDO LOS TIPOS DE CAMBIO</summary>
-            <div class="manual-content">
-                • <b>Zelle a USDT / Efectivo:</b> El cliente transfiere y tú entregas el cambio. Ganas la comisión estipulada.<br>
-                • <b>PayPal a Bs / USDT:</b> Recibes saldo PayPal y pagas en Bolívares (ganas por el diferencial de la tasa manual que le pusiste) o entregas USDT (cobrando tu porcentaje de comisión por el riesgo del procesador).<br>
-                • <b>Arbitraje Efectivo:</b> Compras dólares baratos en la calle, los depositas, los vuelves USDT y los vendes por bolívares.<br>
-                • <b>Arbitraje BCV:</b> Vendes USDT por Bs, compras dólares electrónicos en el banco y los regresas a Binance. La app resta las comisiones del banco y Binance para darte tu ganancia neta.
+            <summary><span style="display:flex; align-items:center; gap:10px;"><b style="background:var(--input-bg); padding:6px; border-radius:6px;">💸</b> 2. Tipos de cambio</span></summary>
+            <div class="manual-body">
+                • <b>Arbitraje Efectivo:</b> Comprar billetes baratos, depositarlos, pasarlos a USDT y vender por Bs.<br>
+                • <b>Arbitraje BCV:</b> Vender USDT, comprar dólares en el banco y regresar a Binance.<br>
+                • <b>PayPal/Zelle:</b> El cliente transfiere y tú entregas Bolívares o USDT descontando tu margen de riesgo.
             </div>
         </details>
 
         <details>
-            <summary>3️⃣ CÓMO LLEVAR EL LIBRO</summary>
-            <div class="manual-content">
-                Cada vez que hagas un negocio, regístralo en la pestaña <b>Operar</b>. En la pantalla principal verás la "Utilidad del Día". A las 12 de la noche la app guarda todo sola y arranca en cero al día siguiente.
+            <summary><span style="display:flex; align-items:center; gap:10px;"><b style="background:var(--input-bg); padding:6px; border-radius:6px;">📊</b> 3. Cómo llevar el libro</span></summary>
+            <div class="manual-body">
+                Registra cada negocio en <b>Operar</b>. Revisa que el cuadro de previsualización te muestre tu ganancia en verde antes de darle al botón final. La app reinicia sola a la media noche, pero tu historial y tu "Utilidad del Mes" quedan guardados.
             </div>
         </details>
 
         <details>
-            <summary>4️⃣ CALCULADORA DE PRECIOS Y CONVERSOR</summary>
-            <div class="manual-content">
-                Usa el <b>Conversor Rápido</b> para ver cuánto es cualquier monto en Bs o Divisas en tiempo real a las 3 tasas principales (BCV Dólar, BCV Euro y Binance USDT).<br><br>
-                Y usa la <b>Calculadora de Ahorro</b> para convencer al cliente indeciso que va a pagar en Bs a tasa BCV. Le sacas la cuenta de cuántos USDT necesita enviarte y le demuestras el porcentaje de ahorro de usar criptomonedas.
+            <summary><span style="display:flex; align-items:center; gap:10px;"><b style="background:var(--input-bg); padding:6px; border-radius:6px;">🧮</b> 4. Calc y Conversor</span></summary>
+            <div class="manual-body">
+                Usa el <b>Conversor Rápido</b> para ver montos a las 3 tasas principales de un solo golpe. Usa la pestaña <b>Ahorro</b> para convencer a clientes de pagar en USDT en tiendas que cobran a BCV.
             </div>
         </details>
 
     </div>
-
-    <div class="footer-tag">desarrollado por ByMO Technology</div>
 </div>
 
 <div class="nav-bar">
-    <div class="nav-item active" onclick="nav('libro')"><span class="nav-icon">📊</span>Libro</div>
-    <div class="nav-item" onclick="nav('operar')"><span class="nav-icon">💸</span>Operar</div>
-    <div class="nav-item" onclick="nav('calc')"><span class="nav-icon">🧮</span>Calcular</div>
-    <div class="nav-item" onclick="nav('tasas')"><span class="nav-icon">⚙️</span>Tasas</div>
-    <div class="nav-item" onclick="nav('manual')"><span class="nav-icon">📖</span>Manual</div>
+    <div class="nav-item active" onclick="nav('libro')">
+        <svg viewBox="0 0 24 24"><path d="M4 6h16M4 12h16M4 18h16" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+        Libro
+    </div>
+    <div class="nav-item" onclick="nav('operar')">
+        <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="2" fill="none"/><path d="M12 8v8M8 12h8" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+        Operar
+    </div>
+    <div class="nav-item" onclick="nav('calc')">
+        <svg viewBox="0 0 24 24"><rect x="4" y="4" width="16" height="16" rx="2" stroke="currentColor" stroke-width="2" fill="none"/><path d="M8 8h1M15 8h1M8 12h1M15 12h1M8 16h8" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+        Calcular
+    </div>
+    <div class="nav-item" onclick="nav('tasas')">
+        <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="4" stroke="currentColor" stroke-width="2" fill="none"/><path d="M12 4v2M12 18v2M4 12h2M18 12h2" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+        Tasas
+    </div>
+    <div class="nav-item" onclick="nav('manual')">
+        <svg viewBox="0 0 24 24"><path d="M4 19V5a2 2 0 012-2h12a2 2 0 012 2v14M4 19a2 2 0 002 2h12a2 2 0 002-2M4 19h16" stroke="currentColor" stroke-width="2" fill="none"/></svg>
+        Manual
+    </div>
 </div>
 
 <script>
@@ -308,115 +476,35 @@
         document.querySelectorAll('.nav-item').forEach(i => i.classList.remove('active'));
         document.getElementById('sec-' + id).classList.add('active');
         
-        if(id !== 'operar') {
-            document.querySelectorAll('.nav-item').forEach(i => {
-                if(i.innerText.toLowerCase().includes(id.toLowerCase().replace('calc', 'calcular'))) i.classList.add('active');
-            });
+        // Hide Main Header on sub-pages
+        document.getElementById('mainHeader').style.display = (id === 'libro') ? 'block' : 'none';
+
+        // Nav active state logic
+        if(id === 'historial') {
+            document.querySelectorAll('.nav-item')[0].classList.add('active');
+            renderHistorial();
         } else {
-            document.querySelectorAll('.nav-item')[1].classList.add('active');
+            let matched = Array.from(document.querySelectorAll('.nav-item')).find(i => i.innerText.toLowerCase().includes(id.toLowerCase().replace('calc', 'calcular')));
+            if(matched) matched.classList.add('active');
         }
+
+        if(id === 'operar') updatePreview();
     }
 
-    function calcularConversor() {
-        let monto = parseFloat(document.getElementById('convMonto').value) || 0;
-        let modo = document.getElementById('convModo').value;
-        
-        let tBcvUsd = parseFloat(document.getElementById('tBcvUsd').value) || 1;
-        let tBcvEur = parseFloat(document.getElementById('tBcvEur').value) || 1;
-        let tUsdt = parseFloat(document.getElementById('tUsdtBs').value) || 1;
-
-        if (modo === 'div_bs') {
-            document.getElementById('resConvBcv').innerText = (monto * tBcvUsd).toLocaleString('es-VE', {minimumFractionDigits: 2, maximumFractionDigits: 2}) + " Bs";
-            document.getElementById('resConvEur').innerText = (monto * tBcvEur).toLocaleString('es-VE', {minimumFractionDigits: 2, maximumFractionDigits: 2}) + " Bs";
-            document.getElementById('resConvUsdt').innerText = (monto * tUsdt).toLocaleString('es-VE', {minimumFractionDigits: 2, maximumFractionDigits: 2}) + " Bs";
-        } else {
-            document.getElementById('resConvBcv').innerText = (monto / tBcvUsd).toLocaleString('es-VE', {minimumFractionDigits: 2, maximumFractionDigits: 2}) + " $";
-            document.getElementById('resConvEur').innerText = (monto / tBcvEur).toLocaleString('es-VE', {minimumFractionDigits: 2, maximumFractionDigits: 2}) + " €";
-            document.getElementById('resConvUsdt').innerText = (monto / tUsdt).toLocaleString('es-VE', {minimumFractionDigits: 2, maximumFractionDigits: 2}) + " USDT";
-        }
+    function switchCalcTab(tabId) {
+        document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+        document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+        document.getElementById('tab-btn-' + tabId).classList.add('active');
+        document.getElementById('calc-tab-' + tabId).classList.add('active');
     }
 
-    // Sistema de Doble Verificación para Tasas
-    async function sincronizarTasasAPI() {
-        const btn = document.getElementById('btnSync');
-        const originalText = btn.innerText;
-        btn.innerText = "Sincronizando... ⏳";
-        btn.disabled = true;
-
-        let bcvUsd = 0, bcvEur = 0, binanceUsdt = 0;
-
-        try {
-            // Intento 1: pyDolarVenezuela (Más directa)
-            let resBcv1 = await fetch('https://pydolarvenezuela-api.vercel.app/api/v1/dollar?page=bcv');
-            let dataBcv1 = await resBcv1.json();
-            if(dataBcv1 && dataBcv1.monitors && dataBcv1.monitors.usd) {
-                bcvUsd = dataBcv1.monitors.usd.price;
-                bcvEur = dataBcv1.monitors.eur.price;
-            }
-        } catch (e) {
-            console.log("Fallo API 1 (BCV), saltando a respaldo...");
-            // Intento 2 (Respaldo): DolarAPI
-            try {
-                let resBcv2 = await fetch('https://ve.dolarapi.com/v1/dolares/oficial');
-                let dataBcv2 = await resBcv2.json();
-                bcvUsd = dataBcv2.promedio;
-                let resEur2 = await fetch('https://ve.dolarapi.com/v1/euros/oficial');
-                let dataEur2 = await resEur2.json();
-                bcvEur = dataEur2.promedio;
-            } catch (err2) {
-                console.error("Ambas APIs de BCV fallaron");
-            }
-        }
-
-        try {
-            // Intento 1: pyDolarVenezuela para Binance
-            let resBin1 = await fetch('https://pydolarvenezuela-api.vercel.app/api/v1/dollar?page=binance');
-            let dataBin1 = await resBin1.json();
-            if(dataBin1 && dataBin1.monitors && dataBin1.monitors.binance) {
-                binanceUsdt = dataBin1.monitors.binance.price;
-            }
-        } catch (e) {
-            console.log("Fallo API 1 (Binance), saltando a respaldo...");
-            // Intento 2 (Respaldo): DolarAPI (Paralelo como referencia)
-            try {
-                let resBin2 = await fetch('https://ve.dolarapi.com/v1/dolares/paralelo');
-                let dataBin2 = await resBin2.json();
-                binanceUsdt = dataBin2.promedio;
-            } catch (err2) {
-                console.error("Ambas APIs de Binance fallaron");
-            }
-        }
-
-        // Actualizar campos si conseguimos los datos
-        if(bcvUsd > 0) {
-            document.getElementById('tBcvUsd').value = bcvUsd;
-            document.getElementById('tDolarElecBs').value = bcvUsd;
-            document.getElementById('calcBcv').value = bcvUsd;
-        }
-        if(bcvEur > 0) document.getElementById('tBcvEur').value = bcvEur;
-        if(binanceUsdt > 0) {
-            document.getElementById('tUsdtBs').value = binanceUsdt;
-            document.getElementById('calcBin').value = binanceUsdt;
-        }
-
-        if(bcvUsd > 0 || binanceUsdt > 0) {
-            saveTasas(true); 
-            calcularConversor();
-            alert("✅ Tasas sincronizadas y guardadas con éxito.");
-        } else {
-            alert("❌ Hubo un error de conexión con ambos servidores. Verifica tu internet o ingresa las tasas de forma manual.");
-        }
-
-        btn.innerText = originalText;
-        btn.disabled = false;
-    }
-
+    /* Lógica de Tasas */
     function loadTasas() {
         const fields = [
             'tEfBs', 'tUsdtBs', 'tZelleCop', 'tZelleEf', 'tBcvUsd', 
             'tBcvEur', 'tZelleBs', 'tBsEfCalle', 'tEfUsdtCom', 
             'tDolarElecBs', 'comBancoElec', 'comBinanceElec',
-            'tPaypalBs', 'tPaypalUsdtCom'
+            'tPaypalBs', 'tPaypalUsdtCom', 'tCapitalBase'
         ];
         fields.forEach(f => {
             if(localStorage.getItem(f)) document.getElementById(f).value = localStorage.getItem(f);
@@ -431,183 +519,296 @@
             'tEfBs', 'tUsdtBs', 'tZelleCop', 'tZelleEf', 'tBcvUsd', 
             'tBcvEur', 'tZelleBs', 'tBsEfCalle', 'tEfUsdtCom', 
             'tDolarElecBs', 'comBancoElec', 'comBinanceElec',
-            'tPaypalBs', 'tPaypalUsdtCom'
+            'tPaypalBs', 'tPaypalUsdtCom', 'tCapitalBase'
         ];
         fields.forEach(f => localStorage.setItem(f, document.getElementById(f).value));
-        calcularConversor(); 
+        calcularConversor();
+        renderLibro(); // Update capital
         if(!silent) alert("Tasas Guardadas ✅");
+    }
+
+    /* Automatización DolarAPI */
+    async function sincronizarTasasAPI() {
+        const btn = document.getElementById('btnSync');
+        const originalText = btn.innerText;
+        btn.innerText = "Sincronizando... ⏳";
+        btn.disabled = true;
+        let bcvUsd = 0, bcvEur = 0, binanceUsdt = 0;
+        try {
+            let resBcv1 = await fetch('https://pydolarvenezuela-api.vercel.app/api/v1/dollar?page=bcv');
+            let dataBcv1 = await resBcv1.json();
+            if(dataBcv1 && dataBcv1.monitors && dataBcv1.monitors.usd) { bcvUsd = dataBcv1.monitors.usd.price; bcvEur = dataBcv1.monitors.eur.price; }
+        } catch (e) {
+            try {
+                let resBcv2 = await fetch('https://ve.dolarapi.com/v1/dolares/oficial');
+                let dataBcv2 = await resBcv2.json(); bcvUsd = dataBcv2.promedio;
+                let resEur2 = await fetch('https://ve.dolarapi.com/v1/euros/oficial');
+                let dataEur2 = await resEur2.json(); bcvEur = dataEur2.promedio;
+            } catch (err2) {}
+        }
+
+        try {
+            let resBin1 = await fetch('https://pydolarvenezuela-api.vercel.app/api/v1/dollar?page=binance');
+            let dataBin1 = await resBin1.json();
+            if(dataBin1 && dataBin1.monitors && dataBin1.monitors.binance) binanceUsdt = dataBin1.monitors.binance.price;
+        } catch (e) {
+            try {
+                let resBin2 = await fetch('https://ve.dolarapi.com/v1/dolares/paralelo');
+                let dataBin2 = await resBin2.json(); binanceUsdt = dataBin2.promedio;
+            } catch (err2) {}
+        }
+
+        if(bcvUsd > 0) { document.getElementById('tBcvUsd').value = bcvUsd; document.getElementById('tDolarElecBs').value = bcvUsd; document.getElementById('calcBcv').value = bcvUsd; }
+        if(bcvEur > 0) document.getElementById('tBcvEur').value = bcvEur;
+        if(binanceUsdt > 0) { document.getElementById('tUsdtBs').value = binanceUsdt; document.getElementById('calcBin').value = binanceUsdt; }
+
+        if(bcvUsd > 0 || binanceUsdt > 0) { saveTasas(true); alert("✅ Tasas sincronizadas."); } else { alert("❌ Error de conexión."); }
+        btn.innerText = originalText; btn.disabled = false;
+    }
+
+    /* Calculadora & Conversor */
+    function calcularConversor() {
+        let monto = parseFloat(document.getElementById('convMonto').value) || 0;
+        let modo = document.getElementById('convModo').value;
+        let tBcvUsd = parseFloat(document.getElementById('tBcvUsd').value) || 1;
+        let tBcvEur = parseFloat(document.getElementById('tBcvEur').value) || 1;
+        let tUsdt = parseFloat(document.getElementById('tUsdtBs').value) || 1;
+
+        if (modo === 'div_bs') {
+            document.getElementById('resConvBcv').innerText = (monto * tBcvUsd).toLocaleString('es-VE', {minimumFractionDigits: 2}) + " Bs";
+            document.getElementById('resConvEur').innerText = (monto * tBcvEur).toLocaleString('es-VE', {minimumFractionDigits: 2}) + " Bs";
+            document.getElementById('resConvUsdt').innerText = (monto * tUsdt).toLocaleString('es-VE', {minimumFractionDigits: 2}) + " Bs";
+        } else {
+            document.getElementById('resConvBcv').innerText = (monto / tBcvUsd).toLocaleString('es-VE', {minimumFractionDigits: 2}) + " $";
+            document.getElementById('resConvEur').innerText = (monto / tBcvEur).toLocaleString('es-VE', {minimumFractionDigits: 2}) + " €";
+            document.getElementById('resConvUsdt').innerText = (monto / tUsdt).toLocaleString('es-VE', {minimumFractionDigits: 2}) + " USDT";
+        }
     }
 
     function updateCalcLabels() {
         let sym = document.getElementById('calcMoneda').value === 'USD' ? '$' : '€';
         document.getElementById('refSym').innerText = sym;
-        document.getElementById('refSym2').innerText = sym;
-        
-        if (sym === '€' && localStorage.getItem('tBcvEur')) {
-            document.getElementById('calcBcv').value = localStorage.getItem('tBcvEur');
-        } else if (sym === '$' && localStorage.getItem('tBcvUsd')) {
-            document.getElementById('calcBcv').value = localStorage.getItem('tBcvUsd');
-        }
+        document.getElementById('calcBcv').value = (sym === '€') ? localStorage.getItem('tBcvEur') : localStorage.getItem('tBcvUsd');
     }
 
     function execCalc() {
         let p = parseFloat(document.getElementById('calcPrice').value) || 0;
         let bcv = parseFloat(document.getElementById('calcBcv').value) || 1;
         let bin = parseFloat(document.getElementById('calcBin').value) || 1;
-        let totalBs = p * bcv;
-        let usdt = totalBs / bin;
+        let usdt = (p * bcv) / bin;
         let diff = ((bin - bcv) / bin) * 100;
+        let diffUsdt = (p) - usdt; // Diferencia en dolares
 
-        document.getElementById('calcRes').style.display = 'block';
+        document.getElementById('calcResCard').style.display = 'block';
         document.getElementById('calcResVal').innerText = usdt.toFixed(2) + " USDT";
-        document.getElementById('calcResDiff').innerText = "Ahorro Diferencial: " + diff.toFixed(2) + "%";
+        document.getElementById('calcResDiff').innerText = "+" + diffUsdt.toFixed(2) + " USDT (" + diff.toFixed(2) + "%)";
     }
 
-    function registrar() {
-        let concepto = document.getElementById('opConcepto').value || "Varios";
-        let tipo = document.getElementById('opTipo').value;
-        let monto = parseFloat(document.getElementById('opMonto').value) || 0;
-        
-        if(monto <= 0) return alert("Ingresa un monto válido");
-
-        let gain = 0;
+    /* Core Logic de Operaciones */
+    function calculateLogic(tipo, monto) {
         let tUsdt = parseFloat(localStorage.getItem('tUsdtBs')) || 1;
         let tEf = parseFloat(localStorage.getItem('tEfBs')) || 1;
         let tZelleBs = parseFloat(localStorage.getItem('tZelleBs')) || 1;
+        
+        let gain = 0; let recibe = 0; let tasaApli = 1.00; let comiStr = "-0.00";
 
         if(tipo === 'zelle_usdt' || tipo === 'zelle_ef') {
             let com = parseFloat(localStorage.getItem('tZelleEf')) || 0;
-            gain = monto * (com / 100);
+            gain = monto * (com / 100); recibe = monto - gain; tasaApli = 1.00; comiStr = `-${gain.toFixed(2)} USDT`;
         } else if (tipo === 'zelle_bs') {
-            gain = monto - ((monto * tZelleBs) / tUsdt);
+            gain = monto - ((monto * tZelleBs) / tUsdt); recibe = monto * tZelleBs; tasaApli = tZelleBs; comiStr = "Dif. Tasa";
         } else if (tipo === 'paypal_bs') {
             let tPaypalBs = parseFloat(localStorage.getItem('tPaypalBs')) || 1;
-            gain = monto - ((monto * tPaypalBs) / tUsdt);
+            gain = monto - ((monto * tPaypalBs) / tUsdt); recibe = monto * tPaypalBs; tasaApli = tPaypalBs; comiStr = "Dif. Tasa";
         } else if (tipo === 'paypal_usdt') {
             let comPaypalUsdt = parseFloat(localStorage.getItem('tPaypalUsdtCom')) || 0;
-            gain = monto * (comPaypalUsdt / 100);
+            gain = monto * (comPaypalUsdt / 100); recibe = monto - gain; tasaApli = 1.00; comiStr = `-${gain.toFixed(2)} USDT`;
         } else if(tipo === 'ef_usdt') {
             let comEfUsdt = parseFloat(localStorage.getItem('tEfUsdtCom')) || 0;
-            gain = monto * (comEfUsdt / 100); 
+            gain = monto * (comEfUsdt / 100); recibe = monto - gain; tasaApli = 1.00; comiStr = `-${gain.toFixed(2)} USDT`;
         } else if(tipo === 'bs_ef') {
-            gain = (monto / tEf) - (monto / tUsdt); 
+            gain = (monto / tEf) - (monto / tUsdt); recibe = monto / tEf; tasaApli = tEf; comiStr = "Dif. Tasa";
         } else if(tipo === 'zelle_cop') {
-            gain = monto * 0.02;
+            gain = monto * 0.02; recibe = monto * (parseFloat(localStorage.getItem('tZelleCop'))||3500); tasaApli = "2% Aprox"; comiStr = "-";
         } else if(tipo === 'ciclo_calle') {
             let tBsEfCalle = parseFloat(localStorage.getItem('tBsEfCalle')) || 1;
             let comEfUsdt = parseFloat(localStorage.getItem('tEfUsdtCom')) || 0;
-            
             let bsInvertidos = monto * tBsEfCalle;
             let usdtNetoRecibido = monto * (1 - (comEfUsdt / 100));
             let bsRecuperados = usdtNetoRecibido * tUsdt;
-            
-            gain = (bsRecuperados - bsInvertidos) / tUsdt;
+            gain = (bsRecuperados - bsInvertidos) / tUsdt; recibe = bsRecuperados; tasaApli = "Ciclo"; comiStr = "Varios";
         } else if (tipo === 'usdt_bcv_usdt') {
             let tDolarElecBs = parseFloat(localStorage.getItem('tDolarElecBs')) || 1;
             let comBancoElec = parseFloat(localStorage.getItem('comBancoElec')) || 0;
             let comBinanceElec = parseFloat(localStorage.getItem('comBinanceElec')) || 0;
-
             let bsObtenidos = monto * tUsdt; 
             let costoPorUsdBanco = tDolarElecBs * (1 + (comBancoElec / 100));
             let usdBancoComprados = bsObtenidos / costoPorUsdBanco;
             let usdtFinal = usdBancoComprados * (1 - (comBinanceElec / 100));
-
-            gain = usdtFinal - monto;
+            gain = usdtFinal - monto; recibe = usdtFinal; tasaApli = "Ciclo"; comiStr = "Bco+Bin";
         }
+        
+        let margin = monto > 0 ? (gain / (monto / (tipo==='bs_ef'?tEf:1))) * 100 : 0;
+        // Ajuste burdo de margen para no romper si monto es Bs y lo divide raro
+        if (tipo === 'bs_ef') margin = (gain / (monto/tUsdt)) * 100;
 
-        let fechaHoy = new Date();
-        let anio = fechaHoy.getFullYear();
-        let mes = String(fechaHoy.getMonth() + 1).padStart(2, '0');
-        let dia = String(fechaHoy.getDate()).padStart(2, '0');
-        let stringFecha = `${anio}-${mes}-${dia}`;
+        return { gain, recibe, tasaApli, comiStr, margin };
+    }
 
-        let newOp = {
-            id: Date.now(),
-            date: stringFecha,
-            time: fechaHoy.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'}),
-            concepto: concepto,
-            tipo: document.getElementById('opTipo').options[document.getElementById('opTipo').selectedIndex].text,
-            monto: monto,
-            gain: gain
-        };
+    function updatePreview() {
+        let tipo = document.getElementById('opTipo').value;
+        let monto = parseFloat(document.getElementById('opMonto').value) || 0;
+        let res = calculateLogic(tipo, monto);
+        
+        document.getElementById('prevTasa').innerText = res.tasaApli;
+        document.getElementById('prevCom').innerText = res.comiStr;
+        
+        let cur = (tipo.includes('bs') && !tipo.includes('usdt_bcv')) ? 'Bs' : 'USDT';
+        if(tipo === 'zelle_ef') cur = 'USD';
+        document.getElementById('prevRecibe').innerText = res.recibe.toFixed(2) + " " + cur;
+        
+        document.getElementById('prevGain').innerText = (res.gain >= 0 ? '+' : '') + res.gain.toFixed(2) + " USDT";
+        document.getElementById('prevGain').className = res.gain >= 0 ? "text-green" : "text-red";
+        
+        document.getElementById('prevMargin').innerText = res.margin.toFixed(2) + "%";
+        document.getElementById('prevMargin').className = res.margin >= 0 ? "text-green" : "text-red";
+    }
 
-        ops.unshift(newOp);
+    function registrar() {
+        let concepto = document.getElementById('opConcepto').value || "Varios";
+        let tipoVal = document.getElementById('opTipo').value;
+        let tipoText = document.getElementById('opTipo').options[document.getElementById('opTipo').selectedIndex].text;
+        let monto = parseFloat(document.getElementById('opMonto').value) || 0;
+        if(monto <= 0) return alert("Ingresa un monto válido");
+
+        let res = calculateLogic(tipoVal, monto);
+
+        let d = new Date();
+        let stringFecha = `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+        let stringMes = `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}`;
+
+        ops.unshift({
+            id: Date.now(), date: stringFecha, month: stringMes, time: d.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'}),
+            concepto: concepto, tipo: tipoText, monto: monto, gain: res.gain
+        });
         localStorage.setItem('bymo_ops', JSON.stringify(ops));
         
         document.getElementById('opConcepto').value = "";
         document.getElementById('opMonto').value = "";
-        
-        renderLibro();
         nav('libro');
     }
 
-    function renderLibro() {
-        let list = document.getElementById('historyList');
-        let selectFecha = document.getElementById('filtroFecha');
-        
-        let fechaHoyObj = new Date();
-        let stringHoy = `${fechaHoyObj.getFullYear()}-${String(fechaHoyObj.getMonth() + 1).padStart(2, '0')}-${String(fechaHoyObj.getDate()).padStart(2, '0')}`;
-        
-        let huboCambio = false;
-        ops.forEach(o => {
-            if (!o.date) { o.date = stringHoy; huboCambio = true; }
-        });
-        if (huboCambio) localStorage.setItem('bymo_ops', JSON.stringify(ops));
+    /* Renderizado (Dashboard e Historial) */
+    function getTodayStr() {
+        let d = new Date(); return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+    }
+    function getMonthStr() {
+        let d = new Date(); return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}`;
+    }
 
-        let fechasUnicas = [...new Set(ops.map(o => o.date))];
-        if (!fechasUnicas.includes(stringHoy)) fechasUnicas.unshift(stringHoy);
+    function renderLibro() {
+        let today = getTodayStr();
+        let currentMonth = getMonthStr();
         
+        let dayGain = 0; let dayCount = 0;
+        let monthGain = 0; let totalVol = 0; let allGain = 0;
+
+        ops.forEach(o => {
+            if(!o.date) o.date = today;
+            if(!o.month) o.month = currentMonth;
+            
+            if(o.date === today) { dayGain += o.gain; dayCount++; }
+            if(o.month === currentMonth) monthGain += o.gain;
+            
+            totalVol += (o.monto || 0); // Simplificación de volumen base
+            allGain += o.gain;
+        });
+
+        // Update Hero
+        document.getElementById('dashDayVal').innerText = (dayGain>=0?'+':'') + dayGain.toFixed(2) + " USDT";
+        document.getElementById('dashDayVal').className = "amount " + (dayGain>=0?"text-green":"text-red");
+        document.getElementById('dashDayCount').innerText = dayCount + " operaciones hoy";
+
+        // Update Grid
+        document.getElementById('dashMonthVal').innerText = (monthGain>=0?'+':'') + monthGain.toFixed(2);
+        document.getElementById('dashMonthVal').className = "val " + (monthGain>=0?"text-green":"text-red");
+        
+        let capBase = parseFloat(localStorage.getItem('tCapitalBase')) || 0;
+        let capActual = capBase + allGain;
+        document.getElementById('dashCapVal').innerText = capActual.toFixed(2);
+
+        document.getElementById('dashVolVal').innerText = totalVol.toFixed(2);
+        
+        let avgMargin = totalVol > 0 ? (allGain / totalVol) * 100 : 0;
+        document.getElementById('dashMarginVal').innerText = avgMargin.toFixed(2) + "%";
+
+        // Update Recent List (Max 3)
+        let recents = ops.slice(0, 3);
+        let listHtml = "";
+        if(recents.length === 0) listHtml = "<p class='text-muted' style='text-align:center; padding:20px;'>No hay operaciones.</p>";
+        recents.forEach(o => {
+            listHtml += `
+            <div class="op-item">
+                <div class="op-top"><span>${o.time} • ${o.concepto}</span></div>
+                <div class="op-mid">
+                    <div class="op-title">${o.tipo.split(' ⮕ ')[0]} ⮕ ${o.tipo.split(' ⮕ ')[1]||o.tipo}</div>
+                    <div class="op-gain ${o.gain>=0?'text-green':'text-red'}">${o.gain>=0?'+':''}${o.gain.toFixed(2)}</div>
+                </div>
+                <div class="op-bot"><span>Base: ${o.monto||0}</span></div>
+            </div>`;
+        });
+        document.getElementById('recentOpsList').innerHTML = listHtml;
+    }
+
+    function renderHistorial() {
+        let selectFecha = document.getElementById('filtroFecha');
+        let fechasUnicas = [...new Set(ops.map(o => o.date))];
+        let today = getTodayStr();
+        if (!fechasUnicas.includes(today)) fechasUnicas.unshift(today);
         fechasUnicas.sort((a, b) => new Date(b) - new Date(a));
 
-        let fechaSeleccionada = selectFecha.value || stringHoy;
-
+        let fechaSeleccionada = selectFecha.value || today;
         selectFecha.innerHTML = "";
         fechasUnicas.forEach(f => {
             let opt = document.createElement('option');
-            opt.value = f;
-            opt.innerText = (f === stringHoy) ? "📅 Hoy" : "📅 " + f;
+            opt.value = f; opt.innerText = (f === today) ? "Hoy" : f;
             if(f === fechaSeleccionada) opt.selected = true;
             selectFecha.appendChild(opt);
         });
-
         fechaSeleccionada = selectFecha.value;
 
-        document.getElementById('tituloDashboard').innerText = (fechaSeleccionada === stringHoy) ? "Utilidad del Día" : "Utilidad de la Fecha";
-
         let opsFiltradas = ops.filter(o => o.date === fechaSeleccionada);
+        let totalGain = 0;
         
-        list.innerHTML = "";
-        let total = 0;
-        
-        if (opsFiltradas.length === 0) {
-            list.innerHTML = "<p style='font-size:12px; text-align:center; opacity:0.6;'>No hay operaciones en esta fecha.</p>";
-        }
-
+        let html = "";
         opsFiltradas.forEach(o => {
-            total += o.gain;
-            let displayMonto = o.monto ? o.monto : 'N/A';
-            
-            list.innerHTML += `
-                <div class="card-op ${o.gain < 0 ? 'neg' : ''}">
-                    <div>
-                        <div class="op-meta">${o.time} - ${o.concepto}</div>
-                        <div class="op-title" style="font-size: 12px;">${o.tipo}</div>
-                        <div class="op-monto">Inv/Base: <b>${displayMonto}</b></div>
-                        <button onclick="borrar(${o.id})" style="width:auto; padding:3px 8px; margin:5px 0 0 0; font-size:10px; background:var(--red-text); border:none; border-radius:4px; color:white; cursor:pointer;">Borrar</button>
-                    </div>
-                    <div class="op-gain" style="color:${o.gain < 0 ? 'var(--red-text)' : 'var(--green-text)'}">
-                        ${o.gain >= 0 ? '+' : ''}${o.gain.toFixed(2)} USDT
-                    </div>
+            totalGain += o.gain;
+            html += `
+            <div class="card" style="padding:12px; border-left:4px solid ${o.gain>=0?'var(--primary-green)':'var(--danger-red)'}; margin-bottom:10px;">
+                <div class="op-top"><span>${o.time} • ${o.concepto}</span></div>
+                <div class="op-mid">
+                    <div class="op-title">${o.tipo}</div>
+                    <div class="op-gain ${o.gain>=0?'text-green':'text-red'}">${o.gain>=0?'+':''}${o.gain.toFixed(2)} USDT</div>
                 </div>
-            `;
+                <div class="op-bot">
+                    <span>Inversión: ${o.monto||0}</span>
+                    <span style="color:#ff4d4f; cursor:pointer;" onclick="borrar(${o.id})">Borrar</span>
+                </div>
+            </div>`;
         });
-        document.getElementById('totalDay').innerText = total.toFixed(2) + " USDT";
+        
+        if(opsFiltradas.length === 0) html = "<p class='text-muted' style='text-align:center;'>No hay operaciones esta fecha.</p>";
+        document.getElementById('fullOpsList').innerHTML = html;
+        document.getElementById('histCount').innerText = opsFiltradas.length;
+        document.getElementById('histNet').innerText = (totalGain>=0?'+':'') + totalGain.toFixed(2) + " USDT";
+        document.getElementById('histNet').className = "val " + (totalGain>=0?"text-green":"text-red");
     }
 
     function borrar(id) {
-        if(confirm("¿Eliminar registro?")) {
+        if(confirm("¿Eliminar registro de forma permanente?")) {
             ops = ops.filter(o => o.id !== id);
             localStorage.setItem('bymo_ops', JSON.stringify(ops));
+            renderHistorial();
             renderLibro();
         }
     }
