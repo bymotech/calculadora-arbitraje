@@ -64,6 +64,15 @@
         .op-monto { font-size: 12px; opacity: 0.8; margin-top: 3px; }
         .op-gain { font-weight: bold; font-size: 16px; text-align: right; }
 
+        /* Estilos integrados para el Manual */
+        details { background: var(--card-bg); border-radius: 10px; margin-bottom: 12px; border: 1px solid var(--input-border); overflow: hidden; }
+        details summary { background: var(--menu-bg); color: var(--text-color); font-weight: bold; cursor: pointer; padding: 15px; outline: none; list-style: none; display: flex; justify-content: space-between; align-items: center; transition: 0.3s; font-size: 13px; }
+        details[open] summary { background: var(--brand-color); color: #000; }
+        details summary::after { content: "▼"; font-size: 12px; transition: 0.3s; }
+        details[open] summary::after { content: "▲"; }
+        .manual-content { padding: 15px; font-size: 13px; line-height: 1.6; color: var(--text-color); border-top: 1px solid var(--input-border); }
+        .manual-content b { color: var(--green-text); }
+
         .footer-tag { text-align: center; font-size: 9px; opacity: 0.4; margin-top: 30px; font-style: italic; padding-bottom: 20px; }
     </style>
 </head>
@@ -76,7 +85,6 @@
     </div>
 
     <div id="sec-libro" class="section active">
-        
         <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
             <h3 style="font-size: 14px; margin: 0;">Consulta de Saldos</h3>
             <select id="filtroFecha" onchange="renderLibro()" style="width: auto; padding: 4px; font-size: 12px; border-radius: 5px; border: 1px solid var(--input-border); background: var(--input-bg); color: var(--text-color); margin: 0;"></select>
@@ -177,6 +185,52 @@
         <button class="btn-save" onclick="saveTasas()">Guardar Tasas</button>
     </div>
 
+    <div id="sec-manual" class="section">
+        <h3 style="text-align: center; margin-bottom: 15px;">Manual de Operaciones</h3>
+        
+        <details>
+            <summary>1️⃣ PRIMER PASO: PONER LAS TASAS AL DÍA</summary>
+            <div class="manual-content">
+                Mano, esto es lo primero que tienes que hacer apenas te tomes el café en la mañana. Si las tasas están viejas, vas a terminar regalando el trabajo o cobrando de más y espantando al cliente.<br><br>
+                Vas a la pestaña de <b>Tasas</b> y pones los montos reales: cuánto está pagando Binance (P2P), a cuánto está el BCV (Dólar y Euro) y qué comisión vas a cobrar por los Zelle o el Efectivo. Cuando termines, dale a <b>"Guardar"</b>. La app se queda con eso grabado y así todos los cálculos que hagas en el día salen exactos.
+            </div>
+        </details>
+
+        <details>
+            <summary>2️⃣ ENTENDIENDO LOS TIPOS DE CAMBIO</summary>
+            <div class="manual-content">
+                Aquí no hay pérdida, elegimos el que toque según lo que pida el cliente:<br><br>
+                • <b>Zelle a USDT:</b> El cliente te transfiere por Zelle y tú le recargas su Binance. Aquí ganas por la comisión que pusiste en tasas.<br>
+                • <b>Zelle a Bolívares:</b> Recibes los verdes en el imperio y pagas en soberanos aquí. La ganancia es la diferencia entre el precio del Zelle y el precio de Binance.<br>
+                • <b>Arbitraje (El Ruleteo):</b> Este es el fuerte. Cuando compras dólares en efectivo baratos en la calle, los depositas, los vuelves USDT y luego los vendes por bolívares para volver a empezar. La app te dice cuánto te quedó de ganancia neta en USDT después de dar toda la vuelta.
+            </div>
+        </details>
+
+        <details>
+            <summary>3️⃣ CÓMO LLEVAR EL LIBRO SIN ENROLLARSE</summary>
+            <div class="manual-content">
+                Cada vez que hagas un negocio, regístralo de una vez en la pestaña <b>Operar</b>. Pon el nombre del cliente para que no se te olvide quién fue y el monto.<br><br>
+                En la pantalla principal (el <b>Libro</b>), verás la "Utilidad del Día". Eso es lo que llevas en el bolsillo ganado hoy. Si el número está en verde, vamos bien; si sale algo en rojo, mosca que perdiste plata en ese movimiento. Lo mejor es que a las 12 de la noche la app guarda todo sola y arranca en cero al día siguiente.
+            </div>
+        </details>
+
+        <details>
+            <summary>4️⃣ EL TRUCO PARA VENDER MÁS (CALC)</summary>
+            <div class="manual-content">
+                La pestaña <b>Calc</b> es para convencer al cliente indeciso. Si alguien va a pagar algo en un negocio que cuesta dólares de etiqueta (tasa BCV), tú le sacas la cuenta ahí mismo.<br><br>
+                La app le muestra cuántos USDT te tiene que pasar y, lo más importante, le dice cuánto se está ahorrando por no usar el efectivo o la tarjeta del banco. Es la herramienta perfecta para cerrar el trato rápido.
+            </div>
+        </details>
+
+        <details>
+            <summary>5️⃣ REVISAR LO QUE SE GANÓ AYER</summary>
+            <div class="manual-content">
+                Si quieres saber cómo te fue en la semana, ve al filtro de fechas que está arriba en tu Libro. Ahí vas a ver una lista de los días pasados con el total que se hizo y las operaciones que tiraste. Así llevas tu contabilidad clarita sin tener que andar anotando en cuadernos que después se pierden.
+            </div>
+        </details>
+
+    </div>
+
     <div class="footer-tag">desarrollado por ByMO Technology</div>
 </div>
 
@@ -185,6 +239,7 @@
     <div class="nav-item" onclick="nav('operar')"><span class="nav-icon">💸</span>Operar</div>
     <div class="nav-item" onclick="nav('calc')"><span class="nav-icon">🛒</span>Calc</div>
     <div class="nav-item" onclick="nav('tasas')"><span class="nav-icon">⚙️</span>Tasas</div>
+    <div class="nav-item" onclick="nav('manual')"><span class="nav-icon">📖</span>Manual</div>
 </div>
 
 <script>
@@ -202,7 +257,7 @@
         
         if(id !== 'operar') {
             document.querySelectorAll('.nav-item').forEach(i => {
-                if(i.innerText.includes(id.charAt(0).toUpperCase() + id.slice(1))) i.classList.add('active');
+                if(i.innerText.toLowerCase().includes(id.toLowerCase())) i.classList.add('active');
             });
         } else {
             document.querySelectorAll('.nav-item')[1].classList.add('active');
@@ -276,7 +331,6 @@
             gain = (bsRecuperados - bsInvertidos) / tUsdt;
         }
 
-        // Obtener fecha actual en formato local YYYY-MM-DD (sin problemas de zona horaria extraños)
         let fechaHoy = new Date();
         let anio = fechaHoy.getFullYear();
         let mes = String(fechaHoy.getMonth() + 1).padStart(2, '0');
@@ -307,7 +361,6 @@
         let list = document.getElementById('historyList');
         let selectFecha = document.getElementById('filtroFecha');
         
-        // Asignar fecha de hoy a operaciones viejas (parche de compatibilidad)
         let fechaHoyObj = new Date();
         let stringHoy = `${fechaHoyObj.getFullYear()}-${String(fechaHoyObj.getMonth() + 1).padStart(2, '0')}-${String(fechaHoyObj.getDate()).padStart(2, '0')}`;
         
@@ -317,17 +370,13 @@
         });
         if (huboCambio) localStorage.setItem('bymo_ops', JSON.stringify(ops));
 
-        // Obtener fechas únicas para el filtro
         let fechasUnicas = [...new Set(ops.map(o => o.date))];
         if (!fechasUnicas.includes(stringHoy)) fechasUnicas.unshift(stringHoy);
         
-        // Ordenar de más reciente a más antigua
         fechasUnicas.sort((a, b) => new Date(b) - new Date(a));
 
-        // Mantener la fecha que el usuario haya seleccionado (o forzar hoy)
         let fechaSeleccionada = selectFecha.value || stringHoy;
 
-        // Construir el desplegable
         selectFecha.innerHTML = "";
         fechasUnicas.forEach(f => {
             let opt = document.createElement('option');
@@ -337,13 +386,10 @@
             selectFecha.appendChild(opt);
         });
 
-        // Asegurar lectura de la selección actual
         fechaSeleccionada = selectFecha.value;
 
-        // Cambiar título del dashboard
         document.getElementById('tituloDashboard').innerText = (fechaSeleccionada === stringHoy) ? "Utilidad del Día" : "Utilidad de la Fecha";
 
-        // Filtrar y renderizar operaciones
         let opsFiltradas = ops.filter(o => o.date === fechaSeleccionada);
         
         list.innerHTML = "";
