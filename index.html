@@ -3,18 +3,47 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Arbitraje PRO</title>
+    <title>Arbitraje PRO - ByMO Tech</title>
     <style>
-        body { font-family: Arial, sans-serif; padding: 20px; background-color: #f4f4f9; }
-        .container { max-width: 400px; margin: 0 auto; background: white; padding: 20px; border-radius: 10px; box-shadow: 0 4px 8px rgba(0,0,0,0.1); }
-        h2 { text-align: center; color: #333; font-size: 22px; margin-bottom: 15px;}
+        /* Variables para el Modo Claro/Oscuro Automático */
+        :root {
+            --bg-color: #f4f4f9;
+            --container-bg: #ffffff;
+            --text-color: #333333;
+            --input-bg: #ffffff;
+            --input-border: #cccccc;
+            --result-bg: #e9ecef;
+            --menu-bg: #e0e0e0;
+            --green-text: #28a745;
+            --red-text: #dc3545;
+        }
+
+        @media (prefers-color-scheme: dark) {
+            :root {
+                --bg-color: #121212;
+                --container-bg: #1e1e1e;
+                --text-color: #e0e0e0;
+                --input-bg: #2c2c2c;
+                --input-border: #444444;
+                --result-bg: #2a2a2a;
+                --menu-bg: #333333;
+                --green-text: #4caf50;
+                --red-text: #ff5252;
+            }
+        }
+
+        body { font-family: Arial, sans-serif; padding: 20px; background-color: var(--bg-color); color: var(--text-color); transition: background 0.3s; }
+        .container { max-width: 400px; margin: 0 auto; background: var(--container-bg); padding: 20px; border-radius: 10px; box-shadow: 0 4px 8px rgba(0,0,0,0.2); }
+        h2 { text-align: center; color: var(--text-color); font-size: 22px; margin-bottom: 15px;}
         label { font-weight: bold; display: block; margin-top: 12px; font-size: 14px;}
-        input, select { width: 100%; padding: 10px; margin-top: 5px; border: 1px solid #ccc; border-radius: 5px; box-sizing: border-box; font-size: 16px;}
+        input, select { width: 100%; padding: 10px; margin-top: 5px; border: 1px solid var(--input-border); border-radius: 5px; box-sizing: border-box; font-size: 16px; background-color: var(--input-bg); color: var(--text-color); }
         button { width: 100%; padding: 12px; background-color: #28a745; color: white; border: none; border-radius: 5px; margin-top: 20px; font-size: 16px; font-weight: bold; cursor: pointer; }
-        .result { margin-top: 20px; padding: 15px; background: #e9ecef; border-radius: 5px; text-align: center; font-size: 18px; }
+        .result { margin-top: 20px; padding: 15px; background: var(--result-bg); border-radius: 5px; text-align: center; font-size: 18px; }
         .seccion { display: none; margin-top: 15px; }
         .activa { display: block; }
-        .menu-principal { background-color: #e0e0e0; font-weight: bold; }
+        .menu-principal { background-color: var(--menu-bg); font-weight: bold; }
+        .texto-verde { color: var(--green-text); font-weight: bold; }
+        .texto-rojo { color: var(--red-text); font-weight: bold; }
     </style>
 </head>
 <body>
@@ -30,24 +59,24 @@
 
         <div id="sec-producto" class="seccion activa">
             <label>Precio Producto en Estante ($ BCV):</label>
-            <input type="number" id="prodUsd" value="10.00" step="0.01">
+            <input type="number" id="prodUsd" value="10.00" step="0.01" inputmode="decimal">
             <label>Tasa BCV Actual (Bs/$):</label>
-            <input type="number" id="tasaBcv" value="483.00" step="0.01">
+            <input type="number" id="tasaBcv" value="483.00" step="0.01" inputmode="decimal">
             <label>Tasa Binance USDT (Bs/USDT):</label>
-            <input type="number" id="tasaBin" value="628.00" step="0.01">
+            <input type="number" id="tasaBin" value="628.00" step="0.01" inputmode="decimal">
             <button onclick="calcularProducto()">Calcular Costo en USDT</button>
             <div class="result" id="resProd">Resultado: 0 USDT</div>
         </div>
 
         <div id="sec-banco" class="seccion">
             <label>Precio Venta USDT (Bs):</label>
-            <input type="number" id="precioUsdt1" value="0.00" step="0.01">
+            <input type="number" id="precioUsdt1" value="0.00" step="0.01" inputmode="decimal">
             <label>Precio Compra USD Banco (Bs):</label>
-            <input type="number" id="precioBcv1" value="0.00" step="0.01">
+            <input type="number" id="precioBcv1" value="0.00" step="0.01" inputmode="decimal">
             <label>Comisión Banco (%):</label>
-            <input type="number" id="comBanco" value="0.0" step="0.1">
+            <input type="number" id="comBanco" value="0.0" step="0.1" inputmode="decimal">
             <label>Comisión Binance (%):</label>
-            <input type="number" id="comBinance" value="0.0" step="0.1">
+            <input type="number" id="comBinance" value="0.0" step="0.1" inputmode="decimal">
             <button onclick="calcularBanco()">Calcular Rentabilidad</button>
             <div class="result" id="resBanco">Resultado: 0%</div>
         </div>
@@ -59,28 +88,28 @@
                 <option value="efectivo_a_usdt">Efectivo -> USDT -> Vender</option>
             </select>
             <label>Precio USDT Promedio (Bs):</label>
-            <input type="number" id="precioUsdt2" value="0.00" step="0.01">
+            <input type="number" id="precioUsdt2" value="0.00" step="0.01" inputmode="decimal">
             <label>Precio Dólar Efectivo (Bs):</label>
-            <input type="number" id="precioEf" value="0.00" step="0.01">
+            <input type="number" id="precioEf" value="0.00" step="0.01" inputmode="decimal">
             <label>Comisión del Cambio (%):</label>
-            <input type="number" id="comCambio" value="0.0" step="0.1">
+            <input type="number" id="comCambio" value="0.0" step="0.1" inputmode="decimal">
             <button onclick="calcularEfectivo()">Calcular Rentabilidad</button>
             <div class="result" id="resEfectivo">Resultado: 0%</div>
         </div>
 
         <div id="sec-cop" class="seccion">
             <label>Monto Zelle ($):</label>
-            <input type="number" id="montoZelle" value="0.00" step="1">
+            <input type="number" id="montoZelle" value="0.00" step="1" inputmode="decimal">
             <label>Tasa Zelle a Pesos (COP):</label>
-            <input type="number" id="tasaZelleCop" value="0" step="1">
+            <input type="number" id="tasaZelleCop" value="0" step="1" inputmode="decimal">
             <label>Tasa Pesos a USDT (COP):</label>
-            <input type="number" id="tasaCopUsdt" value="0" step="1">
+            <input type="number" id="tasaCopUsdt" value="0" step="1" inputmode="decimal">
             <label>Comisión (Zelle -> COP):</label>
             <select id="tipoComisionCop">
                 <option value="fija">Monto Fijo ($)</option>
                 <option value="porcentaje">Porcentaje (%)</option>
             </select>
-            <input type="number" id="valorComisionCop" value="0.0" step="0.1">
+            <input type="number" id="valorComisionCop" value="0.0" step="0.1" inputmode="decimal">
             <button onclick="calcularCop()">Calcular Rentabilidad</button>
             <div class="result" id="resCop">Resultado: 0%</div>
         </div>
@@ -106,6 +135,10 @@
             }
         }
 
+        function getColorClass(valor) {
+            return valor >= 0 ? "texto-verde" : "texto-rojo";
+        }
+
         function calcularBanco() {
             let pU = parseFloat(document.getElementById('precioUsdt1').value) || 0;
             let pB = parseFloat(document.getElementById('precioBcv1').value) || 0;
@@ -114,7 +147,7 @@
             let costo = (100 * pB) * (1 + (cB / 100));
             let rec = 100 * (1 - (cBin / 100)) * pU;
             let rent = costo > 0 ? ((rec - costo) / costo) * 100 : 0;
-            document.getElementById('resBanco').innerHTML = "Rent: <b>" + rent.toFixed(2) + "%</b>";
+            document.getElementById('resBanco').innerHTML = "Rentabilidad: <span class='" + getColorClass(rent) + "'>" + rent.toFixed(2) + "%</span>";
         }
 
         function calcularEfectivo() {
@@ -125,7 +158,7 @@
             let costo = (t === "usdt_a_efectivo") ? (100 * pU) : (100 * pE);
             let rec = (t === "usdt_a_efectivo") ? (100 * (1 - (c/100)) * pE) : (100 * (1 - (c/100)) * pU);
             let rent = costo > 0 ? ((rec - costo) / costo) * 100 : 0;
-            document.getElementById('resEfectivo').innerHTML = "Rent: <b>" + rent.toFixed(2) + "%</b>";
+            document.getElementById('resEfectivo').innerHTML = "Rentabilidad: <span class='" + getColorClass(rent) + "'>" + rent.toFixed(2) + "%</span>";
         }
 
         function calcularCop() {
@@ -137,7 +170,7 @@
             let neto = tipo === 'fija' ? (cap - val) : (cap * (1 - (val/100)));
             let usdtF = tCU > 0 ? (neto * tZC / tCU) : 0;
             let rent = cap > 0 ? ((usdtF - cap) / cap) * 100 : 0;
-            document.getElementById('resCop').innerHTML = "Rent: <b>" + rent.toFixed(2) + "%</b>";
+            document.getElementById('resCop').innerHTML = "Rentabilidad: <span class='" + getColorClass(rent) + "'>" + rent.toFixed(2) + "%</span>";
         }
 
         function calcularProducto() {
@@ -149,10 +182,8 @@
             let ahorro = tI > 0 ? ((tI - tB) / tI) * 100 : 0;
             
             let resHtml = "Necesitas cambiar: <b>" + usdtNec.toFixed(2) + " USDT</b><br><small>Equivale a: " + costoBs.toFixed(2) + " Bs";
-            if (ahorro > 0) {
-                resHtml += "<br>Ahorro (Diferencial): <span style='color:green'><b>" + ahorro.toFixed(2) + "%</b></span>";
-            } else if (ahorro < 0) {
-                resHtml += "<br>Pérdida (Diferencial): <span style='color:red'><b>" + Math.abs(ahorro).toFixed(2) + "%</b></span>";
+            if (ahorro !== 0) {
+                resHtml += "<br>Diferencial: <span class='" + getColorClass(ahorro) + "'>" + Math.abs(ahorro).toFixed(2) + "%</span>";
             }
             resHtml += "</small>";
             
