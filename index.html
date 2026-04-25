@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Libro Diario Cambista - ByMO Tech</title>
+    <title>ByMO Tech - Suite Cambista</title>
     <style>
         :root {
             --bg-color: #f4f4f9;
@@ -32,266 +32,249 @@
             }
         }
 
-        body { font-family: Arial, sans-serif; padding: 10px; background-color: var(--bg-color); color: var(--text-color); transition: background 0.3s; margin: 0; }
-        .container { max-width: 450px; margin: 0 auto; background: var(--container-bg); padding: 15px; border-radius: 10px; box-shadow: 0 4px 8px rgba(0,0,0,0.2); position: relative; }
+        body { font-family: 'Segoe UI', Arial, sans-serif; padding: 0; background-color: var(--bg-color); color: var(--text-color); margin: 0; padding-bottom: 70px; }
+        .container { max-width: 450px; margin: 0 auto; background: var(--container-bg); min-height: 100vh; padding: 15px; box-sizing: border-box; }
         
-        /* Header y Logo */
-        .header { display: flex; align-items: center; justify-content: space-between; border-bottom: 1px solid var(--input-border); padding-bottom: 10px; margin-bottom: 15px; }
-        .logo-svg { width: 40px; height: 40px; fill: var(--brand-color); filter: drop-shadow(0px 0px 2px rgba(0,0,0,0.5)); }
-        h2 { font-size: 18px; margin: 0; color: var(--text-color); }
+        /* Header Simplificado */
+        .header { text-align: center; padding-bottom: 10px; border-bottom: 1px solid var(--input-border); margin-bottom: 15px; }
+        .logo-simple { font-size: 40px; margin-bottom: 5px; }
 
-        /* Dashboard Total */
-        .dashboard { background: var(--card-bg); padding: 15px; border-radius: 8px; text-align: center; margin-bottom: 20px; border-left: 5px solid var(--brand-color); }
-        .dashboard p { margin: 0; font-size: 14px; text-transform: uppercase; letter-spacing: 1px; opacity: 0.8; }
-        .dashboard h1 { margin: 5px 0 0 0; font-size: 32px; color: var(--green-text); }
-        .dashboard h1.negativo { color: var(--red-text); }
+        /* Dashboard de Ganancia */
+        .dashboard { background: var(--card-bg); padding: 15px; border-radius: 12px; text-align: center; margin-bottom: 20px; border: 1px solid var(--input-border); }
+        .dashboard p { margin: 0; font-size: 12px; text-transform: uppercase; font-weight: bold; opacity: 0.7; }
+        .dashboard h1 { margin: 5px 0 0 0; font-size: 28px; color: var(--green-text); }
 
-        /* Formularios */
-        label { font-weight: bold; display: block; margin-top: 10px; font-size: 13px; opacity: 0.9;}
-        input, select { width: 100%; padding: 10px; margin-top: 5px; border: 1px solid var(--input-border); border-radius: 5px; box-sizing: border-box; font-size: 15px; background-color: var(--input-bg); color: var(--text-color); }
-        
-        .row { display: flex; gap: 10px; }
-        .col { flex: 1; }
+        /* Navegación Inferior Estilo App */
+        .nav-bar { position: fixed; bottom: 0; left: 0; width: 100%; background: var(--container-bg); display: flex; border-top: 1px solid var(--input-border); z-index: 100; }
+        .nav-item { flex: 1; text-align: center; padding: 12px 5px; font-size: 10px; font-weight: bold; cursor: pointer; color: var(--text-color); opacity: 0.6; }
+        .nav-item.active { opacity: 1; color: var(--brand-color); border-top: 3px solid var(--brand-color); }
+        .nav-icon { font-size: 20px; display: block; margin-bottom: 2px; }
 
-        button { width: 100%; padding: 12px; border: none; border-radius: 5px; margin-top: 15px; font-size: 15px; font-weight: bold; cursor: pointer; color: white; }
-        .btn-config { background-color: #6c757d; }
-        .btn-accion { background-color: #28a745; }
-        .btn-eliminar { background-color: var(--red-text); padding: 5px 10px; font-size: 12px; margin-top: 5px; width: auto;}
+        /* Estilos de Formulario */
+        .section { display: none; }
+        .section.active { display: block; }
+        label { font-weight: bold; display: block; margin-top: 15px; font-size: 13px; }
+        input, select { width: 100%; padding: 12px; margin-top: 5px; border: 1px solid var(--input-border); border-radius: 8px; background: var(--input-bg); color: var(--text-color); font-size: 15px; }
+        button { width: 100%; padding: 14px; border: none; border-radius: 8px; margin-top: 20px; font-size: 16px; font-weight: bold; cursor: pointer; color: white; transition: 0.2s; }
+        .btn-add { background: #28a745; }
+        .btn-save { background: #6c757d; }
 
         /* Historial */
-        .historial-title { margin-top: 25px; font-size: 16px; border-bottom: 1px solid var(--input-border); padding-bottom: 5px; }
-        .op-card { background: var(--card-bg); padding: 12px; border-radius: 8px; margin-top: 10px; font-size: 13px; border-left: 4px solid var(--green-text); display: flex; justify-content: space-between; align-items: center;}
-        .op-card.perdida { border-left-color: var(--red-text); }
-        .op-info { flex: 1; }
-        .op-monto { text-align: right; font-weight: bold; font-size: 15px; }
-        .fecha { font-size: 11px; opacity: 0.6; margin-bottom: 4px; }
+        .card-op { background: var(--card-bg); padding: 12px; border-radius: 10px; margin-bottom: 10px; border-left: 5px solid var(--green-text); display: flex; justify-content: space-between; align-items: center; }
+        .card-op.neg { border-left-color: var(--red-text); }
+        .op-meta { font-size: 11px; opacity: 0.6; }
+        .op-title { font-weight: bold; font-size: 14px; margin: 2px 0; }
+        .op-gain { font-weight: bold; font-size: 16px; text-align: right; }
 
-        .footer-tech { text-align: center; font-size: 10px; color: var(--text-color); opacity: 0.5; margin-top: 30px; font-style: italic; }
-        
-        /* Pestañas */
-        .tabs { display: flex; margin-bottom: 15px; }
-        .tab { flex: 1; text-align: center; padding: 10px; background: var(--menu-bg); cursor: pointer; font-weight: bold; font-size: 14px;}
-        .tab.active { background: var(--brand-color); color: #000; }
-        .tab-content { display: none; }
-        .tab-content.active { display: block; }
+        .footer-tag { text-align: center; font-size: 9px; opacity: 0.4; margin-top: 30px; font-style: italic; }
     </style>
 </head>
 <body>
-    <div class="container">
-        <div class="header">
-            <svg class="logo-svg" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
-                <rect x="42" y="20" width="6" height="60" rx="3" />
-                <rect x="25" y="35" width="6" height="30" rx="3" />
-                <rect x="59" y="35" width="6" height="30" rx="3" />
-                <rect x="76" y="45" width="6" height="10" rx="3" />
-                <rect x="9" y="45" width="6" height="10" rx="3" />
-                <circle cx="50" cy="40" r="5" />
-                <circle cx="50" cy="60" r="5" />
-                <path d="M50 40 L65 40 L65 55 L50 55" fill="none" stroke="#ffcc00" stroke-width="5" stroke-linecap="round"/>
-            </svg>
-            <h2>Libro Diario Cambista</h2>
-        </div>
 
-        <div class="dashboard">
-            <p>Ganancia Total del Día (USDT)</p>
-            <h1 id="totalGanancia">0.00</h1>
-        </div>
-
-        <div class="tabs">
-            <div class="tab active" onclick="cambiarTab('operacion')">Nueva Operación</div>
-            <div class="tab" onclick="cambiarTab('tasas')">Config. Tasas</div>
-        </div>
-
-        <div id="tab-operacion" class="tab-content active">
-            <label>Concepto / Cliente:</label>
-            <input type="text" id="concepto" placeholder="Ej. Cambio de Zelle María">
-            
-            <label>Tipo de Cambio:</label>
-            <select id="tipoOperacion">
-                <option value="zelle_usdt">Recibo Zelle -> Entrego USDT</option>
-                <option value="bs_efectivo">Recibo Bs -> Entrego Efectivo ($)</option>
-                <option value="zelle_cop_usdt">Arbitraje: Zelle -> COP -> USDT</option>
-            </select>
-
-            <label>Monto a Cambiar (Inversión/Recibido):</label>
-            <input type="number" id="montoInversion" value="" placeholder="Ej. 100" step="0.01" inputmode="decimal">
-
-            <button class="btn-accion" onclick="registrarOperacion()">Registrar Operación</button>
-        </div>
-
-        <div id="tab-tasas" class="tab-content">
-            <p style="font-size: 12px; opacity: 0.8; margin-top:0;">Configura las tasas de tu jornada de trabajo. Se guardarán automáticamente.</p>
-            
-            <div class="row">
-                <div class="col">
-                    <label>Tasa Zelle -> COP:</label>
-                    <input type="number" id="tZelleCop" value="3514" step="1" inputmode="decimal">
-                </div>
-                <div class="col">
-                    <label>Tasa COP -> USDT:</label>
-                    <input type="number" id="tCopUsdt" value="3540" step="1" inputmode="decimal">
-                </div>
-            </div>
-
-            <div class="row">
-                <div class="col">
-                    <label>Tasa Venta USDT (Bs):</label>
-                    <input type="number" id="tUsdtBs" value="45.0" step="0.1" inputmode="decimal">
-                </div>
-                <div class="col">
-                    <label>Tasa Efectivo (Bs/$):</label>
-                    <input type="number" id="tEfectivoBs" value="43.5" step="0.1" inputmode="decimal">
-                </div>
-            </div>
-            
-            <label>Comisión cobrada por recibir Zelle (%):</label>
-            <input type="number" id="comZelle" value="5" step="0.1" inputmode="decimal">
-
-            <button class="btn-config" onclick="guardarTasas()">Guardar Tasas del Día</button>
-        </div>
-
-        <h3 class="historial-title">Historial de Hoy</h3>
-        <div id="listaOperaciones">
-            </div>
-
-        <div class="footer-tech">desarrollado por ByMO Technology</div>
+<div class="container">
+    <div class="header">
+        <div class="logo-simple">⚡</div>
+        <h2 style="font-size: 16px; margin: 0;">ByMO Tech Suite</h2>
     </div>
 
-    <script>
-        // Memoria de la App
-        let operaciones = JSON.parse(localStorage.getItem('bymo_operaciones')) || [];
+    <div id="sec-libro" class="section active">
+        <div class="dashboard">
+            <p>Utilidad del Día</p>
+            <h1 id="totalDay">0.00 USDT</h1>
+        </div>
+        <h3 style="font-size: 14px;">Historial de Hoy</h3>
+        <div id="historyList"></div>
+    </div>
+
+    <div id="sec-operar" class="section">
+        <h3 style="text-align: center;">Nueva Operación</h3>
+        <label>Concepto / Cliente:</label>
+        <input type="text" id="opConcepto" placeholder="Ej: Cambio Juan Perez">
         
-        // Cargar Tasas guardadas al iniciar
-        window.onload = () => {
-            if(localStorage.getItem('tZelleCop')) document.getElementById('tZelleCop').value = localStorage.getItem('tZelleCop');
-            if(localStorage.getItem('tCopUsdt')) document.getElementById('tCopUsdt').value = localStorage.getItem('tCopUsdt');
-            if(localStorage.getItem('tUsdtBs')) document.getElementById('tUsdtBs').value = localStorage.getItem('tUsdtBs');
-            if(localStorage.getItem('tEfectivoBs')) document.getElementById('tEfectivoBs').value = localStorage.getItem('tEfectivoBs');
-            if(localStorage.getItem('comZelle')) document.getElementById('comZelle').value = localStorage.getItem('comZelle');
-            actualizarUI();
+        <label>Tipo de Cambio:</label>
+        <select id="opTipo">
+            <option value="zelle_usdt">🇺🇸 Zelle ⮕ 🟢 USDT</option>
+            <option value="zelle_ef">🇺🇸 Zelle ⮕ 💵 Efectivo</option>
+            <option value="zelle_cop">🇺🇸 Zelle ⮕ 🇨🇴 Pesos COP</option>
+            <option value="ef_usdt">💵 Efectivo ⮕ 🟢 USDT</option>
+            <option value="bs_ef">🇻🇪 Bolívares ⮕ 💵 Efectivo</option>
+        </select>
+
+        <label>Monto Recibido:</label>
+        <input type="number" id="opMonto" placeholder="0.00" inputmode="decimal">
+        
+        <button class="btn-add" onclick="registrar()">Registrar en Libro</button>
+    </div>
+
+    <div id="sec-calc" class="section">
+        <h3 style="text-align: center;">Calculadora de Precios</h3>
+        <label>Moneda Ref:</label>
+        <select id="calcMoneda" onchange="updateCalcLabels()">
+            <option value="USD">Dólar ($)</option>
+            <option value="EUR">Euro (€)</option>
+        </select>
+        <label>Precio en Etiqueta (<span id="refSym">$</span>):</label>
+        <input type="number" id="calcPrice" placeholder="0.00" inputmode="decimal">
+        <label>Tasa BCV (Bs/<span id="refSym2">$</span>):</label>
+        <input type="number" id="calcBcv" placeholder="0.00" inputmode="decimal">
+        <label>Tasa Binance (Bs/USDT):</label>
+        <input type="number" id="calcBin" placeholder="0.00" inputmode="decimal">
+        
+        <div id="calcRes" class="dashboard" style="margin-top:20px; display:none;">
+            <p id="calcResTitle">Necesitas Cambiar</p>
+            <h1 id="calcResVal">0.00 USDT</h1>
+            <p id="calcResDiff" style="font-size: 10px; color: var(--green-text);"></p>
+        </div>
+        <button class="btn-save" onclick="execCalc()">Calcular Precio</button>
+    </div>
+
+    <div id="sec-tasas" class="section">
+        <h3 style="text-align: center;">Configuración de Tasas</h3>
+        <p style="font-size: 11px; opacity:0.7;">Ajusta las tasas para los cálculos automáticos del día.</p>
+        
+        <label>💵 Tasa Efectivo (Bs/$):</label>
+        <input type="number" id="tEfBs" step="0.1" inputmode="decimal">
+        
+        <label>🟢 Tasa USDT (Bs/USDT):</label>
+        <input type="number" id="tUsdtBs" step="0.1" inputmode="decimal">
+
+        <label>🇨🇴 Tasa Zelle ⮕ COP:</label>
+        <input type="number" id="tZelleCop" step="1" inputmode="decimal">
+        
+        <label>🇺🇸 Tasa Zelle ⮕ Efectivo (% Comisión):</label>
+        <input type="number" id="tZelleEf" step="0.1" inputmode="decimal">
+
+        <label>🏦 Tasas BCV (Dólar / Euro):</label>
+        <div style="display:flex; gap:10px;">
+            <input type="number" id="tBcvUsd" placeholder="USD" inputmode="decimal">
+            <input type="number" id="tBcvEur" placeholder="EUR" inputmode="decimal">
+        </div>
+
+        <button class="btn-save" onclick="saveTasas()">Guardar Tasas</button>
+    </div>
+
+    <div class="footer-tag">desarrollado por Bymo Technology</div>
+</div>
+
+<div class="nav-bar">
+    <div class="nav-item active" onclick="nav('libro')"><span class="nav-icon">📊</span>Libro</div>
+    <div class="nav-item" onclick="nav('operar')"><span class="nav-icon">💸</span>Operar</div>
+    <div class="nav-item" onclick="nav('calc')"><span class="nav-icon">🛒</span>Calc</div>
+    <div class="nav-item" onclick="nav('tasas')"><span class="nav-icon">⚙️</span>Tasas</div>
+</div>
+
+<script>
+    let ops = JSON.parse(localStorage.getItem('bymo_ops')) || [];
+
+    window.onload = () => {
+        loadTasas();
+        renderLibro();
+    };
+
+    function nav(id) {
+        document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+        document.querySelectorAll('.nav-item').forEach(i => i.classList.remove('active'));
+        document.getElementById('sec-' + id).classList.add('active');
+        event.currentTarget.classList.add('active');
+    }
+
+    function loadTasas() {
+        const fields = ['tEfBs', 'tUsdtBs', 'tZelleCop', 'tZelleEf', 'tBcvUsd', 'tBcvEur'];
+        fields.forEach(f => {
+            if(localStorage.getItem(f)) document.getElementById(f).value = localStorage.getItem(f);
+        });
+    }
+
+    function saveTasas() {
+        const fields = ['tEfBs', 'tUsdtBs', 'tZelleCop', 'tZelleEf', 'tBcvUsd', 'tBcvEur'];
+        fields.forEach(f => localStorage.setItem(f, document.getElementById(f).value));
+        alert("Tasas Guardadas ✅");
+    }
+
+    function updateCalcLabels() {
+        let sym = document.getElementById('calcMoneda').value === 'USD' ? '$' : '€';
+        document.getElementById('refSym').innerText = sym;
+        document.getElementById('refSym2').innerText = sym;
+    }
+
+    function execCalc() {
+        let p = parseFloat(document.getElementById('calcPrice').value) || 0;
+        let bcv = parseFloat(document.getElementById('calcBcv').value) || 1;
+        let bin = parseFloat(document.getElementById('calcBin').value) || 1;
+        let totalBs = p * bcv;
+        let usdt = totalBs / bin;
+        let diff = ((bin - bcv) / bin) * 100;
+
+        document.getElementById('calcRes').style.display = 'block';
+        document.getElementById('calcResVal').innerText = usdt.toFixed(2) + " USDT";
+        document.getElementById('calcResDiff').innerText = "Ahorro Diferencial: " + diff.toFixed(2) + "%";
+    }
+
+    function registrar() {
+        let concepto = document.getElementById('opConcepto').value || "Varios";
+        let tipo = document.getElementById('opTipo').value;
+        let monto = parseFloat(document.getElementById('opMonto').value) || 0;
+        if(monto <= 0) return alert("Ingresa un monto");
+
+        let gain = 0;
+        let tUsdt = parseFloat(localStorage.getItem('tUsdtBs')) || 1;
+        let tEf = parseFloat(localStorage.getItem('tEfBs')) || 1;
+
+        if(tipo === 'zelle_usdt' || tipo === 'zelle_ef') {
+            let com = parseFloat(localStorage.getItem('tZelleEf')) || 0;
+            gain = monto * (com / 100);
+        } else if(tipo === 'ef_usdt') {
+            gain = (monto * tEf / tUsdt) - monto;
+        } else if(tipo === 'bs_ef') {
+            gain = (monto / tEf) - (monto / tUsdt); // Arbitraje simple
+        } else if(tipo === 'zelle_cop') {
+            gain = monto * 0.02; // Asumiendo 2% de margen por defecto
+        }
+
+        let newOp = {
+            id: Date.now(),
+            time: new Date().toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'}),
+            concepto: concepto,
+            tipo: document.getElementById('opTipo').options[document.getElementById('opTipo').selectedIndex].text,
+            gain: gain
         };
 
-        function cambiarTab(tab) {
-            document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
-            document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
-            
-            event.target.classList.add('active');
-            document.getElementById('tab-' + tab).classList.add('active');
+        ops.unshift(newOp);
+        localStorage.setItem('bymo_ops', JSON.stringify(ops));
+        document.getElementById('opMonto').value = "";
+        renderLibro();
+        nav('libro');
+    }
+
+    function renderLibro() {
+        let list = document.getElementById('historyList');
+        list.innerHTML = "";
+        let total = 0;
+        ops.forEach(o => {
+            total += o.gain;
+            list.innerHTML += `
+                <div class="card-op ${o.gain < 0 ? 'neg' : ''}">
+                    <div>
+                        <div class="op-meta">${o.time} - ${o.concepto}</div>
+                        <div class="op-title">${o.tipo}</div>
+                        <button onclick="borrar(${o.id})" style="width:auto; padding:2px 5px; margin:0; font-size:9px; background:red;">X</button>
+                    </div>
+                    <div class="op-gain" style="color:${o.gain < 0 ? 'var(--red-text)' : 'var(--green-text)'}">
+                        ${o.gain >= 0 ? '+' : ''}${o.gain.toFixed(2)}
+                    </div>
+                </div>
+            `;
+        });
+        document.getElementById('totalDay').innerText = total.toFixed(2) + " USDT";
+    }
+
+    function borrar(id) {
+        if(confirm("¿Eliminar registro?")) {
+            ops = ops.filter(o => o.id !== id);
+            localStorage.setItem('bymo_ops', JSON.stringify(ops));
+            renderLibro();
         }
-
-        function guardarTasas() {
-            localStorage.setItem('tZelleCop', document.getElementById('tZelleCop').value);
-            localStorage.setItem('tCopUsdt', document.getElementById('tCopUsdt').value);
-            localStorage.setItem('tUsdtBs', document.getElementById('tUsdtBs').value);
-            localStorage.setItem('tEfectivoBs', document.getElementById('tEfectivoBs').value);
-            localStorage.setItem('comZelle', document.getElementById('comZelle').value);
-            alert("Tasas actualizadas y guardadas en el teléfono.");
-            cambiarTab('operacion'); // Vuelve a la pestaña principal
-        }
-
-        function registrarOperacion() {
-            let concepto = document.getElementById('concepto').value || "Cliente Varios";
-            let tipo = document.getElementById('tipoOperacion').value;
-            let monto = parseFloat(document.getElementById('montoInversion').value);
-
-            if (!monto || monto <= 0) {
-                alert("Por favor ingresa un monto válido.");
-                return;
-            }
-
-            let ganancia = 0;
-            let detalle = "";
-
-            // Lógica de rentabilidad estandarizada en USDT/USD
-            if (tipo === 'zelle_usdt') {
-                // Recibe 100 Zelle. Cobra X% de comisión. Entrega menos USDT.
-                let comision = parseFloat(document.getElementById('comZelle').value) || 0;
-                let usdtEntregados = monto * (1 - (comision/100));
-                ganancia = monto - usdtEntregados; 
-                detalle = `Recibido: ${monto}$ Zelle | Entregado: ${usdtEntregados.toFixed(2)} USDT`;
-            
-            } else if (tipo === 'bs_efectivo') {
-                // Recibe Bs, compra Efectivo barato y lo vende caro? Asumimos diferencial simple para el prototipo
-                let tUsdt = parseFloat(document.getElementById('tUsdtBs').value) || 1;
-                let tEfectivo = parseFloat(document.getElementById('tEfectivoBs').value) || 1;
-                let equivalenteUsdt = monto / tUsdt; 
-                let dolaresEntregados = monto / tEfectivo;
-                // Si la tasa de venta de USDT es mayor a la de Efectivo, hay ganancia en el arbitraje
-                ganancia = equivalenteUsdt - dolaresEntregados;
-                detalle = `Recibido: ${monto} Bs | Entregado: ${dolaresEntregados.toFixed(2)}$ Efectivo`;
-
-            } else if (tipo === 'zelle_cop_usdt') {
-                let tZc = parseFloat(document.getElementById('tZelleCop').value) || 1;
-                let tCu = parseFloat(document.getElementById('tCopUsdt').value) || 1;
-                let cop = monto * tZc;
-                let usdtObtenido = cop / tCu;
-                ganancia = usdtObtenido - monto;
-                detalle = `Inversión: ${monto}$ Zelle | USDT Final: ${usdtObtenido.toFixed(2)}`;
-            }
-
-            // Crear el registro
-            let nuevaOp = {
-                id: Date.now(),
-                fecha: new Date().toLocaleTimeString('es-VE', {hour: '2-digit', minute:'2-digit', day:'2-digit', month:'2-digit'}),
-                concepto: concepto,
-                tipo: tipo,
-                ganancia: ganancia,
-                detalle: detalle
-            };
-
-            operaciones.unshift(nuevaOp); // Agrega al principio de la lista
-            localStorage.setItem('bymo_operaciones', JSON.stringify(operaciones));
-            
-            document.getElementById('concepto').value = "";
-            document.getElementById('montoInversion').value = "";
-            
-            actualizarUI();
-        }
-
-        function borrarOperacion(id) {
-            if(confirm("¿Seguro que quieres borrar este registro?")) {
-                operaciones = operaciones.filter(op => op.id !== id);
-                localStorage.setItem('bymo_operaciones', JSON.stringify(operaciones));
-                actualizarUI();
-            }
-        }
-
-        function actualizarUI() {
-            let lista = document.getElementById('listaOperaciones');
-            lista.innerHTML = "";
-            
-            let gananciaTotal = 0;
-
-            if (operaciones.length === 0) {
-                lista.innerHTML = "<p style='font-size:12px; text-align:center; opacity:0.6;'>No hay operaciones registradas hoy.</p>";
-            } else {
-                operaciones.forEach(op => {
-                    gananciaTotal += op.ganancia;
-                    
-                    let claseColor = op.ganancia >= 0 ? "ganancia" : "perdida";
-                    let colorTexto = op.ganancia >= 0 ? "var(--green-text)" : "var(--red-text)";
-                    let signo = op.ganancia >= 0 ? "+" : "";
-
-                    lista.innerHTML += `
-                        <div class="op-card ${claseColor}">
-                            <div class="op-info">
-                                <div class="fecha">${op.fecha} - ${op.concepto}</div>
-                                <div style="font-weight:bold; margin-bottom:4px;">${op.tipo.replace(/_/g, ' ').toUpperCase()}</div>
-                                <div style="font-size:11px; opacity:0.8;">${op.detalle}</div>
-                                <button class="btn-eliminar" onclick="borrarOperacion(${op.id})">Borrar</button>
-                            </div>
-                            <div class="op-monto" style="color:${colorTexto}">
-                                ${signo}${op.ganancia.toFixed(2)} USDT
-                            </div>
-                        </div>
-                    `;
-                });
-            }
-
-            let dashboard = document.getElementById('totalGanancia');
-            dashboard.innerText = (gananciaTotal >= 0 ? "+" : "") + gananciaTotal.toFixed(2);
-            dashboard.className = gananciaTotal >= 0 ? "" : "negativo";
-        }
-    </script>
+    }
+</script>
 </body>
 </html>
