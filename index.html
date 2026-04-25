@@ -24,8 +24,11 @@
         body { background-color: var(--bg-dark); color: var(--text-main); padding-bottom: 80px; overflow-x: hidden; }
         .container { max-width: 500px; margin: 0 auto; padding: 15px; width: 100%; min-height: 100vh; position: relative; }
         
+        .btn-refresh { position: absolute; top: 15px; right: 15px; font-size: 20px; cursor: pointer; z-index: 50; opacity: 0.8; transition: 0.2s; }
+        .btn-refresh:active { transform: rotate(180deg); }
+
         .header { text-align: center; padding-top: 10px; margin-bottom: 20px; }
-        .header-logo { height: 35px; margin-bottom: 5px; }
+        .logo-img { height: 45px; width: auto; object-fit: contain; margin-bottom: 5px; filter: drop-shadow(0px 0px 2px rgba(0,0,0,0.2)); }
         .header-title { font-size: 16px; font-weight: 600; letter-spacing: 0.5px; }
 
         h3 { font-size: 15px; font-weight: 600; margin-bottom: 12px; color: var(--text-main); }
@@ -67,7 +70,7 @@
         .op-mid { display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px; }
         .op-title { font-size: 14px; font-weight: 600; display: flex; align-items: center; gap: 6px; }
         .op-gain { font-size: 14px; font-weight: bold; }
-        .op-bot { font-size: 12px; color: var(--text-muted); display: flex; justify-content: space-between; }
+        .op-bot { font-size: 12px; color: var(--text-muted); display: flex; justify-content: space-between; margin-top: 4px;}
         
         .preview-card { background: var(--card-border); padding: 15px; border-radius: 12px; text-align: center; margin-bottom: 15px; }
         .preview-card .big-result { font-size: 28px; font-weight: bold; color: var(--primary-green); margin: 10px 0; }
@@ -101,29 +104,31 @@
         .conv-row { display: flex; justify-content: space-between; border-bottom: 1px solid var(--card-border); padding: 8px 0; font-size: 14px; }
         .conv-row:last-child { border-bottom: none; }
         .conv-val { font-weight: bold; color: var(--primary-green); font-size: 16px; }
+
+        .footer-tag { text-align: center; font-size: 10px; opacity: 0.4; margin-top: 30px; padding-bottom: 20px; }
     </style>
 </head>
 <body>
 
 <div class="container">
     
+    <div class="btn-refresh" onclick="location.reload()" title="Refrescar App">🔄</div>
+
     <div class="header" id="mainHeader">
-        <svg viewBox="0 0 100 100" class="header-logo" xmlns="http://www.w3.org/2000/svg">
-            <rect x="42" y="20" width="6" height="60" rx="3" fill="#ffffff" />
-            <rect x="25" y="35" width="6" height="30" rx="3" fill="#ffffff" />
-            <rect x="59" y="35" width="6" height="30" rx="3" fill="#ffffff" />
-            <circle cx="50" cy="40" r="5" fill="#ffffff" />
-            <circle cx="50" cy="60" r="5" fill="#ffffff" />
-            <path d="M50 40 L65 40 L65 55 L50 55" fill="none" stroke="#ffffff" stroke-width="5" stroke-linecap="round"/>
-        </svg>
+        <img src="logo.png" alt="ByMO Tech Logo" class="logo-img" onerror="this.style.display='none'">
         <div class="header-title">ByMO Tech Suite</div>
     </div>
 
     <div id="sec-libro" class="section active">
-        <div class="card dashboard-hero">
-            <div class="label">UTILIDAD DEL DÍA</div>
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
+            <h3 style="font-size: 14px; margin: 0;">Consulta de Saldos</h3>
+            <select id="filtroFecha" onchange="renderLibro()" style="width: auto; padding: 4px; font-size: 12px; border-radius: 5px; border: 1px solid var(--card-border); background: var(--input-bg); color: var(--text-main); margin: 0;"></select>
+        </div>
+
+        <div class="dashboard-hero card">
+            <div class="label" id="tituloDashboard">UTILIDAD DEL DÍA</div>
             <div class="amount" id="dashDayVal">+0.00 USDT</div>
-            <div class="subtitle" id="dashDayCount">0 operaciones hoy</div>
+            <div class="subtitle" id="dashDayCount">0 operaciones</div>
         </div>
 
         <div class="metrics-grid">
@@ -165,10 +170,6 @@
             <h3 style="margin:0;">Historial de Operaciones</h3>
         </div>
         
-        <div style="display: flex; justify-content: flex-end; margin-bottom: 15px;">
-            <select id="filtroFecha" onchange="renderHistorial()" style="width: auto; padding: 8px 12px; font-size: 13px;"></select>
-        </div>
-
         <div class="metrics-grid">
             <div class="metric-box">
                 <div class="label">Total Operaciones</div>
@@ -186,7 +187,7 @@
 
     <div id="sec-operar" class="section">
         <div class="page-header">
-            <h3 style="margin:0; text-align:center; width:100%;">Nueva Operación</h3>
+            <h3 style="margin:0; text-align:center; width:100%;">Registro de Operación</h3>
         </div>
         
         <h3 style="font-size: 13px; color:var(--text-muted);">1. Información básica</h3>
@@ -244,7 +245,7 @@
             </div>
         </div>
         
-        <button class="btn" onclick="registrar()">Registrar Operación</button>
+        <button class="btn" id="btnRegistrarOp" onclick="registrar()">Registrar Operación</button>
     </div>
 
     <div id="sec-calc" class="section">
@@ -262,7 +263,7 @@
                     <div style="display:flex; gap:10px;">
                         <input type="number" id="convMonto" value="100" inputmode="decimal" oninput="calcularConversor()">
                         <select id="convModo" onchange="calcularConversor()" style="width: 120px; background:var(--card-bg);">
-                            <option value="div_bs">🇺🇸 USD</option>
+                            <option value="div_bs">🇺🇸 USD / €</option>
                             <option value="bs_div">🇻🇪 Bs</option>
                         </select>
                     </div>
@@ -434,6 +435,8 @@
         </details>
 
     </div>
+
+    <div class="footer-tag"><i>by PEDRO MOTA para ByMO Technology</i></div>
 </div>
 
 <div class="nav-bar">
@@ -461,6 +464,7 @@
 
 <script>
     let ops = JSON.parse(localStorage.getItem('bymo_ops')) || [];
+    let editId = null;
 
     window.onload = () => {
         loadTasas();
@@ -483,7 +487,10 @@
             if(matched) matched.classList.add('active');
         }
 
-        if(id === 'operar') updatePreview();
+        if(id === 'operar') {
+            if(!editId) document.getElementById('btnRegistrarOp').innerText = "Registrar Operación";
+            updatePreview();
+        }
     }
 
     function switchCalcTab(tabId) {
@@ -493,7 +500,6 @@
         document.getElementById('calc-tab-' + tabId).classList.add('active');
     }
 
-    /* Lógica de Tasas */
     function loadTasas() {
         const fields = [
             'tEfBs', 'tUsdtBs', 'tZelleCop', 'tZelleEf', 'tBcvUsd', 
@@ -526,7 +532,6 @@
         if(!silent) alert("Tasas Guardadas ✅");
     }
 
-    /* Automatización DolarAPI */
     async function sincronizarTasasAPI() {
         const btn = document.getElementById('btnSync');
         const originalText = btn.innerText;
@@ -565,7 +570,6 @@
         btn.innerText = originalText; btn.disabled = false;
     }
 
-    /* Calculadora & Conversor */
     function calcularConversor() {
         let monto = parseFloat(document.getElementById('convMonto').value) || 0;
         let modo = document.getElementById('convModo').value;
@@ -603,7 +607,6 @@
         document.getElementById('calcResDiff').innerText = "+" + diffUsdt.toFixed(2) + " USDT (" + diff.toFixed(2) + "%)";
     }
 
-    /* Core Logic de Operaciones (Lee todo directo del DOM para evitar errores de Sync) */
     function calculateLogic(tipo, monto) {
         let tUsdt = parseFloat(document.getElementById('tUsdtBs').value) || 1;
         let tEf = parseFloat(document.getElementById('tEfBs').value) || 1;
@@ -629,9 +632,8 @@
             let comEfUsdt = parseFloat(document.getElementById('tEfUsdtCom').value) || 0;
             gain = monto * (comEfUsdt / 100); recibe = monto - gain; comiStr = `-${gain.toFixed(2)} USDT`;
         } else if (tipo === 'bs_ef') {
-            // El cliente trae Bolívares (Monto) para comprar Efectivo.
             recibe = monto / tEf; 
-            gain = (monto / tUsdt) - recibe; // Costo real en USDT vs lo que entregas
+            gain = (monto / tUsdt) - recibe;
             tasaApli = tEf.toFixed(2); comiStr = "Dif. Tasa";
         } else if (tipo === 'zelle_cop') {
             let tZelleCop = parseFloat(document.getElementById('tZelleCop').value) || 3500;
@@ -686,6 +688,23 @@
         document.getElementById('prevMargin').className = res.margin >= 0 ? "text-green" : "text-red";
     }
 
+    function editar(id) {
+        let op = ops.find(o => o.id === id);
+        if(!op) return;
+        
+        document.getElementById('opConcepto').value = op.concepto;
+        document.getElementById('opMonto').value = op.monto;
+        
+        let select = document.getElementById('opTipo');
+        for(let i=0; i<select.options.length; i++){
+            if(select.options[i].text === op.tipo) select.selectedIndex = i;
+        }
+        
+        editId = id;
+        document.getElementById('btnRegistrarOp').innerText = "Actualizar Operación";
+        nav('operar');
+    }
+
     function registrar() {
         let concepto = document.getElementById('opConcepto').value || "Varios";
         let tipoVal = document.getElementById('opTipo').value;
@@ -695,14 +714,27 @@
 
         let res = calculateLogic(tipoVal, monto);
 
-        let d = new Date();
-        let stringFecha = `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
-        let stringMes = `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}`;
+        if(editId) {
+            let index = ops.findIndex(o => o.id === editId);
+            if(index !== -1) {
+                ops[index].concepto = concepto;
+                ops[index].tipo = tipoText;
+                ops[index].monto = monto;
+                ops[index].gain = res.gain;
+            }
+            editId = null;
+            document.getElementById('btnRegistrarOp').innerText = "Registrar Operación";
+        } else {
+            let d = new Date();
+            let stringFecha = `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+            let stringMes = `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}`;
 
-        ops.unshift({
-            id: Date.now(), date: stringFecha, month: stringMes, time: d.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'}),
-            concepto: concepto, tipo: tipoText, monto: monto, gain: res.gain
-        });
+            ops.unshift({
+                id: Date.now(), date: stringFecha, month: stringMes, time: d.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'}),
+                concepto: concepto, tipo: tipoText, monto: monto, gain: res.gain
+            });
+        }
+        
         localStorage.setItem('bymo_ops', JSON.stringify(ops));
         
         document.getElementById('opConcepto').value = "";
@@ -713,7 +745,6 @@
         nav('libro');
     }
 
-    /* Renderizado (Dashboard e Historial) */
     function getTodayStr() {
         let d = new Date(); return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
     }
@@ -722,9 +753,26 @@
     }
 
     function renderLibro() {
+        let selectFecha = document.getElementById('filtroFecha');
         let today = getTodayStr();
         let currentMonth = getMonthStr();
         
+        let fechasUnicas = [...new Set(ops.map(o => o.date))];
+        if (!fechasUnicas.includes(today)) fechasUnicas.unshift(today);
+        fechasUnicas.sort((a, b) => new Date(b) - new Date(a));
+
+        let fechaSeleccionada = selectFecha.value || today;
+        selectFecha.innerHTML = "";
+        fechasUnicas.forEach(f => {
+            let opt = document.createElement('option');
+            opt.value = f; opt.innerText = (f === today) ? "Hoy" : f;
+            if(f === fechaSeleccionada) opt.selected = true;
+            selectFecha.appendChild(opt);
+        });
+        fechaSeleccionada = selectFecha.value;
+        
+        document.getElementById('tituloDashboard').innerText = (fechaSeleccionada === today) ? "UTILIDAD DEL DÍA" : "UTILIDAD (FECHA)";
+
         let dayGain = 0; let dayCount = 0;
         let monthGain = 0; let totalVol = 0; let allGain = 0;
 
@@ -732,7 +780,7 @@
             if(!o.date) o.date = today;
             if(!o.month) o.month = currentMonth;
             
-            if(o.date === today) { dayGain += o.gain; dayCount++; }
+            if(o.date === fechaSeleccionada) { dayGain += o.gain; dayCount++; }
             if(o.month === currentMonth) monthGain += o.gain;
             
             totalVol += (o.monto || 0); 
@@ -741,7 +789,7 @@
 
         document.getElementById('dashDayVal').innerText = (dayGain>=0?'+':'') + dayGain.toFixed(2) + " USDT";
         document.getElementById('dashDayVal').className = "amount " + (dayGain>=0?"text-green":"text-red");
-        document.getElementById('dashDayCount').innerText = dayCount + " operaciones hoy";
+        document.getElementById('dashDayCount').innerText = dayCount + " operaciones";
 
         document.getElementById('dashMonthVal').innerText = (monthGain>=0?'+':'') + monthGain.toFixed(2);
         document.getElementById('dashMonthVal').className = "val " + (monthGain>=0?"text-green":"text-red");
@@ -755,9 +803,10 @@
         let avgMargin = totalVol > 0 ? (allGain / totalVol) * 100 : 0;
         document.getElementById('dashMarginVal').innerText = avgMargin.toFixed(2) + "%";
 
-        let recents = ops.slice(0, 3);
+        let opsFiltradas = ops.filter(o => o.date === fechaSeleccionada);
+        let recents = opsFiltradas.slice(0, 3);
         let listHtml = "";
-        if(recents.length === 0) listHtml = "<p class='text-muted' style='text-align:center; padding:20px;'>No hay operaciones recientes.</p>";
+        if(recents.length === 0) listHtml = "<p class='text-muted' style='text-align:center; padding:20px;'>No hay operaciones.</p>";
         recents.forEach(o => {
             listHtml += `
             <div class="op-item">
@@ -766,7 +815,13 @@
                     <div class="op-title">${o.tipo.split(' ⮕ ')[0]} ⮕ ${o.tipo.split(' ⮕ ')[1]||o.tipo}</div>
                     <div class="op-gain ${o.gain>=0?'text-green':'text-red'}">${o.gain>=0?'+':''}${o.gain.toFixed(2)}</div>
                 </div>
-                <div class="op-bot"><span>Base: ${o.monto||0}</span></div>
+                <div class="op-bot">
+                    <span>Base: ${o.monto||0}</span>
+                    <div>
+                        <span style="color:#007bff; cursor:pointer; font-weight:bold; margin-right:10px;" onclick="editar(${o.id})">Editar</span>
+                        <span style="color:#ff4d4f; cursor:pointer; font-weight:bold;" onclick="borrar(${o.id})">Borrar</span>
+                    </div>
+                </div>
             </div>`;
         });
         document.getElementById('recentOpsList').innerHTML = listHtml;
@@ -774,20 +829,7 @@
 
     function renderHistorial() {
         let selectFecha = document.getElementById('filtroFecha');
-        let fechasUnicas = [...new Set(ops.map(o => o.date))];
-        let today = getTodayStr();
-        if (!fechasUnicas.includes(today)) fechasUnicas.unshift(today);
-        fechasUnicas.sort((a, b) => new Date(b) - new Date(a));
-
-        let fechaSeleccionada = selectFecha.value || today;
-        selectFecha.innerHTML = "";
-        fechasUnicas.forEach(f => {
-            let opt = document.createElement('option');
-            opt.value = f; opt.innerText = (f === today) ? "Hoy" : f;
-            if(f === fechaSeleccionada) opt.selected = true;
-            selectFecha.appendChild(opt);
-        });
-        fechaSeleccionada = selectFecha.value;
+        let fechaSeleccionada = selectFecha.value || getTodayStr();
 
         let opsFiltradas = ops.filter(o => o.date === fechaSeleccionada);
         let totalGain = 0;
@@ -802,9 +844,12 @@
                     <div class="op-title">${o.tipo}</div>
                     <div class="op-gain ${o.gain>=0?'text-green':'text-red'}">${o.gain>=0?'+':''}${o.gain.toFixed(2)} USDT</div>
                 </div>
-                <div class="op-bot">
+                <div class="op-bot" style="margin-top:6px;">
                     <span>Base Inversión: ${o.monto||0}</span>
-                    <span style="color:#ff4d4f; cursor:pointer; font-weight:bold;" onclick="borrar(${o.id})">Borrar</span>
+                    <div>
+                        <span style="color:#007bff; cursor:pointer; font-weight:bold; margin-right:10px;" onclick="editar(${o.id})">Editar</span>
+                        <span style="color:#ff4d4f; cursor:pointer; font-weight:bold;" onclick="borrar(${o.id})">Borrar</span>
+                    </div>
                 </div>
             </div>`;
         });
