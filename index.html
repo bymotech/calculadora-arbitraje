@@ -24,21 +24,17 @@
         body { background-color: var(--bg-dark); color: var(--text-main); padding-bottom: 80px; overflow-x: hidden; }
         .container { max-width: 500px; margin: 0 auto; padding: 15px; width: 100%; min-height: 100vh; position: relative; }
         
-        /* Header */
         .header { text-align: center; padding-top: 10px; margin-bottom: 20px; }
         .header-logo { height: 35px; margin-bottom: 5px; }
         .header-title { font-size: 16px; font-weight: 600; letter-spacing: 0.5px; }
 
-        /* Typography & Utilities */
         h3 { font-size: 15px; font-weight: 600; margin-bottom: 12px; color: var(--text-main); }
         .text-green { color: var(--primary-green) !important; }
         .text-red { color: var(--danger-red) !important; }
         .text-muted { color: var(--text-muted); font-size: 12px; }
 
-        /* Cards */
         .card { background: var(--card-bg); border: 1px solid var(--card-border); border-radius: 14px; padding: 15px; margin-bottom: 15px; }
         
-        /* Grid Dashboard */
         .dashboard-hero { text-align: center; padding: 20px 10px; }
         .dashboard-hero .label { font-size: 11px; text-transform: uppercase; color: var(--text-muted); letter-spacing: 1px; margin-bottom: 5px; }
         .dashboard-hero .amount { font-size: 34px; font-weight: bold; color: var(--primary-green); margin-bottom: 5px; }
@@ -51,22 +47,18 @@
         .metric-box .val.neutral { color: var(--brand-yellow); }
         .metric-box .sub { font-size: 10px; color: var(--text-muted); margin-top: 4px; }
 
-        /* Form Inputs */
         .input-group { margin-bottom: 15px; }
         .input-group label { display: block; font-size: 13px; color: var(--text-muted); margin-bottom: 6px; }
         input, select { width: 100%; background: var(--input-bg); border: 1px solid var(--card-border); color: var(--text-main); padding: 14px; border-radius: 10px; font-size: 15px; outline: none; transition: 0.2s; }
         input:focus, select:focus { border-color: var(--primary-green); }
         
-        /* Buttons */
         .btn { width: 100%; background: var(--primary-green); color: #000; font-weight: bold; font-size: 16px; padding: 15px; border: none; border-radius: 10px; cursor: pointer; transition: 0.2s; }
         .btn:active { background: var(--primary-green-hover); transform: scale(0.98); }
         .btn-secondary { background: var(--card-border); color: var(--text-main); }
         
-        /* FAB */
         .fab { position: fixed; bottom: 90px; right: 20px; width: 56px; height: 56px; background: var(--primary-green); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 28px; color: #000; box-shadow: 0 4px 12px rgba(32,201,116,0.4); cursor: pointer; z-index: 90; transition: 0.2s; }
         .fab:active { transform: scale(0.9); }
 
-        /* List of Operations */
         .header-list { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; }
         .header-list a { font-size: 12px; color: #5882ff; text-decoration: none; cursor: pointer; }
         .op-item { display: flex; flex-direction: column; padding: 12px; border-bottom: 1px solid var(--card-border); }
@@ -77,30 +69,25 @@
         .op-gain { font-size: 14px; font-weight: bold; }
         .op-bot { font-size: 12px; color: var(--text-muted); display: flex; justify-content: space-between; }
         
-        /* Preview Card (Operar) */
         .preview-card { background: var(--card-border); padding: 15px; border-radius: 12px; text-align: center; margin-bottom: 15px; }
         .preview-card .big-result { font-size: 28px; font-weight: bold; color: var(--primary-green); margin: 10px 0; }
         .preview-row { display: flex; justify-content: space-between; font-size: 13px; margin-bottom: 8px; color: var(--text-muted); }
         
-        /* Tabs */
         .tabs-header { display: flex; background: var(--card-bg); border-radius: 10px; padding: 4px; margin-bottom: 20px; border: 1px solid var(--card-border); }
         .tab-btn { flex: 1; text-align: center; padding: 10px; font-size: 13px; font-weight: 600; color: var(--text-muted); cursor: pointer; border-radius: 8px; transition: 0.3s; }
         .tab-btn.active { background: var(--input-bg); color: var(--primary-green); border: 1px solid var(--card-border); }
         .tab-content { display: none; }
         .tab-content.active { display: block; }
 
-        /* Sections */
         .section { display: none; animation: fadeIn 0.3s ease; }
         .section.active { display: block; }
         @keyframes fadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
 
-        /* Bottom Nav */
         .nav-bar { position: fixed; bottom: 0; left: 0; width: 100%; background: var(--nav-bg); display: flex; border-top: 1px solid var(--card-border); z-index: 100; padding-bottom: env(safe-area-inset-bottom); }
         .nav-item { flex: 1; text-align: center; padding: 12px 0; font-size: 10px; font-weight: 600; cursor: pointer; color: var(--text-muted); display: flex; flex-direction: column; align-items: center; gap: 4px; transition: 0.2s; }
         .nav-item svg { width: 20px; height: 20px; fill: currentColor; }
         .nav-item.active { color: var(--primary-green); }
 
-        /* Manual Accordion */
         details { background: var(--card-bg); border: 1px solid var(--card-border); border-radius: 12px; margin-bottom: 10px; overflow: hidden; }
         summary { padding: 15px; font-size: 14px; font-weight: 600; display: flex; align-items: center; justify-content: space-between; cursor: pointer; list-style: none; outline: none; }
         summary::-webkit-details-marker { display: none; }
@@ -108,10 +95,12 @@
         details[open] summary::after { content: '−'; }
         .manual-body { padding: 0 15px 15px 15px; font-size: 13px; color: var(--text-muted); line-height: 1.5; border-top: 1px solid var(--card-border); margin-top: 5px; padding-top: 10px; }
 
-        /* Top Header for sub-pages */
         .page-header { display: flex; align-items: center; gap: 15px; margin-bottom: 20px; }
         .back-btn { font-size: 20px; cursor: pointer; padding: 5px; }
 
+        .conv-row { display: flex; justify-content: space-between; border-bottom: 1px solid var(--card-border); padding: 8px 0; font-size: 14px; }
+        .conv-row:last-child { border-bottom: none; }
+        .conv-val { font-weight: bold; color: var(--primary-green); font-size: 16px; }
     </style>
 </head>
 <body>
@@ -134,7 +123,7 @@
         <div class="card dashboard-hero">
             <div class="label">UTILIDAD DEL DÍA</div>
             <div class="amount" id="dashDayVal">+0.00 USDT</div>
-            <div class="subtitle" id="dashDayCount">0 operaciones</div>
+            <div class="subtitle" id="dashDayCount">0 operaciones hoy</div>
         </div>
 
         <div class="metrics-grid">
@@ -222,7 +211,7 @@
                 </select>
             </div>
             <div class="input-group" style="margin-bottom: 0;">
-                <label>Monto principal (Divisa Base)</label>
+                <label>Monto principal (Divisa Base que recibes/inviertes)</label>
                 <input type="number" id="opMonto" placeholder="Ej: 100" inputmode="decimal" oninput="updatePreview()">
             </div>
         </div>
@@ -351,7 +340,31 @@
         </div>
 
         <div class="card">
-            <h3>Dólares y Efectivo</h3>
+            <h3>Zelle y PayPal</h3>
+            <div class="input-group">
+                <label>🇺🇸 Zelle ⮕ USDT (% Com)</label>
+                <input type="number" id="tZelleUsdtCom" step="0.1" inputmode="decimal">
+            </div>
+            <div class="input-group">
+                <label>🇺🇸 Zelle ⮕ Efectivo (% Com)</label>
+                <input type="number" id="tZelleEf" step="0.1" inputmode="decimal">
+            </div>
+            <div class="input-group">
+                <label>🇺🇸 Zelle ⮕ Bs Ref</label>
+                <input type="number" id="tZelleBs" step="0.1" inputmode="decimal">
+            </div>
+            <div class="input-group">
+                <label>🅿️ PayPal ⮕ Bs Ref</label>
+                <input type="number" id="tPaypalBs" step="0.1" inputmode="decimal">
+            </div>
+            <div class="input-group" style="margin-bottom:0;">
+                <label>🅿️ PayPal ⮕ USDT (% Com)</label>
+                <input type="number" id="tPaypalUsdtCom" step="0.1" inputmode="decimal">
+            </div>
+        </div>
+
+        <div class="card">
+            <h3>Dólares Efectivo</h3>
             <div class="input-group">
                 <label>💵 VENTA Efectivo Calle (Bs/$)</label>
                 <input type="number" id="tEfBs" step="0.1" inputmode="decimal">
@@ -367,23 +380,7 @@
         </div>
 
         <div class="card">
-            <h3>Zelle, PayPal y Banco</h3>
-            <div class="input-group">
-                <label>🇺🇸 Zelle ⮕ Bs Ref</label>
-                <input type="number" id="tZelleBs" step="0.1" inputmode="decimal">
-            </div>
-            <div class="input-group">
-                <label>🇺🇸 Zelle ⮕ Efectivo (% Com)</label>
-                <input type="number" id="tZelleEf" step="0.1" inputmode="decimal">
-            </div>
-            <div class="input-group">
-                <label>🅿️ PayPal ⮕ Bs Ref</label>
-                <input type="number" id="tPaypalBs" step="0.1" inputmode="decimal">
-            </div>
-            <div class="input-group">
-                <label>🅿️ PayPal ⮕ USDT (% Com)</label>
-                <input type="number" id="tPaypalUsdtCom" step="0.1" inputmode="decimal">
-            </div>
+            <h3>Dólares Electrónicos (Banco)</h3>
             <div class="input-group">
                 <label>🏦 Dólar Electrónico BCV (Bs/$)</label>
                 <input type="number" id="tDolarElecBs" step="0.01" inputmode="decimal">
@@ -416,23 +413,23 @@
         <details>
             <summary><span style="display:flex; align-items:center; gap:10px;"><b style="background:var(--input-bg); padding:6px; border-radius:6px;">💸</b> 2. Tipos de cambio</span></summary>
             <div class="manual-body">
-                • <b>Arbitraje Efectivo:</b> Comprar billetes baratos, depositarlos, pasarlos a USDT y vender por Bs.<br>
-                • <b>Arbitraje BCV:</b> Vender USDT, comprar dólares en el banco y regresar a Binance.<br>
-                • <b>PayPal/Zelle:</b> El cliente transfiere y tú entregas Bolívares o USDT descontando tu margen de riesgo.
+                • <b>Arbitraje Efectivo:</b> Comprar billetes baratos en la calle, depositarlos, pasarlos a USDT y vender por Bs.<br>
+                • <b>Arbitraje BCV:</b> Vender USDT, comprar dólares electrónicos en el banco y regresarlos a Binance.<br>
+                • <b>PayPal/Zelle:</b> El cliente transfiere y tú entregas Bolívares o USDT descontando tu margen de riesgo o ganando por la diferencia de tasa.
             </div>
         </details>
 
         <details>
             <summary><span style="display:flex; align-items:center; gap:10px;"><b style="background:var(--input-bg); padding:6px; border-radius:6px;">📊</b> 3. Cómo llevar el libro</span></summary>
             <div class="manual-body">
-                Registra cada negocio en <b>Operar</b>. Revisa que el cuadro de previsualización te muestre tu ganancia en verde antes de darle al botón final. La app reinicia sola a la media noche, pero tu historial y tu "Utilidad del Mes" quedan guardados.
+                Registra cada negocio en <b>Operar</b>. Revisa que el cuadro de previsualización te muestre tu ganancia en verde antes de darle al botón final. La app guarda el registro automáticamente; a las 12 AM el panel del día arranca en cero, pero tu historial y tu "Utilidad del Mes" siguen acumulando.
             </div>
         </details>
 
         <details>
             <summary><span style="display:flex; align-items:center; gap:10px;"><b style="background:var(--input-bg); padding:6px; border-radius:6px;">🧮</b> 4. Calc y Conversor</span></summary>
             <div class="manual-body">
-                Usa el <b>Conversor Rápido</b> para ver montos a las 3 tasas principales de un solo golpe. Usa la pestaña <b>Ahorro</b> para convencer a clientes de pagar en USDT en tiendas que cobran a BCV.
+                Usa el <b>Conversor Rápido</b> para ver montos a las 3 tasas principales de un solo golpe. Usa la pestaña <b>Ahorro</b> para convencer a clientes de pagar en USDT en tiendas que cobran a BCV mostrando la diferencia.
             </div>
         </details>
 
@@ -476,10 +473,8 @@
         document.querySelectorAll('.nav-item').forEach(i => i.classList.remove('active'));
         document.getElementById('sec-' + id).classList.add('active');
         
-        // Hide Main Header on sub-pages
         document.getElementById('mainHeader').style.display = (id === 'libro') ? 'block' : 'none';
 
-        // Nav active state logic
         if(id === 'historial') {
             document.querySelectorAll('.nav-item')[0].classList.add('active');
             renderHistorial();
@@ -504,10 +499,11 @@
             'tEfBs', 'tUsdtBs', 'tZelleCop', 'tZelleEf', 'tBcvUsd', 
             'tBcvEur', 'tZelleBs', 'tBsEfCalle', 'tEfUsdtCom', 
             'tDolarElecBs', 'comBancoElec', 'comBinanceElec',
-            'tPaypalBs', 'tPaypalUsdtCom', 'tCapitalBase'
+            'tPaypalBs', 'tPaypalUsdtCom', 'tCapitalBase', 'tZelleUsdtCom'
         ];
         fields.forEach(f => {
-            if(localStorage.getItem(f)) document.getElementById(f).value = localStorage.getItem(f);
+            let el = document.getElementById(f);
+            if(el && localStorage.getItem(f)) el.value = localStorage.getItem(f);
         });
         
         if(localStorage.getItem('tBcvUsd')) document.getElementById('calcBcv').value = localStorage.getItem('tBcvUsd');
@@ -519,11 +515,14 @@
             'tEfBs', 'tUsdtBs', 'tZelleCop', 'tZelleEf', 'tBcvUsd', 
             'tBcvEur', 'tZelleBs', 'tBsEfCalle', 'tEfUsdtCom', 
             'tDolarElecBs', 'comBancoElec', 'comBinanceElec',
-            'tPaypalBs', 'tPaypalUsdtCom', 'tCapitalBase'
+            'tPaypalBs', 'tPaypalUsdtCom', 'tCapitalBase', 'tZelleUsdtCom'
         ];
-        fields.forEach(f => localStorage.setItem(f, document.getElementById(f).value));
+        fields.forEach(f => {
+            let el = document.getElementById(f);
+            if(el) localStorage.setItem(f, el.value);
+        });
         calcularConversor();
-        renderLibro(); // Update capital
+        renderLibro();
         if(!silent) alert("Tasas Guardadas ✅");
     }
 
@@ -588,7 +587,7 @@
     function updateCalcLabels() {
         let sym = document.getElementById('calcMoneda').value === 'USD' ? '$' : '€';
         document.getElementById('refSym').innerText = sym;
-        document.getElementById('calcBcv').value = (sym === '€') ? localStorage.getItem('tBcvEur') : localStorage.getItem('tBcvUsd');
+        document.getElementById('calcBcv').value = (sym === '€') ? document.getElementById('tBcvEur').value : document.getElementById('tBcvUsd').value;
     }
 
     function execCalc() {
@@ -597,50 +596,57 @@
         let bin = parseFloat(document.getElementById('calcBin').value) || 1;
         let usdt = (p * bcv) / bin;
         let diff = ((bin - bcv) / bin) * 100;
-        let diffUsdt = (p) - usdt; // Diferencia en dolares
+        let diffUsdt = (p) - usdt;
 
         document.getElementById('calcResCard').style.display = 'block';
         document.getElementById('calcResVal').innerText = usdt.toFixed(2) + " USDT";
         document.getElementById('calcResDiff').innerText = "+" + diffUsdt.toFixed(2) + " USDT (" + diff.toFixed(2) + "%)";
     }
 
-    /* Core Logic de Operaciones */
+    /* Core Logic de Operaciones (Lee todo directo del DOM para evitar errores de Sync) */
     function calculateLogic(tipo, monto) {
-        let tUsdt = parseFloat(localStorage.getItem('tUsdtBs')) || 1;
-        let tEf = parseFloat(localStorage.getItem('tEfBs')) || 1;
-        let tZelleBs = parseFloat(localStorage.getItem('tZelleBs')) || 1;
+        let tUsdt = parseFloat(document.getElementById('tUsdtBs').value) || 1;
+        let tEf = parseFloat(document.getElementById('tEfBs').value) || 1;
+        let tZelleBs = parseFloat(document.getElementById('tZelleBs').value) || 1;
         
-        let gain = 0; let recibe = 0; let tasaApli = 1.00; let comiStr = "-0.00";
+        let gain = 0; let recibe = 0; let tasaApli = "1.00"; let comiStr = "-0.00";
 
-        if(tipo === 'zelle_usdt' || tipo === 'zelle_ef') {
-            let com = parseFloat(localStorage.getItem('tZelleEf')) || 0;
-            gain = monto * (com / 100); recibe = monto - gain; tasaApli = 1.00; comiStr = `-${gain.toFixed(2)} USDT`;
+        if (tipo === 'zelle_usdt') {
+            let com = parseFloat(document.getElementById('tZelleUsdtCom').value) || 0;
+            gain = monto * (com / 100); recibe = monto - gain; comiStr = `-${gain.toFixed(2)} USDT`;
+        } else if (tipo === 'zelle_ef') {
+            let com = parseFloat(document.getElementById('tZelleEf').value) || 0;
+            gain = monto * (com / 100); recibe = monto - gain; comiStr = `-${gain.toFixed(2)} USD`;
         } else if (tipo === 'zelle_bs') {
-            gain = monto - ((monto * tZelleBs) / tUsdt); recibe = monto * tZelleBs; tasaApli = tZelleBs; comiStr = "Dif. Tasa";
+            gain = monto - ((monto * tZelleBs) / tUsdt); recibe = monto * tZelleBs; tasaApli = tZelleBs.toFixed(2); comiStr = "Dif. Tasa";
         } else if (tipo === 'paypal_bs') {
-            let tPaypalBs = parseFloat(localStorage.getItem('tPaypalBs')) || 1;
-            gain = monto - ((monto * tPaypalBs) / tUsdt); recibe = monto * tPaypalBs; tasaApli = tPaypalBs; comiStr = "Dif. Tasa";
+            let tPaypalBs = parseFloat(document.getElementById('tPaypalBs').value) || 1;
+            gain = monto - ((monto * tPaypalBs) / tUsdt); recibe = monto * tPaypalBs; tasaApli = tPaypalBs.toFixed(2); comiStr = "Dif. Tasa";
         } else if (tipo === 'paypal_usdt') {
-            let comPaypalUsdt = parseFloat(localStorage.getItem('tPaypalUsdtCom')) || 0;
-            gain = monto * (comPaypalUsdt / 100); recibe = monto - gain; tasaApli = 1.00; comiStr = `-${gain.toFixed(2)} USDT`;
-        } else if(tipo === 'ef_usdt') {
-            let comEfUsdt = parseFloat(localStorage.getItem('tEfUsdtCom')) || 0;
-            gain = monto * (comEfUsdt / 100); recibe = monto - gain; tasaApli = 1.00; comiStr = `-${gain.toFixed(2)} USDT`;
-        } else if(tipo === 'bs_ef') {
-            gain = (monto / tEf) - (monto / tUsdt); recibe = monto / tEf; tasaApli = tEf; comiStr = "Dif. Tasa";
-        } else if(tipo === 'zelle_cop') {
-            gain = monto * 0.02; recibe = monto * (parseFloat(localStorage.getItem('tZelleCop'))||3500); tasaApli = "2% Aprox"; comiStr = "-";
-        } else if(tipo === 'ciclo_calle') {
-            let tBsEfCalle = parseFloat(localStorage.getItem('tBsEfCalle')) || 1;
-            let comEfUsdt = parseFloat(localStorage.getItem('tEfUsdtCom')) || 0;
+            let comPaypalUsdt = parseFloat(document.getElementById('tPaypalUsdtCom').value) || 0;
+            gain = monto * (comPaypalUsdt / 100); recibe = monto - gain; comiStr = `-${gain.toFixed(2)} USDT`;
+        } else if (tipo === 'ef_usdt') {
+            let comEfUsdt = parseFloat(document.getElementById('tEfUsdtCom').value) || 0;
+            gain = monto * (comEfUsdt / 100); recibe = monto - gain; comiStr = `-${gain.toFixed(2)} USDT`;
+        } else if (tipo === 'bs_ef') {
+            // El cliente trae Bolívares (Monto) para comprar Efectivo.
+            recibe = monto / tEf; 
+            gain = (monto / tUsdt) - recibe; // Costo real en USDT vs lo que entregas
+            tasaApli = tEf.toFixed(2); comiStr = "Dif. Tasa";
+        } else if (tipo === 'zelle_cop') {
+            let tZelleCop = parseFloat(document.getElementById('tZelleCop').value) || 3500;
+            gain = monto * 0.02; recibe = monto * tZelleCop; tasaApli = tZelleCop; comiStr = "-";
+        } else if (tipo === 'ciclo_calle') {
+            let tBsEfCalle = parseFloat(document.getElementById('tBsEfCalle').value) || 1;
+            let comEfUsdt = parseFloat(document.getElementById('tEfUsdtCom').value) || 0;
             let bsInvertidos = monto * tBsEfCalle;
             let usdtNetoRecibido = monto * (1 - (comEfUsdt / 100));
             let bsRecuperados = usdtNetoRecibido * tUsdt;
             gain = (bsRecuperados - bsInvertidos) / tUsdt; recibe = bsRecuperados; tasaApli = "Ciclo"; comiStr = "Varios";
         } else if (tipo === 'usdt_bcv_usdt') {
-            let tDolarElecBs = parseFloat(localStorage.getItem('tDolarElecBs')) || 1;
-            let comBancoElec = parseFloat(localStorage.getItem('comBancoElec')) || 0;
-            let comBinanceElec = parseFloat(localStorage.getItem('comBinanceElec')) || 0;
+            let tDolarElecBs = parseFloat(document.getElementById('tDolarElecBs').value) || 1;
+            let comBancoElec = parseFloat(document.getElementById('comBancoElec').value) || 0;
+            let comBinanceElec = parseFloat(document.getElementById('comBinanceElec').value) || 0;
             let bsObtenidos = monto * tUsdt; 
             let costoPorUsdBanco = tDolarElecBs * (1 + (comBancoElec / 100));
             let usdBancoComprados = bsObtenidos / costoPorUsdBanco;
@@ -648,9 +654,11 @@
             gain = usdtFinal - monto; recibe = usdtFinal; tasaApli = "Ciclo"; comiStr = "Bco+Bin";
         }
         
-        let margin = monto > 0 ? (gain / (monto / (tipo==='bs_ef'?tEf:1))) * 100 : 0;
-        // Ajuste burdo de margen para no romper si monto es Bs y lo divide raro
-        if (tipo === 'bs_ef') margin = (gain / (monto/tUsdt)) * 100;
+        let margin = 0;
+        if(monto > 0) {
+            if(tipo === 'bs_ef') { margin = (gain / (monto / tUsdt)) * 100; } 
+            else { margin = (gain / monto) * 100; }
+        }
 
         return { gain, recibe, tasaApli, comiStr, margin };
     }
@@ -663,9 +671,13 @@
         document.getElementById('prevTasa').innerText = res.tasaApli;
         document.getElementById('prevCom').innerText = res.comiStr;
         
-        let cur = (tipo.includes('bs') && !tipo.includes('usdt_bcv')) ? 'Bs' : 'USDT';
-        if(tipo === 'zelle_ef') cur = 'USD';
-        document.getElementById('prevRecibe').innerText = res.recibe.toFixed(2) + " " + cur;
+        let cur = 'USDT';
+        if(tipo.includes('bs') && !tipo.includes('bcv')) cur = 'Bs';
+        if(tipo === 'zelle_ef' || tipo === 'bs_ef') cur = 'USD Efectivo';
+        if(tipo === 'zelle_cop') cur = 'COP';
+        if(tipo === 'ciclo_calle' || tipo === 'usdt_bcv_usdt') cur = 'Bs Recup.';
+        
+        document.getElementById('prevRecibe').innerText = res.recibe.toLocaleString('es-VE', {minimumFractionDigits: 2, maximumFractionDigits:2}) + " " + cur;
         
         document.getElementById('prevGain').innerText = (res.gain >= 0 ? '+' : '') + res.gain.toFixed(2) + " USDT";
         document.getElementById('prevGain').className = res.gain >= 0 ? "text-green" : "text-red";
@@ -695,6 +707,9 @@
         
         document.getElementById('opConcepto').value = "";
         document.getElementById('opMonto').value = "";
+        
+        renderLibro();
+        renderHistorial();
         nav('libro');
     }
 
@@ -720,20 +735,18 @@
             if(o.date === today) { dayGain += o.gain; dayCount++; }
             if(o.month === currentMonth) monthGain += o.gain;
             
-            totalVol += (o.monto || 0); // Simplificación de volumen base
+            totalVol += (o.monto || 0); 
             allGain += o.gain;
         });
 
-        // Update Hero
         document.getElementById('dashDayVal').innerText = (dayGain>=0?'+':'') + dayGain.toFixed(2) + " USDT";
         document.getElementById('dashDayVal').className = "amount " + (dayGain>=0?"text-green":"text-red");
         document.getElementById('dashDayCount').innerText = dayCount + " operaciones hoy";
 
-        // Update Grid
         document.getElementById('dashMonthVal').innerText = (monthGain>=0?'+':'') + monthGain.toFixed(2);
         document.getElementById('dashMonthVal').className = "val " + (monthGain>=0?"text-green":"text-red");
         
-        let capBase = parseFloat(localStorage.getItem('tCapitalBase')) || 0;
+        let capBase = parseFloat(document.getElementById('tCapitalBase').value) || 0;
         let capActual = capBase + allGain;
         document.getElementById('dashCapVal').innerText = capActual.toFixed(2);
 
@@ -742,10 +755,9 @@
         let avgMargin = totalVol > 0 ? (allGain / totalVol) * 100 : 0;
         document.getElementById('dashMarginVal').innerText = avgMargin.toFixed(2) + "%";
 
-        // Update Recent List (Max 3)
         let recents = ops.slice(0, 3);
         let listHtml = "";
-        if(recents.length === 0) listHtml = "<p class='text-muted' style='text-align:center; padding:20px;'>No hay operaciones.</p>";
+        if(recents.length === 0) listHtml = "<p class='text-muted' style='text-align:center; padding:20px;'>No hay operaciones recientes.</p>";
         recents.forEach(o => {
             listHtml += `
             <div class="op-item">
@@ -791,13 +803,13 @@
                     <div class="op-gain ${o.gain>=0?'text-green':'text-red'}">${o.gain>=0?'+':''}${o.gain.toFixed(2)} USDT</div>
                 </div>
                 <div class="op-bot">
-                    <span>Inversión: ${o.monto||0}</span>
-                    <span style="color:#ff4d4f; cursor:pointer;" onclick="borrar(${o.id})">Borrar</span>
+                    <span>Base Inversión: ${o.monto||0}</span>
+                    <span style="color:#ff4d4f; cursor:pointer; font-weight:bold;" onclick="borrar(${o.id})">Borrar</span>
                 </div>
             </div>`;
         });
         
-        if(opsFiltradas.length === 0) html = "<p class='text-muted' style='text-align:center;'>No hay operaciones esta fecha.</p>";
+        if(opsFiltradas.length === 0) html = "<p class='text-muted' style='text-align:center;'>No hay operaciones en esta fecha.</p>";
         document.getElementById('fullOpsList').innerHTML = html;
         document.getElementById('histCount').innerText = opsFiltradas.length;
         document.getElementById('histNet').innerText = (totalGain>=0?'+':'') + totalGain.toFixed(2) + " USDT";
@@ -805,7 +817,7 @@
     }
 
     function borrar(id) {
-        if(confirm("¿Eliminar registro de forma permanente?")) {
+        if(confirm("¿Seguro que quieres borrar este registro?")) {
             ops = ops.filter(o => o.id !== id);
             localStorage.setItem('bymo_ops', JSON.stringify(ops));
             renderHistorial();
