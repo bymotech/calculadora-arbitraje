@@ -158,8 +158,7 @@
             <h3>Últimas Operaciones</h3>
             <a onclick="nav('historial')">Ver todas</a>
         </div>
-        <div class="card" style="padding: 0;" id="recentOpsList">
-            </div>
+        <div class="card" style="padding: 0;" id="recentOpsList"></div>
         
         <div class="fab" onclick="nav('operar')">+</div>
     </div>
@@ -407,7 +406,7 @@
         <details>
             <summary><span style="display:flex; align-items:center; gap:10px;"><b style="background:var(--input-bg); padding:6px; border-radius:6px;">🔄</b> 1. Primer paso: tasas al día</span></summary>
             <div class="manual-body">
-                Lo primero apenas arranques. Ve a <b>Tasas</b> y presiona "Sincronizar Automático" para que la app baje los datos del BCV y Binance. Las demás comisiones (como PayPal y efectivo) ajústalas tú mismo y dale Guardar.
+                Lo primero apenas arranques. Ve a <b>Tasas</b> y presiona "Sincronizar Automático" para que la app baje los datos del BCV y Binance. La app utiliza un sistema de verificación doble (DolarAPI y pyDolarVenezuela) para que nunca te quedes sin tasas. Las demás comisiones (como PayPal, comisiones de Zelle y efectivo) ajústalas tú mismo manualmente y dale <b>Guardar</b>.
             </div>
         </details>
 
@@ -416,27 +415,36 @@
             <div class="manual-body">
                 • <b>Arbitraje Efectivo:</b> Comprar billetes baratos en la calle, depositarlos, pasarlos a USDT y vender por Bs.<br>
                 • <b>Arbitraje BCV:</b> Vender USDT, comprar dólares electrónicos en el banco y regresarlos a Binance.<br>
-                • <b>PayPal/Zelle:</b> El cliente transfiere y tú entregas Bolívares o USDT descontando tu margen de riesgo o ganando por la diferencia de tasa.
+                • <b>PayPal/Zelle a Bs o USDT:</b> El cliente transfiere y tú entregas Bolívares o USDT descontando tu margen de riesgo o ganando por la diferencia de tasa que configuraste en tu panel.
             </div>
         </details>
 
         <details>
-            <summary><span style="display:flex; align-items:center; gap:10px;"><b style="background:var(--input-bg); padding:6px; border-radius:6px;">📊</b> 3. Cómo llevar el libro</span></summary>
+            <summary><span style="display:flex; align-items:center; gap:10px;"><b style="background:var(--input-bg); padding:6px; border-radius:6px;">📊</b> 3. Cómo llevar el libro (y editar)</span></summary>
             <div class="manual-body">
-                Registra cada negocio en <b>Operar</b>. Revisa que el cuadro de previsualización te muestre tu ganancia en verde antes de darle al botón final. La app guarda el registro automáticamente; a las 12 AM el panel del día arranca en cero, pero tu historial y tu "Utilidad del Mes" siguen acumulando.
+                Registra cada negocio en <b>Operar</b>. Puedes pulsar el botón verde flotante <b>"+"</b> en cualquier momento. Revisa que el cuadro de previsualización te muestre tu ganancia antes de darle al botón final.<br><br>
+                ¿Te equivocaste en un monto? ¡Tranquilo! En el historial puedes darle a <b>"Editar"</b> y la app te devolverá los datos para que los corrijas y actualices. También puedes borrarlos por completo. La app guarda el registro automáticamente; a las 12 AM el panel del día arranca en cero, pero tu historial y tu "Utilidad del Mes" siguen acumulando. Si quieres ver días pasados, usa el <b>Filtro de Fechas</b> arriba en tu Libro.
             </div>
         </details>
 
         <details>
-            <summary><span style="display:flex; align-items:center; gap:10px;"><b style="background:var(--input-bg); padding:6px; border-radius:6px;">🧮</b> 4. Calc y Conversor</span></summary>
+            <summary><span style="display:flex; align-items:center; gap:10px;"><b style="background:var(--input-bg); padding:6px; border-radius:6px;">🧮</b> 4. Calcular y Conversor</span></summary>
             <div class="manual-body">
-                Usa el <b>Conversor Rápido</b> para ver montos a las 3 tasas principales de un solo golpe. Usa la pestaña <b>Ahorro</b> para convencer a clientes de pagar en USDT en tiendas que cobran a BCV mostrando la diferencia.
+                Usa el <b>Conversor Rápido</b> para ver montos a las 3 tasas principales (BCV Dólar, BCV Euro, Binance USDT) de un solo golpe sin salir de la app.<br><br>
+                Usa la pestaña <b>Calculadora de Ahorro</b> para convencer a clientes de pagar en USDT en tiendas que cobran a BCV mostrando el porcentaje y cantidad exacta de dinero que se ahorran.
+            </div>
+        </details>
+
+        <details>
+            <summary><span style="display:flex; align-items:center; gap:10px;"><b style="background:var(--input-bg); padding:6px; border-radius:6px;">⚡</b> 5. Actualización Rápida</span></summary>
+            <div class="manual-body">
+                En la esquina superior derecha de tu pantalla siempre tendrás el botón de <b>Refrescar (🔄)</b>. Úsalo si necesitas recargar la aplicación rápidamente sin tener que cerrarla y volverla a abrir.
             </div>
         </details>
 
     </div>
 
-    <div class="footer-tag"><i>by PEDRO MOTA para ByMO Technology</i></div>
+    <div class="footer-tag"><i>by PEDRO MOTA for ByMO Technology</i></div>
 </div>
 
 <div class="nav-bar">
