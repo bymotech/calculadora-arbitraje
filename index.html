@@ -119,6 +119,8 @@
             <option value="zelle_ef">🇺🇸 Zelle ⮕ 💵 Efectivo</option>
             <option value="zelle_cop">🇺🇸 Zelle ⮕ 🇨🇴 Pesos COP</option>
             <option value="zelle_bs">🇺🇸 Zelle ⮕ 🇻🇪 Bolívares</option>
+            <option value="paypal_bs">🅿️ PayPal ⮕ 🇻🇪 Bolívares</option>
+            <option value="paypal_usdt">🅿️ PayPal ⮕ 🟢 USDT</option>
             <option value="ef_usdt">💵 Efectivo ⮕ 🟢 USDT</option>
             <option value="bs_ef">🇻🇪 Bolívares ⮕ 💵 Efectivo (Venta)</option>
             <option value="ciclo_calle">🔄 Arbitraje Efectivo: Bs ⮕ Efec ⮕ USDT ⮕ Bs</option>
@@ -127,7 +129,7 @@
 
         <label>Monto Principal ($/USDT):</label>
         <input type="number" id="opMonto" placeholder="Ej: 100" inputmode="decimal">
-        <p style="font-size: 10px; opacity: 0.6; margin-top: 5px;">*Si es Arbitraje, anota la cantidad de USDT o Dólares base de la vuelta.</p>
+        <p style="font-size: 10px; opacity: 0.6; margin-top: 5px;">*Anota la cantidad de la divisa inicial que recibes o con la que arrancas.</p>
         
         <button class="btn-add" onclick="registrar()">Registrar en Libro</button>
     </div>
@@ -219,6 +221,12 @@
         <label>🇺🇸 Tasa Zelle ⮕ Bs Ref:</label>
         <input type="number" id="tZelleBs" placeholder="Ej: 44.5" step="0.1" inputmode="decimal">
 
+        <label>🅿️ Tasa PayPal ⮕ Bs Ref (Manual):</label>
+        <input type="number" id="tPaypalBs" placeholder="Ej: 38.5" step="0.1" inputmode="decimal">
+
+        <label>🅿️ Comisión PayPal ⮕ USDT (%):</label>
+        <input type="number" id="tPaypalUsdtCom" placeholder="Ej: 12" step="0.1" inputmode="decimal">
+
         <label>💵 Tasa VENTA Efectivo (Bs/$):</label>
         <input type="number" id="tEfBs" placeholder="A cómo vendes el billete" step="0.1" inputmode="decimal">
 
@@ -244,7 +252,7 @@
             <summary>1️⃣ PRIMER PASO: PONER LAS TASAS AL DÍA</summary>
             <div class="manual-content">
                 Mano, esto es lo primero que tienes que hacer apenas te tomes el café en la mañana. Si las tasas están viejas, vas a terminar regalando el trabajo o cobrando de más.<br><br>
-                Ve a la pestaña <b>Tasas</b>. Ahora puedes simplemente presionar el botón azul <b>"Sincronizar BCV y Binance Automático"</b> para que la app busque las tasas en internet por ti. Las demás comisiones y tasas de calle sí debes ajustarlas manualmente y darle a <b>"Guardar"</b>.
+                Ve a la pestaña <b>Tasas</b>. Ahora puedes simplemente presionar el botón azul <b>"Sincronizar BCV y Binance Automático"</b> para que la app busque las tasas en internet por ti. Las demás comisiones (como PayPal) y tasas de calle sí debes ajustarlas manualmente y darle a <b>"Guardar"</b>.
             </div>
         </details>
 
@@ -252,6 +260,7 @@
             <summary>2️⃣ ENTENDIENDO LOS TIPOS DE CAMBIO</summary>
             <div class="manual-content">
                 • <b>Zelle a USDT / Efectivo:</b> El cliente transfiere y tú entregas el cambio. Ganas la comisión estipulada.<br>
+                • <b>PayPal a Bs / USDT:</b> Recibes saldo PayPal y pagas en Bolívares (ganas por el diferencial de la tasa manual que le pusiste) o entregas USDT (cobrando tu porcentaje de comisión por el riesgo del procesador).<br>
                 • <b>Arbitraje Efectivo:</b> Compras dólares baratos en la calle, los depositas, los vuelves USDT y los vendes por bolívares.<br>
                 • <b>Arbitraje BCV:</b> Vendes USDT por Bs, compras dólares electrónicos en el banco y los regresas a Binance. La app resta las comisiones del banco y Binance para darte tu ganancia neta.
             </div>
@@ -373,7 +382,8 @@
         const fields = [
             'tEfBs', 'tUsdtBs', 'tZelleCop', 'tZelleEf', 'tBcvUsd', 
             'tBcvEur', 'tZelleBs', 'tBsEfCalle', 'tEfUsdtCom', 
-            'tDolarElecBs', 'comBancoElec', 'comBinanceElec'
+            'tDolarElecBs', 'comBancoElec', 'comBinanceElec',
+            'tPaypalBs', 'tPaypalUsdtCom'
         ];
         fields.forEach(f => {
             if(localStorage.getItem(f)) document.getElementById(f).value = localStorage.getItem(f);
@@ -387,7 +397,8 @@
         const fields = [
             'tEfBs', 'tUsdtBs', 'tZelleCop', 'tZelleEf', 'tBcvUsd', 
             'tBcvEur', 'tZelleBs', 'tBsEfCalle', 'tEfUsdtCom', 
-            'tDolarElecBs', 'comBancoElec', 'comBinanceElec'
+            'tDolarElecBs', 'comBancoElec', 'comBinanceElec',
+            'tPaypalBs', 'tPaypalUsdtCom'
         ];
         fields.forEach(f => localStorage.setItem(f, document.getElementById(f).value));
         calcularConversor(); 
@@ -436,6 +447,12 @@
             gain = monto * (com / 100);
         } else if (tipo === 'zelle_bs') {
             gain = monto - ((monto * tZelleBs) / tUsdt);
+        } else if (tipo === 'paypal_bs') {
+            let tPaypalBs = parseFloat(localStorage.getItem('tPaypalBs')) || 1;
+            gain = monto - ((monto * tPaypalBs) / tUsdt);
+        } else if (tipo === 'paypal_usdt') {
+            let comPaypalUsdt = parseFloat(localStorage.getItem('tPaypalUsdtCom')) || 0;
+            gain = monto * (comPaypalUsdt / 100);
         } else if(tipo === 'ef_usdt') {
             let comEfUsdt = parseFloat(localStorage.getItem('tEfUsdtCom')) || 0;
             gain = monto * (comEfUsdt / 100); 
