@@ -37,22 +37,18 @@
         body { font-family: 'Segoe UI', Arial, sans-serif; background-color: var(--bg-color); color: var(--text-color); padding-bottom: 70px; }
         .container { max-width: 450px; margin: 0 auto; background: var(--container-bg); min-height: 100vh; padding: 15px; width: 100%; overflow-x: hidden; }
         
-        /* Header */
         .header { text-align: center; padding-bottom: 10px; border-bottom: 1px solid var(--input-border); margin-bottom: 15px; }
         .logo-simple { font-size: 40px; margin-bottom: 5px; }
 
-        /* Dashboard */
         .dashboard { background: var(--card-bg); padding: 15px; border-radius: 12px; text-align: center; margin-bottom: 20px; border: 1px solid var(--input-border); }
         .dashboard p { font-size: 12px; text-transform: uppercase; font-weight: bold; opacity: 0.7; }
         .dashboard h1 { margin-top: 5px; font-size: 28px; color: var(--green-text); }
 
-        /* Navegación Inferior */
         .nav-bar { position: fixed; bottom: 0; left: 0; width: 100%; background: var(--container-bg); display: flex; border-top: 1px solid var(--input-border); z-index: 100; }
         .nav-item { flex: 1; text-align: center; padding: 12px 5px; font-size: 10px; font-weight: bold; cursor: pointer; color: var(--text-color); opacity: 0.6; }
         .nav-item.active { opacity: 1; color: var(--brand-color); border-top: 3px solid var(--brand-color); }
         .nav-icon { font-size: 20px; display: block; margin-bottom: 2px; }
 
-        /* Formularios */
         .section { display: none; }
         .section.active { display: block; }
         label { font-weight: bold; display: block; margin-top: 15px; font-size: 13px; }
@@ -61,7 +57,6 @@
         .btn-add { background: #28a745; }
         .btn-save { background: #6c757d; }
 
-        /* Historial */
         .card-op { background: var(--card-bg); padding: 12px; border-radius: 10px; margin-bottom: 10px; border-left: 5px solid var(--green-text); display: flex; justify-content: space-between; align-items: center; }
         .card-op.neg { border-left-color: var(--red-text); }
         .op-meta { font-size: 11px; opacity: 0.6; }
@@ -84,6 +79,9 @@
             <p>Utilidad del Día</p>
             <h1 id="totalDay">0.00 USDT</h1>
         </div>
+        
+        <button class="btn-add" style="margin-top: 0; margin-bottom: 20px;" onclick="nav('operar')">➕ AGREGAR REGISTRO</button>
+
         <h3 style="font-size: 14px; margin-bottom: 10px;">Historial de Hoy</h3>
         <div id="historyList"></div>
     </div>
@@ -99,12 +97,15 @@
             <option value="zelle_usdt">🇺🇸 Zelle ⮕ 🟢 USDT</option>
             <option value="zelle_ef">🇺🇸 Zelle ⮕ 💵 Efectivo</option>
             <option value="zelle_cop">🇺🇸 Zelle ⮕ 🇨🇴 Pesos COP</option>
+            <option value="zelle_bs">🇺🇸 Zelle ⮕ 🇻🇪 Bolívares</option>
             <option value="ef_usdt">💵 Efectivo ⮕ 🟢 USDT</option>
-            <option value="bs_ef">🇻🇪 Bolívares ⮕ 💵 Efectivo</option>
+            <option value="bs_ef">🇻🇪 Bolívares ⮕ 💵 Efectivo (Venta)</option>
+            <option value="ciclo_calle">🔄 Arbitraje (El Ruleteo): Bs ⮕ Efec ⮕ USDT ⮕ Bs</option>
         </select>
 
-        <label>Monto Recibido:</label>
-        <input type="number" id="opMonto" placeholder="0.00" inputmode="decimal">
+        <label>Monto Principal ($/USDT):</label>
+        <input type="number" id="opMonto" placeholder="Ej: 100" inputmode="decimal">
+        <p style="font-size: 10px; opacity: 0.6; margin-top: 5px;">*Si es Arbitraje, anota la cantidad de dólares físicos comprados.</p>
         
         <button class="btn-add" onclick="registrar()">Registrar en Libro</button>
     </div>
@@ -139,23 +140,26 @@
     <div id="sec-tasas" class="section">
         <h3 style="text-align: center; margin-bottom: 10px;">Configuración de Tasas</h3>
         
-        <label>💵 Tasa Efectivo (Bs/$):</label>
-        <input type="number" id="tEfBs" placeholder="Ej: 43.5" step="0.1" inputmode="decimal">
-        
-        <label>🟢 Tasa USDT (Bs/USDT):</label>
+        <label>🟢 Tasa Binance USDT (Bs/USDT):</label>
         <input type="number" id="tUsdtBs" placeholder="Ej: 45.0" step="0.1" inputmode="decimal">
+
+        <label>🇺🇸 Tasa Zelle ⮕ Bs Ref:</label>
+        <input type="number" id="tZelleBs" placeholder="Ej: 44.5" step="0.1" inputmode="decimal">
+
+        <label>💵 Tasa VENTA Efectivo (Bs/$):</label>
+        <input type="number" id="tEfBs" placeholder="A cómo vendes el billete" step="0.1" inputmode="decimal">
+
+        <label>💵 Tasa COMPRA Efectivo Calle (Bs/$):</label>
+        <input type="number" id="tBsEfCalle" placeholder="A cómo compras en la calle" step="0.1" inputmode="decimal">
+
+        <label>💵 Comisión Efectivo ⮕ USDT (%):</label>
+        <input type="number" id="tEfUsdtCom" placeholder="Ej: 2" step="0.1" inputmode="decimal">
 
         <label>🇨🇴 Tasa Zelle ⮕ COP:</label>
         <input type="number" id="tZelleCop" placeholder="Ej: 3500" step="1" inputmode="decimal">
         
         <label>🇺🇸 Tasa Zelle ⮕ Efectivo (% Comisión):</label>
         <input type="number" id="tZelleEf" placeholder="Ej: 3" step="0.1" inputmode="decimal">
-
-        <label>💵 Tasa Efectivo ⮕ USDT (Bs Ref):</label>
-        <input type="number" id="tEfUsdtBsRef" placeholder="Precio referencia" step="0.1" inputmode="decimal">
-        
-        <label>💵 Comisión Efectivo ⮕ USDT (%):</label>
-        <input type="number" id="tEfUsdtCom" placeholder="Ej: 2" step="0.1" inputmode="decimal">
 
         <label>🏦 Tasas BCV (Dólar / Euro):</label>
         <div style="display:flex; gap:10px;">
@@ -188,18 +192,25 @@
         document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
         document.querySelectorAll('.nav-item').forEach(i => i.classList.remove('active'));
         document.getElementById('sec-' + id).classList.add('active');
-        event.currentTarget.classList.add('active');
+        
+        if(id !== 'operar') {
+            document.querySelectorAll('.nav-item').forEach(i => {
+                if(i.innerText.includes(id.charAt(0).toUpperCase() + id.slice(1))) i.classList.add('active');
+            });
+        } else {
+            document.querySelectorAll('.nav-item')[1].classList.add('active');
+        }
     }
 
     function loadTasas() {
-        const fields = ['tEfBs', 'tUsdtBs', 'tZelleCop', 'tZelleEf', 'tBcvUsd', 'tBcvEur', 'tEfUsdtBsRef', 'tEfUsdtCom'];
+        const fields = ['tEfBs', 'tUsdtBs', 'tZelleCop', 'tZelleEf', 'tBcvUsd', 'tBcvEur', 'tZelleBs', 'tBsEfCalle', 'tEfUsdtCom'];
         fields.forEach(f => {
             if(localStorage.getItem(f)) document.getElementById(f).value = localStorage.getItem(f);
         });
     }
 
     function saveTasas() {
-        const fields = ['tEfBs', 'tUsdtBs', 'tZelleCop', 'tZelleEf', 'tBcvUsd', 'tBcvEur', 'tEfUsdtBsRef', 'tEfUsdtCom'];
+        const fields = ['tEfBs', 'tUsdtBs', 'tZelleCop', 'tZelleEf', 'tBcvUsd', 'tBcvEur', 'tZelleBs', 'tBsEfCalle', 'tEfUsdtCom'];
         fields.forEach(f => localStorage.setItem(f, document.getElementById(f).value));
         alert("Tasas Guardadas ✅");
     }
@@ -233,19 +244,33 @@
         let gain = 0;
         let tUsdt = parseFloat(localStorage.getItem('tUsdtBs')) || 1;
         let tEf = parseFloat(localStorage.getItem('tEfBs')) || 1;
+        let tZelleBs = parseFloat(localStorage.getItem('tZelleBs')) || 1;
 
         if(tipo === 'zelle_usdt' || tipo === 'zelle_ef') {
             let com = parseFloat(localStorage.getItem('tZelleEf')) || 0;
             gain = monto * (com / 100);
+        } else if (tipo === 'zelle_bs') {
+            // Ganancia = (Valor real del Zelle en USDT) - (Lo que pagaste en Bs convertido a USDT)
+            gain = monto - ((monto * tZelleBs) / tUsdt);
         } else if(tipo === 'ef_usdt') {
-            // Lógica con la nueva comisión de Efectivo a USDT
             let comEfUsdt = parseFloat(localStorage.getItem('tEfUsdtCom')) || 0;
             gain = monto * (comEfUsdt / 100); 
-            // Si quieres usar la tasa ref, ajustas esta fórmula
         } else if(tipo === 'bs_ef') {
+            // Compraste Bs y vendiste dólares (Venta normal)
             gain = (monto / tEf) - (monto / tUsdt); 
         } else if(tipo === 'zelle_cop') {
             gain = monto * 0.02; // Margen base de ejemplo
+        } else if(tipo === 'ciclo_calle') {
+            // El Ruleteo: Compras efectivo en calle, pasas a USDT cobrando %, vendes en Binance
+            let tBsEfCalle = parseFloat(localStorage.getItem('tBsEfCalle')) || 1;
+            let comEfUsdt = parseFloat(localStorage.getItem('tEfUsdtCom')) || 0;
+            
+            let bsInvertidos = monto * tBsEfCalle;
+            let usdtNetoRecibido = monto * (1 - (comEfUsdt / 100));
+            let bsRecuperados = usdtNetoRecibido * tUsdt;
+            
+            // Ganancia neta en USDT
+            gain = (bsRecuperados - bsInvertidos) / tUsdt;
         }
 
         let newOp = {
@@ -259,7 +284,6 @@
         ops.unshift(newOp);
         localStorage.setItem('bymo_ops', JSON.stringify(ops));
         
-        // Limpiar los campos para la próxima operación
         document.getElementById('opConcepto').value = "";
         document.getElementById('opMonto').value = "";
         
@@ -282,7 +306,7 @@
                 <div class="card-op ${o.gain < 0 ? 'neg' : ''}">
                     <div>
                         <div class="op-meta">${o.time} - ${o.concepto}</div>
-                        <div class="op-title">${o.tipo}</div>
+                        <div class="op-title" style="font-size: 12px;">${o.tipo}</div>
                         <button onclick="borrar(${o.id})" style="width:auto; padding:3px 8px; margin:5px 0 0 0; font-size:10px; background:var(--red-text); border:none; border-radius:4px; color:white; cursor:pointer;">Borrar</button>
                     </div>
                     <div class="op-gain" style="color:${o.gain < 0 ? 'var(--red-text)' : 'var(--green-text)'}">
