@@ -79,12 +79,17 @@
         </select>
 
         <div id="sec-producto" class="seccion activa">
-            <label>Precio Producto ($ BCV):</label>
-            <input type="number" id="prodUsd" value="10.00" step="0.01" inputmode="decimal">
-            <label>Tasa BCV (Bs/$):</label>
-            <input type="number" id="tasaBcv" value="483.00" step="0.01" inputmode="decimal">
+            <label>Moneda de Referencia (BCV):</label>
+            <select id="monedaRef" onchange="actualizarLabelMoneda()">
+                <option value="USD">Dólar ($)</option>
+                <option value="EUR">Euro (€)</option>
+            </select>
+            <label>Precio Producto (<span id="labelPrecioRef">$</span>):</label>
+            <input type="number" id="prodUsd" value="0.00" step="0.01" inputmode="decimal">
+            <label>Tasa BCV (<span id="labelTasaRef">Bs/$</span>):</label>
+            <input type="number" id="tasaBcv" value="0.00" step="0.01" inputmode="decimal">
             <label>Tasa Binance (Bs/USDT):</label>
-            <input type="number" id="tasaBin" value="628.00" step="0.01" inputmode="decimal">
+            <input type="number" id="tasaBin" value="0.00" step="0.01" inputmode="decimal">
             <button class="btn-principal" onclick="calcularProducto()">Calcular</button>
             <div class="result" id="resProd">Resultado: 0 USDT</div>
             <button class="btn-whatsapp" onclick="compartirWp('producto')">Copiar para WhatsApp</button>
@@ -139,7 +144,7 @@
             <button class="btn-whatsapp" onclick="compartirWp('zelle_cop')">Copiar para WhatsApp</button>
         </div>
 
-        <div class="footer-tech">desarrollado por Bymo Technology</div>
+        <div class="footer-tech">desarrollado por ByMO Technology</div>
     </div>
 
     <script>
@@ -147,6 +152,13 @@
             document.querySelectorAll('.seccion').forEach(s => s.classList.remove('activa'));
             let sel = document.getElementById('menuTipo').value;
             document.getElementById('sec-' + (sel === 'zelle_cop' ? 'cop' : sel)).classList.add('activa');
+        }
+
+        function actualizarLabelMoneda() {
+            let mon = document.getElementById('monedaRef').value;
+            let sim = mon === 'USD' ? '$' : '€';
+            document.getElementById('labelPrecioRef').innerText = sim;
+            document.getElementById('labelTasaRef').innerText = 'Bs/' + sim;
         }
 
         function getColorClass(valor) { return valor >= 0 ? "texto-verde" : "texto-rojo"; }
@@ -159,7 +171,7 @@
             let usdtNec = tI > 0 ? (costoBs / tI) : 0;
             let ahorro = tI > 0 ? ((tI - tB) / tI) * 100 : 0;
             let resHtml = "Necesitas: <b>" + usdtNec.toFixed(2) + " USDT</b><br><small>Equivale a: " + costoBs.toFixed(2) + " Bs";
-            if (ahorro !== 0) resHtml += "<br>Ahorro: <span class='" + getColorClass(ahorro) + "'>" + Math.abs(ahorro).toFixed(2) + "%</span>";
+            if (ahorro !== 0) resHtml += "<br>Diferencial: <span class='" + getColorClass(ahorro) + "'>" + Math.abs(ahorro).toFixed(2) + "%</span>";
             document.getElementById('resProd').innerHTML = resHtml + "</small>";
         }
 
@@ -198,23 +210,24 @@
         }
 
         function compartirWp(modulo) {
-            let msg = "*ByMO Tech - Resumen de Cálculo*\n\n";
+            let msg = "*Resumen de Cálculo*\n\n";
             if(modulo === 'producto') {
-                msg += "Producto: " + document.getElementById('prodUsd').value + " $ BCV\n";
-                msg += "Tasa BCV: " + document.getElementById('tasaBcv').value + " Bs/$\n";
+                let sim = document.getElementById('monedaRef').value === 'USD' ? '$' : '€';
+                msg += "Producto: " + document.getElementById('prodUsd').value + " " + sim + " BCV\n";
+                msg += "Tasa BCV: " + document.getElementById('tasaBcv').value + " Bs/" + sim + "\n";
                 msg += "Tasa USDT: " + document.getElementById('tasaBin').value + " Bs/USDT\n";
                 msg += "--------------------------\n";
-                msg += "Costo Final: " + document.getElementById('resProd').innerText.split('\n')[0];
+                msg += "Costo Final: " + document.getElementById('resProd').innerText.split('\n')[0].replace("Necesitas: ", "");
             } else if(modulo === 'banco') {
                 msg += "Operación: Banco vs USDT\n";
-                msg += "Rentabilidad: " + document.getElementById('resBanco').innerText;
+                msg += "Rentabilidad: " + document.getElementById('resBanco').innerText.replace("Rentabilidad: ", "");
             } else if(modulo === 'efectivo') {
                 msg += "Operación: " + (document.getElementById('tipoCambioEf').value === 'usdt_a_efectivo' ? "USDT a Efectivo" : "Efectivo a USDT") + "\n";
-                msg += "Rentabilidad: " + document.getElementById('resEfectivo').innerText;
+                msg += "Rentabilidad: " + document.getElementById('resEfectivo').innerText.replace("Rentabilidad: ", "");
             } else {
                 msg += "Operación: Zelle -> COP -> USDT\n";
                 msg += "Monto: " + document.getElementById('montoZelle').value + " $\n";
-                msg += "Rentabilidad: " + document.getElementById('resCop').innerText;
+                msg += "Rentabilidad: " + document.getElementById('resCop').innerText.replace("Rentabilidad: ", "");
             }
             msg += "\n\n_Generado por ByMO Technology_";
             navigator.clipboard.writeText(msg).then(() => alert("Resumen copiado. ¡Ya puedes pegarlo en WhatsApp!"));
