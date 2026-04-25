@@ -212,7 +212,7 @@
             </div>
             <div class="input-group" style="margin-bottom: 0;">
                 <label>Monto principal (Divisa Base que recibes/inviertes)</label>
-                <input type="number" id="opMonto" placeholder="Ej: 100" inputmode="decimal" oninput="updatePreview()">
+                <input type="text" id="opMonto" placeholder="Ej: 100" inputmode="decimal" oninput="updatePreview()">
             </div>
         </div>
 
@@ -260,7 +260,7 @@
                 <div class="input-group">
                     <label>Tú envías</label>
                     <div style="display:flex; gap:10px;">
-                        <input type="number" id="convMonto" value="100" inputmode="decimal" oninput="calcularConversor()">
+                        <input type="text" id="convMonto" value="100" inputmode="decimal" oninput="calcularConversor()">
                         <select id="convModo" onchange="calcularConversor()" style="width: 120px; background:var(--card-bg);">
                             <option value="div_bs">🇺🇸 USD / €</option>
                             <option value="bs_div">🇻🇪 Bs</option>
@@ -290,16 +290,16 @@
                 </div>
                 <div class="input-group">
                     <label>Precio en Etiqueta (<span id="refSym">$</span>)</label>
-                    <input type="number" id="calcPrice" placeholder="100" inputmode="decimal">
+                    <input type="text" id="calcPrice" placeholder="100" inputmode="decimal">
                 </div>
                 <div style="display:flex; gap:10px; margin-bottom:15px;">
                     <div style="flex:1;">
                         <label class="text-muted" style="font-size:11px;">Tasa BCV</label>
-                        <input type="number" id="calcBcv" placeholder="0.00" inputmode="decimal">
+                        <input type="text" id="calcBcv" placeholder="0.00" inputmode="decimal">
                     </div>
                     <div style="flex:1;">
                         <label class="text-muted" style="font-size:11px;">Tasa USDT</label>
-                        <input type="number" id="calcBin" placeholder="0.00" inputmode="decimal">
+                        <input type="text" id="calcBin" placeholder="0.00" inputmode="decimal">
                     </div>
                 </div>
                 <div class="preview-card" style="margin-bottom:15px; display:none;" id="calcResCard">
@@ -321,20 +321,20 @@
             <h3>Capital y Plataformas</h3>
             <div class="input-group">
                 <label>🏦 Capital Base Operativo (USDT)</label>
-                <input type="number" id="tCapitalBase" placeholder="Ej: 5000" inputmode="decimal">
+                <input type="text" id="tCapitalBase" placeholder="Ej: 5000" inputmode="decimal">
             </div>
             <div class="input-group">
                 <label>🟢 Binance USDT (Bs/USDT)</label>
-                <input type="number" id="tUsdtBs" step="0.1" inputmode="decimal">
+                <input type="text" id="tUsdtBs" inputmode="decimal">
             </div>
             <div style="display:flex; gap:10px;">
                 <div class="input-group" style="flex:1;">
                     <label>🇺🇸 BCV USD</label>
-                    <input type="number" id="tBcvUsd" step="0.01" inputmode="decimal">
+                    <input type="text" id="tBcvUsd" inputmode="decimal">
                 </div>
                 <div class="input-group" style="flex:1;">
                     <label>🇪🇺 BCV EUR</label>
-                    <input type="number" id="tBcvEur" step="0.01" inputmode="decimal">
+                    <input type="text" id="tBcvEur" inputmode="decimal">
                 </div>
             </div>
         </div>
@@ -343,23 +343,23 @@
             <h3>Zelle y PayPal</h3>
             <div class="input-group">
                 <label>🇺🇸 Zelle ⮕ USDT (% Com)</label>
-                <input type="number" id="tZelleUsdtCom" step="0.1" inputmode="decimal">
+                <input type="text" id="tZelleUsdtCom" inputmode="decimal">
             </div>
             <div class="input-group">
                 <label>🇺🇸 Zelle ⮕ Efectivo (% Com)</label>
-                <input type="number" id="tZelleEf" step="0.1" inputmode="decimal">
+                <input type="text" id="tZelleEf" inputmode="decimal">
             </div>
             <div class="input-group">
                 <label>🇺🇸 Zelle ⮕ Bs Ref</label>
-                <input type="number" id="tZelleBs" step="0.1" inputmode="decimal">
+                <input type="text" id="tZelleBs" inputmode="decimal">
             </div>
             <div class="input-group">
                 <label>🅿️ PayPal ⮕ Bs Ref</label>
-                <input type="number" id="tPaypalBs" step="0.1" inputmode="decimal">
+                <input type="text" id="tPaypalBs" inputmode="decimal">
             </div>
             <div class="input-group" style="margin-bottom:0;">
                 <label>🅿️ PayPal ⮕ USDT (% Com)</label>
-                <input type="number" id="tPaypalUsdtCom" step="0.1" inputmode="decimal">
+                <input type="text" id="tPaypalUsdtCom" inputmode="decimal">
             </div>
         </div>
 
@@ -367,15 +367,15 @@
             <h3>Dólares Efectivo</h3>
             <div class="input-group">
                 <label>💵 VENTA Efectivo Calle (Bs/$)</label>
-                <input type="number" id="tEfBs" step="0.1" inputmode="decimal">
+                <input type="text" id="tEfBs" inputmode="decimal">
             </div>
             <div class="input-group">
                 <label>💵 COMPRA Efectivo Calle (Bs/$)</label>
-                <input type="number" id="tBsEfCalle" step="0.1" inputmode="decimal">
+                <input type="text" id="tBsEfCalle" inputmode="decimal">
             </div>
             <div class="input-group" style="margin-bottom:0;">
                 <label>💵 Comisión Efectivo ⮕ USDT (%)</label>
-                <input type="number" id="tEfUsdtCom" step="0.1" inputmode="decimal">
+                <input type="text" id="tEfUsdtCom" inputmode="decimal">
             </div>
         </div>
 
@@ -383,16 +383,16 @@
             <h3>Dólares Electrónicos (Banco)</h3>
             <div class="input-group">
                 <label>🏦 Dólar Electrónico BCV (Bs/$)</label>
-                <input type="number" id="tDolarElecBs" step="0.01" inputmode="decimal">
+                <input type="text" id="tDolarElecBs" inputmode="decimal">
             </div>
             <div style="display:flex; gap:10px; margin-bottom:0;">
                 <div class="input-group" style="flex:1; margin-bottom:0;">
                     <label>🏦 Com Banco %</label>
-                    <input type="number" id="comBancoElec" step="0.1" inputmode="decimal">
+                    <input type="text" id="comBancoElec" inputmode="decimal">
                 </div>
                 <div class="input-group" style="flex:1; margin-bottom:0;">
                     <label>🟡 Com Binance %</label>
-                    <input type="number" id="comBinanceElec" step="0.1" inputmode="decimal">
+                    <input type="text" id="comBinanceElec" inputmode="decimal">
                 </div>
             </div>
         </div>
@@ -406,7 +406,7 @@
         <details>
             <summary><span style="display:flex; align-items:center; gap:10px;"><b style="background:var(--input-bg); padding:6px; border-radius:6px;">🔄</b> 1. Primer paso: tasas al día</span></summary>
             <div class="manual-body">
-                Lo primero apenas arranques. Ve a <b>Tasas</b> y presiona "Sincronizar Automático" para que la app baje los datos del BCV y Binance. La app utiliza un sistema de verificación doble (DolarAPI y pyDolarVenezuela) para que nunca te quedes sin tasas. Las demás comisiones (como PayPal, comisiones de Zelle y efectivo) ajústalas tú mismo manualmente y dale <b>Guardar</b>.
+                Lo primero apenas arranques. Ve a <b>Tasas</b> y presiona "Sincronizar Automático" para que la app baje los datos del BCV y Binance. La app utiliza un sistema de verificación doble (DolarAPI y pyDolarVenezuela) para que nunca te quedes sin tasas. Las demás comisiones (como PayPal, comisiones de Zelle y efectivo) ajústalas tú mismo manualmente y dale <b>Guardar</b>. Si tienes iPhone y escribes una coma (,) la app la convertirá matemáticamente en un punto de manera automática.
             </div>
         </details>
 
@@ -473,6 +473,13 @@
 <script>
     let ops = JSON.parse(localStorage.getItem('bymo_ops')) || [];
     let editId = null;
+
+    // Función mágica para leer números limpiando comas de iPhone/Android
+    function num(id) {
+        let val = document.getElementById(id).value;
+        if(!val) return 0;
+        return parseFloat(val.replace(/,/g, '.')) || 0;
+    }
 
     window.onload = () => {
         loadTasas();
@@ -579,11 +586,11 @@
     }
 
     function calcularConversor() {
-        let monto = parseFloat(document.getElementById('convMonto').value) || 0;
+        let monto = num('convMonto');
         let modo = document.getElementById('convModo').value;
-        let tBcvUsd = parseFloat(document.getElementById('tBcvUsd').value) || 1;
-        let tBcvEur = parseFloat(document.getElementById('tBcvEur').value) || 1;
-        let tUsdt = parseFloat(document.getElementById('tUsdtBs').value) || 1;
+        let tBcvUsd = num('tBcvUsd') || 1;
+        let tBcvEur = num('tBcvEur') || 1;
+        let tUsdt = num('tUsdtBs') || 1;
 
         if (modo === 'div_bs') {
             document.getElementById('resConvBcv').innerText = (monto * tBcvUsd).toLocaleString('es-VE', {minimumFractionDigits: 2}) + " Bs";
@@ -603,9 +610,9 @@
     }
 
     function execCalc() {
-        let p = parseFloat(document.getElementById('calcPrice').value) || 0;
-        let bcv = parseFloat(document.getElementById('calcBcv').value) || 1;
-        let bin = parseFloat(document.getElementById('calcBin').value) || 1;
+        let p = num('calcPrice');
+        let bcv = num('calcBcv') || 1;
+        let bin = num('calcBin') || 1;
         let usdt = (p * bcv) / bin;
         let diff = ((bin - bcv) / bin) * 100;
         let diffUsdt = (p) - usdt;
@@ -616,47 +623,47 @@
     }
 
     function calculateLogic(tipo, monto) {
-        let tUsdt = parseFloat(document.getElementById('tUsdtBs').value) || 1;
-        let tEf = parseFloat(document.getElementById('tEfBs').value) || 1;
-        let tZelleBs = parseFloat(document.getElementById('tZelleBs').value) || 1;
+        let tUsdt = num('tUsdtBs') || 1;
+        let tEf = num('tEfBs') || 1;
+        let tZelleBs = num('tZelleBs') || 1;
         
         let gain = 0; let recibe = 0; let tasaApli = "1.00"; let comiStr = "-0.00";
 
         if (tipo === 'zelle_usdt') {
-            let com = parseFloat(document.getElementById('tZelleUsdtCom').value) || 0;
+            let com = num('tZelleUsdtCom') || 0;
             gain = monto * (com / 100); recibe = monto - gain; comiStr = `-${gain.toFixed(2)} USDT`;
         } else if (tipo === 'zelle_ef') {
-            let com = parseFloat(document.getElementById('tZelleEf').value) || 0;
+            let com = num('tZelleEf') || 0;
             gain = monto * (com / 100); recibe = monto - gain; comiStr = `-${gain.toFixed(2)} USD`;
         } else if (tipo === 'zelle_bs') {
             gain = monto - ((monto * tZelleBs) / tUsdt); recibe = monto * tZelleBs; tasaApli = tZelleBs.toFixed(2); comiStr = "Dif. Tasa";
         } else if (tipo === 'paypal_bs') {
-            let tPaypalBs = parseFloat(document.getElementById('tPaypalBs').value) || 1;
+            let tPaypalBs = num('tPaypalBs') || 1;
             gain = monto - ((monto * tPaypalBs) / tUsdt); recibe = monto * tPaypalBs; tasaApli = tPaypalBs.toFixed(2); comiStr = "Dif. Tasa";
         } else if (tipo === 'paypal_usdt') {
-            let comPaypalUsdt = parseFloat(document.getElementById('tPaypalUsdtCom').value) || 0;
+            let comPaypalUsdt = num('tPaypalUsdtCom') || 0;
             gain = monto * (comPaypalUsdt / 100); recibe = monto - gain; comiStr = `-${gain.toFixed(2)} USDT`;
         } else if (tipo === 'ef_usdt') {
-            let comEfUsdt = parseFloat(document.getElementById('tEfUsdtCom').value) || 0;
+            let comEfUsdt = num('tEfUsdtCom') || 0;
             gain = monto * (comEfUsdt / 100); recibe = monto - gain; comiStr = `-${gain.toFixed(2)} USDT`;
         } else if (tipo === 'bs_ef') {
             recibe = monto / tEf; 
             gain = (monto / tUsdt) - recibe;
             tasaApli = tEf.toFixed(2); comiStr = "Dif. Tasa";
         } else if (tipo === 'zelle_cop') {
-            let tZelleCop = parseFloat(document.getElementById('tZelleCop').value) || 3500;
+            let tZelleCop = num('tZelleCop') || 3500;
             gain = monto * 0.02; recibe = monto * tZelleCop; tasaApli = tZelleCop; comiStr = "-";
         } else if (tipo === 'ciclo_calle') {
-            let tBsEfCalle = parseFloat(document.getElementById('tBsEfCalle').value) || 1;
-            let comEfUsdt = parseFloat(document.getElementById('tEfUsdtCom').value) || 0;
+            let tBsEfCalle = num('tBsEfCalle') || 1;
+            let comEfUsdt = num('tEfUsdtCom') || 0;
             let bsInvertidos = monto * tBsEfCalle;
             let usdtNetoRecibido = monto * (1 - (comEfUsdt / 100));
             let bsRecuperados = usdtNetoRecibido * tUsdt;
             gain = (bsRecuperados - bsInvertidos) / tUsdt; recibe = bsRecuperados; tasaApli = "Ciclo"; comiStr = "Varios";
         } else if (tipo === 'usdt_bcv_usdt') {
-            let tDolarElecBs = parseFloat(document.getElementById('tDolarElecBs').value) || 1;
-            let comBancoElec = parseFloat(document.getElementById('comBancoElec').value) || 0;
-            let comBinanceElec = parseFloat(document.getElementById('comBinanceElec').value) || 0;
+            let tDolarElecBs = num('tDolarElecBs') || 1;
+            let comBancoElec = num('comBancoElec') || 0;
+            let comBinanceElec = num('comBinanceElec') || 0;
             let bsObtenidos = monto * tUsdt; 
             let costoPorUsdBanco = tDolarElecBs * (1 + (comBancoElec / 100));
             let usdBancoComprados = bsObtenidos / costoPorUsdBanco;
@@ -675,7 +682,7 @@
 
     function updatePreview() {
         let tipo = document.getElementById('opTipo').value;
-        let monto = parseFloat(document.getElementById('opMonto').value) || 0;
+        let monto = num('opMonto');
         let res = calculateLogic(tipo, monto);
         
         document.getElementById('prevTasa').innerText = res.tasaApli;
@@ -717,7 +724,7 @@
         let concepto = document.getElementById('opConcepto').value || "Varios";
         let tipoVal = document.getElementById('opTipo').value;
         let tipoText = document.getElementById('opTipo').options[document.getElementById('opTipo').selectedIndex].text;
-        let monto = parseFloat(document.getElementById('opMonto').value) || 0;
+        let monto = num('opMonto');
         if(monto <= 0) return alert("Ingresa un monto válido");
 
         let res = calculateLogic(tipoVal, monto);
@@ -802,7 +809,7 @@
         document.getElementById('dashMonthVal').innerText = (monthGain>=0?'+':'') + monthGain.toFixed(2);
         document.getElementById('dashMonthVal').className = "val " + (monthGain>=0?"text-green":"text-red");
         
-        let capBase = parseFloat(document.getElementById('tCapitalBase').value) || 0;
+        let capBase = num('tCapitalBase') || 0;
         let capActual = capBase + allGain;
         document.getElementById('dashCapVal').innerText = capActual.toFixed(2);
 
