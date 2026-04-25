@@ -53,9 +53,12 @@
         .section.active { display: block; }
         label { font-weight: bold; display: block; margin-top: 15px; font-size: 13px; }
         input, select { width: 100%; padding: 12px; margin-top: 5px; border: 1px solid var(--input-border); border-radius: 8px; background: var(--input-bg); color: var(--text-color); font-size: 15px; }
+        
         button { width: 100%; padding: 14px; border: none; border-radius: 8px; margin-top: 20px; font-size: 16px; font-weight: bold; cursor: pointer; color: white; transition: 0.2s; }
+        button:disabled { opacity: 0.6; cursor: not-allowed; }
         .btn-add { background: #28a745; }
         .btn-save { background: #6c757d; }
+        .btn-sync { background: #007bff; margin-top: 0; margin-bottom: 20px; }
 
         .card-op { background: var(--card-bg); padding: 12px; border-radius: 10px; margin-bottom: 10px; border-left: 5px solid var(--green-text); display: flex; justify-content: space-between; align-items: center; }
         .card-op.neg { border-left-color: var(--red-text); }
@@ -64,7 +67,6 @@
         .op-monto { font-size: 12px; opacity: 0.8; margin-top: 3px; }
         .op-gain { font-weight: bold; font-size: 16px; text-align: right; }
 
-        /* Estilos integrados para el Manual */
         details { background: var(--card-bg); border-radius: 10px; margin-bottom: 12px; border: 1px solid var(--input-border); overflow: hidden; }
         details summary { background: var(--menu-bg); color: var(--text-color); font-weight: bold; cursor: pointer; padding: 15px; outline: none; list-style: none; display: flex; justify-content: space-between; align-items: center; transition: 0.3s; font-size: 13px; }
         details[open] summary { background: var(--brand-color); color: #000; }
@@ -121,7 +123,7 @@
 
         <label>Monto Principal ($/USDT):</label>
         <input type="number" id="opMonto" placeholder="Ej: 100" inputmode="decimal">
-        <p style="font-size: 10px; opacity: 0.6; margin-top: 5px;">*Si es Arbitraje, anota la cantidad de USDT inicial con la que arrancas la vuelta.</p>
+        <p style="font-size: 10px; opacity: 0.6; margin-top: 5px;">*Si es Arbitraje, anota la cantidad de USDT o Dólares base de la vuelta.</p>
         
         <button class="btn-add" onclick="registrar()">Registrar en Libro</button>
     </div>
@@ -154,10 +156,19 @@
     </div>
 
     <div id="sec-tasas" class="section">
-        <h3 style="text-align: center; margin-bottom: 10px;">Configuración de Tasas</h3>
+        <h3 style="text-align: center; margin-bottom: 15px;">Configuración de Tasas</h3>
         
+        <button id="btnSync" class="btn-sync" onclick="sincronizarTasasAPI()">🔄 Sincronizar BCV y Binance Automático</button>
+        <p style="font-size: 10px; text-align:center; opacity:0.6; margin-top:-10px; margin-bottom:15px;">Se conecta a internet para extraer las tasas oficiales del día.</p>
+
         <label>🟢 Tasa Binance USDT (Bs/USDT):</label>
         <input type="number" id="tUsdtBs" placeholder="Ej: 45.0" step="0.1" inputmode="decimal">
+
+        <label>🏦 Tasas BCV Generales (Dólar / Euro):</label>
+        <div style="display:flex; gap:10px;">
+            <input type="number" id="tBcvUsd" placeholder="USD" step="0.01" inputmode="decimal">
+            <input type="number" id="tBcvEur" placeholder="EUR" step="0.01" inputmode="decimal">
+        </div>
 
         <label>🏦 Tasa Dólar Electrónico BCV (Bs/$):</label>
         <input type="number" id="tDolarElecBs" placeholder="Ej: 36.5" step="0.01" inputmode="decimal">
@@ -191,13 +202,7 @@
         <label>🇺🇸 Tasa Zelle ⮕ Efectivo (% Comisión):</label>
         <input type="number" id="tZelleEf" placeholder="Ej: 3" step="0.1" inputmode="decimal">
 
-        <label>🏦 Tasas BCV Generales (Dólar / Euro):</label>
-        <div style="display:flex; gap:10px;">
-            <input type="number" id="tBcvUsd" placeholder="USD" step="0.01" inputmode="decimal">
-            <input type="number" id="tBcvEur" placeholder="EUR" step="0.01" inputmode="decimal">
-        </div>
-
-        <button class="btn-save" onclick="saveTasas()">Guardar Tasas</button>
+        <button class="btn-save" onclick="saveTasas()">Guardar Tasas Manual</button>
     </div>
 
     <div id="sec-manual" class="section">
@@ -206,42 +211,31 @@
         <details>
             <summary>1️⃣ PRIMER PASO: PONER LAS TASAS AL DÍA</summary>
             <div class="manual-content">
-                Mano, esto es lo primero que tienes que hacer apenas te tomes el café en la mañana. Si las tasas están viejas, vas a terminar regalando el trabajo o cobrando de más y espantando al cliente.<br><br>
-                Vas a la pestaña de <b>Tasas</b> y pones los montos reales. Cuando termines, dale a <b>"Guardar"</b>. La app se queda con eso grabado y así todos los cálculos que hagas en el día salen exactos.
+                Mano, esto es lo primero que tienes que hacer apenas te tomes el café en la mañana. Si las tasas están viejas, vas a terminar regalando el trabajo o cobrando de más.<br><br>
+                Ve a la pestaña <b>Tasas</b>. Ahora puedes simplemente presionar el botón azul <b>"Sincronizar BCV y Binance Automático"</b> para que la app busque las tasas en internet por ti. Las demás comisiones y tasas de calle sí debes ajustarlas manualmente y darle a <b>"Guardar"</b>.
             </div>
         </details>
 
         <details>
             <summary>2️⃣ ENTENDIENDO LOS TIPOS DE CAMBIO</summary>
             <div class="manual-content">
-                Aquí no hay pérdida, elegimos el que toque según lo que pida el cliente:<br><br>
-                • <b>Zelle a USDT:</b> El cliente te transfiere por Zelle y tú le recargas su Binance. Aquí ganas por la comisión que pusiste en tasas.<br>
-                • <b>Zelle a Bolívares:</b> Recibes los verdes en el imperio y pagas en soberanos aquí.<br>
-                • <b>Arbitraje Efectivo:</b> Compras dólares en efectivo baratos en la calle, los depositas, los vuelves USDT y los vendes por bolívares.<br>
-                • <b>Arbitraje BCV:</b> Vendes tus USDT por Bs, compras dólares electrónicos en el banco y los regresas a Binance. La app saca la cuenta restando las comisiones del banco y de Binance para darte tu ganancia neta en USDT.
+                • <b>Zelle a USDT / Efectivo:</b> El cliente transfiere y tú entregas el cambio. Ganas la comisión estipulada.<br>
+                • <b>Arbitraje Efectivo:</b> Compras dólares baratos en la calle, los depositas, los vuelves USDT y los vendes por bolívares.<br>
+                • <b>Arbitraje BCV:</b> Vendes USDT por Bs, compras dólares electrónicos en el banco y los regresas a Binance. La app resta las comisiones del banco y Binance para darte tu ganancia neta.
             </div>
         </details>
 
         <details>
-            <summary>3️⃣ CÓMO LLEVAR EL LIBRO SIN ENROLLARSE</summary>
+            <summary>3️⃣ CÓMO LLEVAR EL LIBRO</summary>
             <div class="manual-content">
-                Cada vez que hagas un negocio, regístralo de una vez en la pestaña <b>Operar</b>. Pon el nombre del cliente para que no se te olvide quién fue y el monto.<br><br>
-                En la pantalla principal, verás la "Utilidad del Día". Lo mejor es que a las 12 de la noche la app guarda todo sola y arranca en cero al día siguiente.
+                Cada vez que hagas un negocio, regístralo en la pestaña <b>Operar</b>. En la pantalla principal verás la "Utilidad del Día". A las 12 de la noche la app guarda todo sola y arranca en cero al día siguiente.
             </div>
         </details>
 
         <details>
-            <summary>4️⃣ EL TRUCO PARA VENDER MÁS (CALC)</summary>
+            <summary>4️⃣ CALCULADORA DE PRECIOS</summary>
             <div class="manual-content">
-                La pestaña <b>Calc</b> es para convencer al cliente indeciso. Si alguien va a pagar algo en un negocio que cuesta dólares de etiqueta, tú le sacas la cuenta ahí mismo.<br><br>
-                La app le muestra cuántos USDT te tiene que pasar y cuánto se está ahorrando por no usar el efectivo o la tarjeta del banco. Es la herramienta perfecta para cerrar el trato rápido.
-            </div>
-        </details>
-
-        <details>
-            <summary>5️⃣ REVISAR LO QUE SE GANÓ AYER</summary>
-            <div class="manual-content">
-                Si quieres saber cómo te fue en la semana, ve al filtro de fechas que está arriba en tu Libro. Ahí vas a ver una lista de los días pasados con el total que se hizo y las operaciones que tiraste.
+                Para convencer al cliente indeciso que va a pagar en Bs a tasa BCV. Le sacas la cuenta de cuántos USDT necesita enviarte y le demuestras el ahorro de usar criptomonedas.
             </div>
         </details>
 
@@ -280,6 +274,50 @@
         }
     }
 
+    // AUTOMATIZACIÓN DE TASAS (NUEVO)
+    async function sincronizarTasasAPI() {
+        const btn = document.getElementById('btnSync');
+        const originalText = btn.innerText;
+        btn.innerText = "Sincronizando... ⏳";
+        btn.disabled = true;
+
+        try {
+            // Extraer de API pública pyDolarVenezuela
+            let resBcv = await fetch('https://pydolarvenezuela-api.vercel.app/api/v1/dollar?page=bcv');
+            let dataBcv = await resBcv.json();
+
+            let resBin = await fetch('https://pydolarvenezuela-api.vercel.app/api/v1/dollar?page=binance');
+            let dataBin = await resBin.json();
+
+            if (dataBcv && dataBcv.monitors) {
+                if (dataBcv.monitors.usd) {
+                    document.getElementById('tBcvUsd').value = dataBcv.monitors.usd.price;
+                    document.getElementById('tDolarElecBs').value = dataBcv.monitors.usd.price;
+                    // También se actualiza la calculadora
+                    document.getElementById('calcBcv').value = dataBcv.monitors.usd.price;
+                }
+                if (dataBcv.monitors.eur) {
+                    document.getElementById('tBcvEur').value = dataBcv.monitors.eur.price;
+                }
+            }
+
+            if (dataBin && dataBin.monitors && dataBin.monitors.binance) {
+                document.getElementById('tUsdtBs').value = dataBin.monitors.binance.price;
+                document.getElementById('calcBin').value = dataBin.monitors.binance.price;
+            }
+
+            saveTasas(true); // Guardar silenciosamente
+            alert("✅ Tasas sincronizadas y guardadas con éxito.");
+
+        } catch (error) {
+            console.error("Error al obtener tasas:", error);
+            alert("❌ Hubo un error de conexión con el servidor. Verifica tu internet o ingresa las tasas de forma manual.");
+        }
+
+        btn.innerText = originalText;
+        btn.disabled = false;
+    }
+
     function loadTasas() {
         const fields = [
             'tEfBs', 'tUsdtBs', 'tZelleCop', 'tZelleEf', 'tBcvUsd', 
@@ -289,22 +327,33 @@
         fields.forEach(f => {
             if(localStorage.getItem(f)) document.getElementById(f).value = localStorage.getItem(f);
         });
+        
+        // Rellenar calculadora también si existen
+        if(localStorage.getItem('tBcvUsd')) document.getElementById('calcBcv').value = localStorage.getItem('tBcvUsd');
+        if(localStorage.getItem('tUsdtBs')) document.getElementById('calcBin').value = localStorage.getItem('tUsdtBs');
     }
 
-    function saveTasas() {
+    function saveTasas(silent = false) {
         const fields = [
             'tEfBs', 'tUsdtBs', 'tZelleCop', 'tZelleEf', 'tBcvUsd', 
             'tBcvEur', 'tZelleBs', 'tBsEfCalle', 'tEfUsdtCom', 
             'tDolarElecBs', 'comBancoElec', 'comBinanceElec'
         ];
         fields.forEach(f => localStorage.setItem(f, document.getElementById(f).value));
-        alert("Tasas Guardadas ✅");
+        
+        if(!silent) alert("Tasas Guardadas ✅");
     }
 
     function updateCalcLabels() {
         let sym = document.getElementById('calcMoneda').value === 'USD' ? '$' : '€';
         document.getElementById('refSym').innerText = sym;
         document.getElementById('refSym2').innerText = sym;
+        
+        if (sym === '€' && localStorage.getItem('tBcvEur')) {
+            document.getElementById('calcBcv').value = localStorage.getItem('tBcvEur');
+        } else if (sym === '$' && localStorage.getItem('tBcvUsd')) {
+            document.getElementById('calcBcv').value = localStorage.getItem('tBcvUsd');
+        }
     }
 
     function execCalc() {
@@ -354,7 +403,6 @@
             
             gain = (bsRecuperados - bsInvertidos) / tUsdt;
         } else if (tipo === 'usdt_bcv_usdt') {
-            // Lógica del Arbitraje Dólar Electrónico BCV
             let tDolarElecBs = parseFloat(localStorage.getItem('tDolarElecBs')) || 1;
             let comBancoElec = parseFloat(localStorage.getItem('comBancoElec')) || 0;
             let comBinanceElec = parseFloat(localStorage.getItem('comBinanceElec')) || 0;
@@ -423,7 +471,6 @@
         });
 
         fechaSeleccionada = selectFecha.value;
-
         document.getElementById('tituloDashboard').innerText = (fechaSeleccionada === stringHoy) ? "Utilidad del Día" : "Utilidad de la Fecha";
 
         let opsFiltradas = ops.filter(o => o.date === fechaSeleccionada);
@@ -464,6 +511,5 @@
         }
     }
 </script>
-    <script defer src="/_vercel/insights/script.js"></script>
 </body>
 </html>
