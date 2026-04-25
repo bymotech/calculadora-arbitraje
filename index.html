@@ -115,12 +115,13 @@
             <option value="zelle_bs">🇺🇸 Zelle ⮕ 🇻🇪 Bolívares</option>
             <option value="ef_usdt">💵 Efectivo ⮕ 🟢 USDT</option>
             <option value="bs_ef">🇻🇪 Bolívares ⮕ 💵 Efectivo (Venta)</option>
-            <option value="ciclo_calle">🔄 Arbitraje (El Ruleteo): Bs ⮕ Efec ⮕ USDT ⮕ Bs</option>
+            <option value="ciclo_calle">🔄 Arbitraje Efectivo: Bs ⮕ Efec ⮕ USDT ⮕ Bs</option>
+            <option value="usdt_bcv_usdt">🏦 Arbitraje BCV: USDT ⮕ Bs ⮕ USD BCV ⮕ USDT</option>
         </select>
 
         <label>Monto Principal ($/USDT):</label>
         <input type="number" id="opMonto" placeholder="Ej: 100" inputmode="decimal">
-        <p style="font-size: 10px; opacity: 0.6; margin-top: 5px;">*Si es Arbitraje, anota la cantidad de dólares físicos comprados.</p>
+        <p style="font-size: 10px; opacity: 0.6; margin-top: 5px;">*Si es Arbitraje, anota la cantidad de USDT inicial con la que arrancas la vuelta.</p>
         
         <button class="btn-add" onclick="registrar()">Registrar en Libro</button>
     </div>
@@ -158,6 +159,20 @@
         <label>🟢 Tasa Binance USDT (Bs/USDT):</label>
         <input type="number" id="tUsdtBs" placeholder="Ej: 45.0" step="0.1" inputmode="decimal">
 
+        <label>🏦 Tasa Dólar Electrónico BCV (Bs/$):</label>
+        <input type="number" id="tDolarElecBs" placeholder="Ej: 36.5" step="0.01" inputmode="decimal">
+
+        <div style="display:flex; gap:10px;">
+            <div style="flex:1;">
+                <label>🏦 Com. Banco (%):</label>
+                <input type="number" id="comBancoElec" placeholder="Ej: 1" step="0.1" inputmode="decimal">
+            </div>
+            <div style="flex:1;">
+                <label>🟡 Com. Binance (%):</label>
+                <input type="number" id="comBinanceElec" placeholder="Ej: 1" step="0.1" inputmode="decimal">
+            </div>
+        </div>
+
         <label>🇺🇸 Tasa Zelle ⮕ Bs Ref:</label>
         <input type="number" id="tZelleBs" placeholder="Ej: 44.5" step="0.1" inputmode="decimal">
 
@@ -176,7 +191,7 @@
         <label>🇺🇸 Tasa Zelle ⮕ Efectivo (% Comisión):</label>
         <input type="number" id="tZelleEf" placeholder="Ej: 3" step="0.1" inputmode="decimal">
 
-        <label>🏦 Tasas BCV (Dólar / Euro):</label>
+        <label>🏦 Tasas BCV Generales (Dólar / Euro):</label>
         <div style="display:flex; gap:10px;">
             <input type="number" id="tBcvUsd" placeholder="USD" step="0.01" inputmode="decimal">
             <input type="number" id="tBcvEur" placeholder="EUR" step="0.01" inputmode="decimal">
@@ -192,7 +207,7 @@
             <summary>1️⃣ PRIMER PASO: PONER LAS TASAS AL DÍA</summary>
             <div class="manual-content">
                 Mano, esto es lo primero que tienes que hacer apenas te tomes el café en la mañana. Si las tasas están viejas, vas a terminar regalando el trabajo o cobrando de más y espantando al cliente.<br><br>
-                Vas a la pestaña de <b>Tasas</b> y pones los montos reales: cuánto está pagando Binance (P2P), a cuánto está el BCV (Dólar y Euro) y qué comisión vas a cobrar por los Zelle o el Efectivo. Cuando termines, dale a <b>"Guardar"</b>. La app se queda con eso grabado y así todos los cálculos que hagas en el día salen exactos.
+                Vas a la pestaña de <b>Tasas</b> y pones los montos reales. Cuando termines, dale a <b>"Guardar"</b>. La app se queda con eso grabado y así todos los cálculos que hagas en el día salen exactos.
             </div>
         </details>
 
@@ -201,8 +216,9 @@
             <div class="manual-content">
                 Aquí no hay pérdida, elegimos el que toque según lo que pida el cliente:<br><br>
                 • <b>Zelle a USDT:</b> El cliente te transfiere por Zelle y tú le recargas su Binance. Aquí ganas por la comisión que pusiste en tasas.<br>
-                • <b>Zelle a Bolívares:</b> Recibes los verdes en el imperio y pagas en soberanos aquí. La ganancia es la diferencia entre el precio del Zelle y el precio de Binance.<br>
-                • <b>Arbitraje (El Ruleteo):</b> Este es el fuerte. Cuando compras dólares en efectivo baratos en la calle, los depositas, los vuelves USDT y luego los vendes por bolívares para volver a empezar. La app te dice cuánto te quedó de ganancia neta en USDT después de dar toda la vuelta.
+                • <b>Zelle a Bolívares:</b> Recibes los verdes en el imperio y pagas en soberanos aquí.<br>
+                • <b>Arbitraje Efectivo:</b> Compras dólares en efectivo baratos en la calle, los depositas, los vuelves USDT y los vendes por bolívares.<br>
+                • <b>Arbitraje BCV:</b> Vendes tus USDT por Bs, compras dólares electrónicos en el banco y los regresas a Binance. La app saca la cuenta restando las comisiones del banco y de Binance para darte tu ganancia neta en USDT.
             </div>
         </details>
 
@@ -210,22 +226,22 @@
             <summary>3️⃣ CÓMO LLEVAR EL LIBRO SIN ENROLLARSE</summary>
             <div class="manual-content">
                 Cada vez que hagas un negocio, regístralo de una vez en la pestaña <b>Operar</b>. Pon el nombre del cliente para que no se te olvide quién fue y el monto.<br><br>
-                En la pantalla principal (el <b>Libro</b>), verás la "Utilidad del Día". Eso es lo que llevas en el bolsillo ganado hoy. Si el número está en verde, vamos bien; si sale algo en rojo, mosca que perdiste plata en ese movimiento. Lo mejor es que a las 12 de la noche la app guarda todo sola y arranca en cero al día siguiente.
+                En la pantalla principal, verás la "Utilidad del Día". Lo mejor es que a las 12 de la noche la app guarda todo sola y arranca en cero al día siguiente.
             </div>
         </details>
 
         <details>
             <summary>4️⃣ EL TRUCO PARA VENDER MÁS (CALC)</summary>
             <div class="manual-content">
-                La pestaña <b>Calc</b> es para convencer al cliente indeciso. Si alguien va a pagar algo en un negocio que cuesta dólares de etiqueta (tasa BCV), tú le sacas la cuenta ahí mismo.<br><br>
-                La app le muestra cuántos USDT te tiene que pasar y, lo más importante, le dice cuánto se está ahorrando por no usar el efectivo o la tarjeta del banco. Es la herramienta perfecta para cerrar el trato rápido.
+                La pestaña <b>Calc</b> es para convencer al cliente indeciso. Si alguien va a pagar algo en un negocio que cuesta dólares de etiqueta, tú le sacas la cuenta ahí mismo.<br><br>
+                La app le muestra cuántos USDT te tiene que pasar y cuánto se está ahorrando por no usar el efectivo o la tarjeta del banco. Es la herramienta perfecta para cerrar el trato rápido.
             </div>
         </details>
 
         <details>
             <summary>5️⃣ REVISAR LO QUE SE GANÓ AYER</summary>
             <div class="manual-content">
-                Si quieres saber cómo te fue en la semana, ve al filtro de fechas que está arriba en tu Libro. Ahí vas a ver una lista de los días pasados con el total que se hizo y las operaciones que tiraste. Así llevas tu contabilidad clarita sin tener que andar anotando en cuadernos que después se pierden.
+                Si quieres saber cómo te fue en la semana, ve al filtro de fechas que está arriba en tu Libro. Ahí vas a ver una lista de los días pasados con el total que se hizo y las operaciones que tiraste.
             </div>
         </details>
 
@@ -265,14 +281,22 @@
     }
 
     function loadTasas() {
-        const fields = ['tEfBs', 'tUsdtBs', 'tZelleCop', 'tZelleEf', 'tBcvUsd', 'tBcvEur', 'tZelleBs', 'tBsEfCalle', 'tEfUsdtCom'];
+        const fields = [
+            'tEfBs', 'tUsdtBs', 'tZelleCop', 'tZelleEf', 'tBcvUsd', 
+            'tBcvEur', 'tZelleBs', 'tBsEfCalle', 'tEfUsdtCom', 
+            'tDolarElecBs', 'comBancoElec', 'comBinanceElec'
+        ];
         fields.forEach(f => {
             if(localStorage.getItem(f)) document.getElementById(f).value = localStorage.getItem(f);
         });
     }
 
     function saveTasas() {
-        const fields = ['tEfBs', 'tUsdtBs', 'tZelleCop', 'tZelleEf', 'tBcvUsd', 'tBcvEur', 'tZelleBs', 'tBsEfCalle', 'tEfUsdtCom'];
+        const fields = [
+            'tEfBs', 'tUsdtBs', 'tZelleCop', 'tZelleEf', 'tBcvUsd', 
+            'tBcvEur', 'tZelleBs', 'tBsEfCalle', 'tEfUsdtCom', 
+            'tDolarElecBs', 'comBancoElec', 'comBinanceElec'
+        ];
         fields.forEach(f => localStorage.setItem(f, document.getElementById(f).value));
         alert("Tasas Guardadas ✅");
     }
@@ -329,6 +353,18 @@
             let bsRecuperados = usdtNetoRecibido * tUsdt;
             
             gain = (bsRecuperados - bsInvertidos) / tUsdt;
+        } else if (tipo === 'usdt_bcv_usdt') {
+            // Lógica del Arbitraje Dólar Electrónico BCV
+            let tDolarElecBs = parseFloat(localStorage.getItem('tDolarElecBs')) || 1;
+            let comBancoElec = parseFloat(localStorage.getItem('comBancoElec')) || 0;
+            let comBinanceElec = parseFloat(localStorage.getItem('comBinanceElec')) || 0;
+
+            let bsObtenidos = monto * tUsdt; 
+            let costoPorUsdBanco = tDolarElecBs * (1 + (comBancoElec / 100));
+            let usdBancoComprados = bsObtenidos / costoPorUsdBanco;
+            let usdtFinal = usdBancoComprados * (1 - (comBinanceElec / 100));
+
+            gain = usdtFinal - monto;
         }
 
         let fechaHoy = new Date();
