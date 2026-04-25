@@ -3,9 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Arbitraje PRO - ByMO Tech</title>
+    <title>Arbitraje PRO - ByMO Technology</title>
     <style>
-        /* Variables para el Modo Claro/Oscuro Automático */
         :root {
             --bg-color: #f4f4f9;
             --container-bg: #ffffff;
@@ -33,21 +32,43 @@
         }
 
         body { font-family: Arial, sans-serif; padding: 20px; background-color: var(--bg-color); color: var(--text-color); transition: background 0.3s; }
-        .container { max-width: 400px; margin: 0 auto; background: var(--container-bg); padding: 20px; border-radius: 10px; box-shadow: 0 4px 8px rgba(0,0,0,0.2); }
-        h2 { text-align: center; color: var(--text-color); font-size: 22px; margin-bottom: 15px;}
+        .container { max-width: 400px; margin: 0 auto; background: var(--container-bg); padding: 20px; border-radius: 10px; box-shadow: 0 4px 8px rgba(0,0,0,0.2); position: relative; }
+        
+        .logo-container { text-align: center; margin-bottom: 10px; }
+        .logo-svg { width: 60px; height: 60px; fill: #ffcc00; filter: drop-shadow(0px 0px 2px rgba(0,0,0,0.5)); }
+
+        h2 { text-align: center; color: var(--text-color); font-size: 20px; margin-bottom: 15px; margin-top: 0; }
         label { font-weight: bold; display: block; margin-top: 12px; font-size: 14px;}
         input, select { width: 100%; padding: 10px; margin-top: 5px; border: 1px solid var(--input-border); border-radius: 5px; box-sizing: border-box; font-size: 16px; background-color: var(--input-bg); color: var(--text-color); }
-        button { width: 100%; padding: 12px; background-color: #28a745; color: white; border: none; border-radius: 5px; margin-top: 20px; font-size: 16px; font-weight: bold; cursor: pointer; }
+        
+        .btn-principal { width: 100%; padding: 12px; background-color: #28a745; color: white; border: none; border-radius: 5px; margin-top: 20px; font-size: 16px; font-weight: bold; cursor: pointer; }
+        .btn-whatsapp { width: 100%; padding: 10px; background-color: #25d366; color: white; border: none; border-radius: 5px; margin-top: 10px; font-size: 14px; font-weight: bold; cursor: pointer; }
+        
         .result { margin-top: 20px; padding: 15px; background: var(--result-bg); border-radius: 5px; text-align: center; font-size: 18px; }
         .seccion { display: none; margin-top: 15px; }
         .activa { display: block; }
-        .menu-principal { background-color: var(--menu-bg); font-weight: bold; }
+        .menu-principal { background-color: var(--menu-bg); font-weight: bold; margin-bottom: 10px; }
+        
+        .footer-tech { text-align: center; font-size: 10px; color: var(--text-color); opacity: 0.5; margin-top: 25px; font-style: italic; }
         .texto-verde { color: var(--green-text); font-weight: bold; }
         .texto-rojo { color: var(--red-text); font-weight: bold; }
     </style>
 </head>
 <body>
     <div class="container">
+        <div class="logo-container">
+            <svg class="logo-svg" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+                <rect x="42" y="20" width="6" height="60" rx="3" />
+                <rect x="25" y="35" width="6" height="30" rx="3" />
+                <rect x="59" y="35" width="6" height="30" rx="3" />
+                <rect x="76" y="45" width="6" height="10" rx="3" />
+                <rect x="9" y="45" width="6" height="10" rx="3" />
+                <circle cx="50" cy="40" r="5" />
+                <circle cx="50" cy="60" r="5" />
+                <path d="M50 40 L65 40 L65 55 L50 55" fill="none" stroke="#ffcc00" stroke-width="5" stroke-linecap="round"/>
+            </svg>
+        </div>
+
         <h2>Calculadora de Arbitraje</h2>
         
         <select id="menuTipo" class="menu-principal" onchange="cambiarMenu()">
@@ -58,85 +79,88 @@
         </select>
 
         <div id="sec-producto" class="seccion activa">
-            <label>Precio Producto en Estante ($ BCV):</label>
+            <label>Precio Producto ($ BCV):</label>
             <input type="number" id="prodUsd" value="10.00" step="0.01" inputmode="decimal">
-            <label>Tasa BCV Actual (Bs/$):</label>
+            <label>Tasa BCV (Bs/$):</label>
             <input type="number" id="tasaBcv" value="483.00" step="0.01" inputmode="decimal">
-            <label>Tasa Binance USDT (Bs/USDT):</label>
+            <label>Tasa Binance (Bs/USDT):</label>
             <input type="number" id="tasaBin" value="628.00" step="0.01" inputmode="decimal">
-            <button onclick="calcularProducto()">Calcular Costo en USDT</button>
+            <button class="btn-principal" onclick="calcularProducto()">Calcular</button>
             <div class="result" id="resProd">Resultado: 0 USDT</div>
+            <button class="btn-whatsapp" onclick="compartirWp('producto')">Copiar para WhatsApp</button>
         </div>
 
         <div id="sec-banco" class="seccion">
             <label>Precio Venta USDT (Bs):</label>
             <input type="number" id="precioUsdt1" value="0.00" step="0.01" inputmode="decimal">
-            <label>Precio Compra USD Banco (Bs):</label>
+            <label>Precio Compra Banco (Bs):</label>
             <input type="number" id="precioBcv1" value="0.00" step="0.01" inputmode="decimal">
             <label>Comisión Banco (%):</label>
             <input type="number" id="comBanco" value="0.0" step="0.1" inputmode="decimal">
             <label>Comisión Binance (%):</label>
             <input type="number" id="comBinance" value="0.0" step="0.1" inputmode="decimal">
-            <button onclick="calcularBanco()">Calcular Rentabilidad</button>
+            <button class="btn-principal" onclick="calcularBanco()">Calcular</button>
             <div class="result" id="resBanco">Resultado: 0%</div>
+            <button class="btn-whatsapp" onclick="compartirWp('banco')">Copiar para WhatsApp</button>
         </div>
 
         <div id="sec-efectivo" class="seccion">
-            <label>¿Qué vas a hacer?</label>
+            <label>Operación:</label>
             <select id="tipoCambioEf">
-                <option value="usdt_a_efectivo">USDT -> Efectivo -> Vender</option>
-                <option value="efectivo_a_usdt">Efectivo -> USDT -> Vender</option>
+                <option value="usdt_a_efectivo">USDT -> Efectivo</option>
+                <option value="efectivo_a_usdt">Efectivo -> USDT</option>
             </select>
-            <label>Precio USDT Promedio (Bs):</label>
+            <label>Precio USDT (Bs):</label>
             <input type="number" id="precioUsdt2" value="0.00" step="0.01" inputmode="decimal">
-            <label>Precio Dólar Efectivo (Bs):</label>
+            <label>Precio Efectivo (Bs):</label>
             <input type="number" id="precioEf" value="0.00" step="0.01" inputmode="decimal">
-            <label>Comisión del Cambio (%):</label>
+            <label>Comisión Cambio (%):</label>
             <input type="number" id="comCambio" value="0.0" step="0.1" inputmode="decimal">
-            <button onclick="calcularEfectivo()">Calcular Rentabilidad</button>
+            <button class="btn-principal" onclick="calcularEfectivo()">Calcular</button>
             <div class="result" id="resEfectivo">Resultado: 0%</div>
+            <button class="btn-whatsapp" onclick="compartirWp('efectivo')">Copiar para WhatsApp</button>
         </div>
 
         <div id="sec-cop" class="seccion">
             <label>Monto Zelle ($):</label>
             <input type="number" id="montoZelle" value="0.00" step="1" inputmode="decimal">
-            <label>Tasa Zelle a Pesos (COP):</label>
+            <label>Tasa Zelle -> COP:</label>
             <input type="number" id="tasaZelleCop" value="0" step="1" inputmode="decimal">
-            <label>Tasa Pesos a USDT (COP):</label>
+            <label>Tasa COP -> USDT:</label>
             <input type="number" id="tasaCopUsdt" value="0" step="1" inputmode="decimal">
-            <label>Comisión (Zelle -> COP):</label>
+            <label>Comisión:</label>
             <select id="tipoComisionCop">
-                <option value="fija">Monto Fijo ($)</option>
+                <option value="fija">Fija ($)</option>
                 <option value="porcentaje">Porcentaje (%)</option>
             </select>
             <input type="number" id="valorComisionCop" value="0.0" step="0.1" inputmode="decimal">
-            <button onclick="calcularCop()">Calcular Rentabilidad</button>
+            <button class="btn-principal" onclick="calcularCop()">Calcular</button>
             <div class="result" id="resCop">Resultado: 0%</div>
+            <button class="btn-whatsapp" onclick="compartirWp('zelle_cop')">Copiar para WhatsApp</button>
         </div>
+
+        <div class="footer-tech">desarrollado por Bymo Technology</div>
     </div>
 
     <script>
         function cambiarMenu() {
-            document.getElementById('sec-producto').classList.remove('activa');
-            document.getElementById('sec-banco').classList.remove('activa');
-            document.getElementById('sec-efectivo').classList.remove('activa');
-            document.getElementById('sec-cop').classList.remove('activa');
-            
-            let seleccion = document.getElementById('menuTipo').value;
-            
-            if(seleccion === 'producto') {
-                document.getElementById('sec-producto').classList.add('activa');
-            } else if (seleccion === 'banco') {
-                document.getElementById('sec-banco').classList.add('activa');
-            } else if (seleccion === 'efectivo') {
-                document.getElementById('sec-efectivo').classList.add('activa');
-            } else if (seleccion === 'zelle_cop') {
-                document.getElementById('sec-cop').classList.add('activa');
-            }
+            document.querySelectorAll('.seccion').forEach(s => s.classList.remove('activa'));
+            let sel = document.getElementById('menuTipo').value;
+            document.getElementById('sec-' + (sel === 'zelle_cop' ? 'cop' : sel)).classList.add('activa');
         }
 
-        function getColorClass(valor) {
-            return valor >= 0 ? "texto-verde" : "texto-rojo";
+        function getColorClass(valor) { return valor >= 0 ? "texto-verde" : "texto-rojo"; }
+
+        function calcularProducto() {
+            let pU = parseFloat(document.getElementById('prodUsd').value) || 0;
+            let tB = parseFloat(document.getElementById('tasaBcv').value) || 0;
+            let tI = parseFloat(document.getElementById('tasaBin').value) || 0;
+            let costoBs = pU * tB;
+            let usdtNec = tI > 0 ? (costoBs / tI) : 0;
+            let ahorro = tI > 0 ? ((tI - tB) / tI) * 100 : 0;
+            let resHtml = "Necesitas: <b>" + usdtNec.toFixed(2) + " USDT</b><br><small>Equivale a: " + costoBs.toFixed(2) + " Bs";
+            if (ahorro !== 0) resHtml += "<br>Ahorro: <span class='" + getColorClass(ahorro) + "'>" + Math.abs(ahorro).toFixed(2) + "%</span>";
+            document.getElementById('resProd').innerHTML = resHtml + "</small>";
         }
 
         function calcularBanco() {
@@ -173,21 +197,27 @@
             document.getElementById('resCop').innerHTML = "Rentabilidad: <span class='" + getColorClass(rent) + "'>" + rent.toFixed(2) + "%</span>";
         }
 
-        function calcularProducto() {
-            let pU = parseFloat(document.getElementById('prodUsd').value) || 0;
-            let tB = parseFloat(document.getElementById('tasaBcv').value) || 0;
-            let tI = parseFloat(document.getElementById('tasaBin').value) || 0;
-            let costoBs = pU * tB;
-            let usdtNec = tI > 0 ? (costoBs / tI) : 0;
-            let ahorro = tI > 0 ? ((tI - tB) / tI) * 100 : 0;
-            
-            let resHtml = "Necesitas cambiar: <b>" + usdtNec.toFixed(2) + " USDT</b><br><small>Equivale a: " + costoBs.toFixed(2) + " Bs";
-            if (ahorro !== 0) {
-                resHtml += "<br>Diferencial: <span class='" + getColorClass(ahorro) + "'>" + Math.abs(ahorro).toFixed(2) + "%</span>";
+        function compartirWp(modulo) {
+            let msg = "*ByMO Tech - Resumen de Cálculo*\n\n";
+            if(modulo === 'producto') {
+                msg += "Producto: " + document.getElementById('prodUsd').value + " $ BCV\n";
+                msg += "Tasa BCV: " + document.getElementById('tasaBcv').value + " Bs/$\n";
+                msg += "Tasa USDT: " + document.getElementById('tasaBin').value + " Bs/USDT\n";
+                msg += "--------------------------\n";
+                msg += "Costo Final: " + document.getElementById('resProd').innerText.split('\n')[0];
+            } else if(modulo === 'banco') {
+                msg += "Operación: Banco vs USDT\n";
+                msg += "Rentabilidad: " + document.getElementById('resBanco').innerText;
+            } else if(modulo === 'efectivo') {
+                msg += "Operación: " + (document.getElementById('tipoCambioEf').value === 'usdt_a_efectivo' ? "USDT a Efectivo" : "Efectivo a USDT") + "\n";
+                msg += "Rentabilidad: " + document.getElementById('resEfectivo').innerText;
+            } else {
+                msg += "Operación: Zelle -> COP -> USDT\n";
+                msg += "Monto: " + document.getElementById('montoZelle').value + " $\n";
+                msg += "Rentabilidad: " + document.getElementById('resCop').innerText;
             }
-            resHtml += "</small>";
-            
-            document.getElementById('resProd').innerHTML = resHtml;
+            msg += "\n\n_Generado por ByMO Technology_";
+            navigator.clipboard.writeText(msg).then(() => alert("Resumen copiado. ¡Ya puedes pegarlo en WhatsApp!"));
         }
     </script>
 </body>
