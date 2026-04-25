@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Arbitraje PRO</title>
+    <style>
+        body { font-family: Arial, sans-serif; padding: 20px; background-color: #f4f4f9; }
+        .container { max-width: 400px; margin: 0 auto; background: white; padding: 20px; border-radius: 10px; box-shadow: 0 4px 8px rgba(0,0,0,0.1); }
+        h2 { text-align: center; color: #333; font-size: 22px; margin-bottom: 15px;}
+        label { font-weight: bold; display: block; margin-top: 12px; font-size: 14px;}
+        input, select { width: 100%; padding: 10px; margin-top: 5px; border: 1px solid #ccc; border-radius: 5px; box-sizing: border-box; font-size: 16px;}
+        button { width: 100%; padding: 12px; background-color: #28a745; color: white; border: none; border-radius: 5px; margin-top: 20px; font-size: 16px; font-weight: bold; cursor: pointer; }
+        .result { margin-top: 20px; padding: 15px; background: #e9ecef; border-radius: 5px; text-align: center; font-size: 18px; }
+        .seccion { display: none; margin-top: 15px; }
+        .activa { display: block; }
+        .menu-principal { background-color: #e0e0e0; font-weight: bold; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h2>Calculadora de Arbitraje</h2>
+        
+        <select id="menuTipo" class="menu-principal" onchange="cambiarMenu()">
+            <option value="producto">1. Precio Producto en USDT</option>
+            <option value="banco">2. Arbitraje: Banco vs USDT</option>
+            <option value="efectivo">3. Arbitraje: USDT vs Efectivo</option>
+            <option value="zelle_cop">4. Arbitraje: Zelle -> COP -> USDT</option>
+        </select>
+
+        <div id="sec-producto" class="seccion activa">
+            <label>Precio Producto en Estante ($ BCV):</label>
+            <input type="number" id="prodUsd" value="10.00" step="0.01">
+            <label>Tasa BCV Actual (Bs/$):</label>
+            <input type="number" id="tasaBcv" value="483.00" step="0.01">
+            <label>Tasa Binance USDT (Bs/USDT):</label>
+            <input type="number" id="tasaBin" value="628.00" step="0.01">
+            <button onclick="calcularProducto()">Calcular Costo en USDT</button>
+            <div class="result" id="resProd">Resultado: 0 USDT</div>
+        </div>
+
+        <div id="sec-banco" class="seccion">
+            <label>Precio Venta USDT (Bs):</label>
+            <input type="number" id="precioUsdt1" value="0.00" step="0.01">
+            <label>Precio Compra USD Banco (Bs):</label>
+            <input type="number" id="precioBcv1" value="0.00" step="0.01">
+            <label>Comisión Banco (%):</label>
+            <input type="number" id="comBanco" value="0.0" step="0.1">
+            <label>Comisión Binance (%):</label>
+            <input type="number" id="comBinance" value="0.0" step="0.1">
+            <button onclick="calcularBanco()">Calcular Rentabilidad</button>
+            <div class="result" id="resBanco">Resultado: 0%</div>
+        </div>
+
+        <div id="sec-efectivo" class="seccion">
+            <label>¿Qué vas a hacer?</label>
+            <select id="tipoCambioEf">
+                <option value="usdt_a_efectivo">USDT -> Efectivo -> Vender</option>
+                <option value="efectivo_a_usdt">Efectivo -> USDT -> Vender</option>
+            </select>
+            <label>Precio USDT Promedio (Bs):</label>
+            <input type="number" id="precioUsdt2" value="0.00" step="0.01">
+            <label>Precio Dólar Efectivo (Bs):</label>
+            <input type="number" id="precioEf" value="0.00" step="0.01">
+            <label>Comisión del Cambio (%):</label>
+            <input type="number" id="comCambio" value="0.0" step="0.1">
+            <button onclick="calcularEfectivo()">Calcular Rentabilidad</button>
+            <div class="result" id="resEfectivo">Resultado: 0%</div>
+        </div>
+
+        <div id="sec-cop" class="seccion">
+            <label>Monto Zelle ($):</label>
+            <input type="number" id="montoZelle" value="0.00" step="1">
+            <label>Tasa Zelle a Pesos (COP):</label>
+            <input type="number" id="tasaZelleCop" value="0" step="1">
+            <label>Tasa Pesos a USDT (COP):</label>
+            <input type="number" id="tasaCopUsdt" value="0" step="1">
+            <label>Comisión (Zelle -> COP):</label>
+            <select id="tipoComisionCop">
+                <option value="fija">Monto Fijo ($)</option>
+                <option value="porcentaje">Porcentaje (%)</option>
+            </select>
+            <input type="number" id="valorComisionCop" value="0.0" step="0.1">
+            <button onclick="calcularCop()">Calcular Rentabilidad</button>
+            <div class="result" id="resCop">Resultado: 0%</div>
+        </div>
+    </div>
+
+    <script>
+        function cambiarMenu() {
+            document.getElementById('sec-producto').classList.remove('activa');
+            document.getElementById('sec-banco').classList.remove('activa');
+            document.getElementById('sec-efectivo').classList.remove('activa');
+            document.getElementById('sec-cop').classList.remove('activa');
+            
+            let seleccion = document.getElementById('menuTipo').value;
+            
+            if(seleccion === 'producto') {
+                document.getElementById('sec-producto').classList.add('activa');
+            } else if (seleccion === 'banco') {
+                document.getElementById('sec-banco').classList.add('activa');
+            } else if (seleccion === 'efectivo') {
+                document.getElementById('sec-efectivo').classList.add('activa');
+            } else if (seleccion === 'zelle_cop') {
+                document.getElementById('sec-cop').classList.add('activa');
+            }
+        }
+
+        function calcularBanco() {
+            let pU = parseFloat(document.getElementById('precioUsdt1').value) || 0;
+            let pB = parseFloat(document.getElementById('precioBcv1').value) || 0;
+            let cB = parseFloat(document.getElementById('comBanco').value) || 0;
+            let cBin = parseFloat(document.getElementById('comBinance').value) || 0;
+            let costo = (100 * pB) * (1 + (cB / 100));
+            let rec = 100 * (1 - (cBin / 100)) * pU;
+            let rent = costo > 0 ? ((rec - costo) / costo) * 100 : 0;
+            document.getElementById('resBanco').innerHTML = "Rent: <b>" + rent.toFixed(2) + "%</b>";
+        }
+
+        function calcularEfectivo() {
+            let t = document.getElementById('tipoCambioEf').value;
+            let pU = parseFloat(document.getElementById('precioUsdt2').value) || 0;
+            let pE = parseFloat(document.getElementById('precioEf').value) || 0;
+            let c = parseFloat(document.getElementById('comCambio').value) || 0;
+            let costo = (t === "usdt_a_efectivo") ? (100 * pU) : (100 * pE);
+            let rec = (t === "usdt_a_efectivo") ? (100 * (1 - (c/100)) * pE) : (100 * (1 - (c/100)) * pU);
+            let rent = costo > 0 ? ((rec - costo) / costo) * 100 : 0;
+            document.getElementById('resEfectivo').innerHTML = "Rent: <b>" + rent.toFixed(2) + "%</b>";
+        }
+
+        function calcularCop() {
+            let cap = parseFloat(document.getElementById('montoZelle').value) || 0;
+            let tZC = parseFloat(document.getElementById('tasaZelleCop').value) || 0;
+            let tCU = parseFloat(document.getElementById('tasaCopUsdt').value) || 0;
+            let tipo = document.getElementById('tipoComisionCop').value;
+            let val = parseFloat(document.getElementById('valorComisionCop').value) || 0;
+            let neto = tipo === 'fija' ? (cap - val) : (cap * (1 - (val/100)));
+            let usdtF = tCU > 0 ? (neto * tZC / tCU) : 0;
+            let rent = cap > 0 ? ((usdtF - cap) / cap) * 100 : 0;
+            document.getElementById('resCop').innerHTML = "Rent: <b>" + rent.toFixed(2) + "%</b>";
+        }
+
+        function calcularProducto() {
+            let pU = parseFloat(document.getElementById('prodUsd').value) || 0;
+            let tB = parseFloat(document.getElementById('tasaBcv').value) || 0;
+            let tI = parseFloat(document.getElementById('tasaBin').value) || 0;
+            let costoBs = pU * tB;
+            let usdtNec = tI > 0 ? (costoBs / tI) : 0;
+            let ahorro = tI > 0 ? ((tI - tB) / tI) * 100 : 0;
+            
+            let resHtml = "Necesitas cambiar: <b>" + usdtNec.toFixed(2) + " USDT</b><br><small>Equivale a: " + costoBs.toFixed(2) + " Bs";
+            if (ahorro > 0) {
+                resHtml += "<br>Ahorro (Diferencial): <span style='color:green'><b>" + ahorro.toFixed(2) + "%</b></span>";
+            } else if (ahorro < 0) {
+                resHtml += "<br>Pérdida (Diferencial): <span style='color:red'><b>" + Math.abs(ahorro).toFixed(2) + "%</b></span>";
+            }
+            resHtml += "</small>";
+            
+            document.getElementById('resProd').innerHTML = resHtml;
+        }
+    </script>
+</body>
+</html>
