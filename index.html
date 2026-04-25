@@ -76,6 +76,11 @@
         .manual-content b { color: var(--green-text); }
 
         .footer-tag { text-align: center; font-size: 9px; opacity: 0.4; margin-top: 30px; font-style: italic; padding-bottom: 20px; }
+
+        /* Estilos para el Conversor Rápido */
+        .conv-row { display: flex; justify-content: space-between; border-bottom: 1px solid var(--input-border); padding: 8px 0; font-size: 14px; }
+        .conv-row:last-child { border-bottom: none; }
+        .conv-val { font-weight: bold; color: var(--green-text); font-size: 16px; }
     </style>
 </head>
 <body>
@@ -129,9 +134,38 @@
     </div>
 
     <div id="sec-calc" class="section">
-        <h3 style="text-align: center;">Calculadora de Precios</h3>
         
-        <label>Moneda Ref:</label>
+        <h3 style="text-align: center; margin-bottom: 5px;">Conversor Rápido</h3>
+        <p style="font-size: 10px; text-align:center; opacity:0.6; margin-bottom:15px;">Calcula equivalencias en tiempo real.</p>
+        
+        <div style="display: flex; gap: 10px; margin-bottom: 15px;">
+            <input type="number" id="convMonto" placeholder="Ingresa monto..." inputmode="decimal" oninput="calcularConversor()" style="margin-top: 0; flex: 2;">
+            <select id="convModo" onchange="calcularConversor()" style="margin-top: 0; flex: 1;">
+                <option value="div_bs">Divisa ⮕ Bs</option>
+                <option value="bs_div">Bs ⮕ Divisa</option>
+            </select>
+        </div>
+
+        <div class="dashboard" style="text-align: left; padding: 12px; margin-bottom: 25px;">
+            <div class="conv-row">
+                <span>🇺🇸 Dólar BCV:</span>
+                <span class="conv-val" id="resConvBcv">0.00</span>
+            </div>
+            <div class="conv-row">
+                <span>🇪🇺 Euro BCV:</span>
+                <span class="conv-val" id="resConvEur">0.00</span>
+            </div>
+            <div class="conv-row">
+                <span>🟢 USDT Binance:</span>
+                <span class="conv-val" id="resConvUsdt">0.00</span>
+            </div>
+        </div>
+
+        <hr style="border: 0; border-top: 1px solid var(--input-border); margin-bottom: 20px;">
+
+        <h3 style="text-align: center;">Calculadora de Ahorro</h3>
+        
+        <label>Moneda Ref del Producto:</label>
         <select id="calcMoneda" onchange="updateCalcLabels()">
             <option value="USD">Dólar ($)</option>
             <option value="EUR">Euro (€)</option>
@@ -152,7 +186,7 @@
             <p id="calcResDiff" style="font-size: 10px; color: var(--green-text);"></p>
         </div>
         
-        <button class="btn-save" onclick="execCalc()">Calcular Precio</button>
+        <button class="btn-save" onclick="execCalc()">Calcular Ahorro</button>
     </div>
 
     <div id="sec-tasas" class="section">
@@ -233,9 +267,10 @@
         </details>
 
         <details>
-            <summary>4️⃣ CALCULADORA DE PRECIOS</summary>
+            <summary>4️⃣ CALCULADORA DE PRECIOS Y CONVERSOR</summary>
             <div class="manual-content">
-                Para convencer al cliente indeciso que va a pagar en Bs a tasa BCV. Le sacas la cuenta de cuántos USDT necesita enviarte y le demuestras el ahorro de usar criptomonedas.
+                Usa el <b>Conversor Rápido</b> para ver cuánto es cualquier monto en Bs o Divisas en tiempo real a las 3 tasas principales (BCV Dólar, BCV Euro y Binance USDT).<br><br>
+                Y usa la <b>Calculadora de Ahorro</b> para convencer al cliente indeciso que va a pagar en Bs a tasa BCV. Le sacas la cuenta de cuántos USDT necesita enviarte y le demuestras el porcentaje de ahorro de usar criptomonedas.
             </div>
         </details>
 
@@ -247,7 +282,7 @@
 <div class="nav-bar">
     <div class="nav-item active" onclick="nav('libro')"><span class="nav-icon">📊</span>Libro</div>
     <div class="nav-item" onclick="nav('operar')"><span class="nav-icon">💸</span>Operar</div>
-    <div class="nav-item" onclick="nav('calc')"><span class="nav-icon">🛒</span>Calc</div>
+    <div class="nav-item" onclick="nav('calc')"><span class="nav-icon">🧮</span>Calcular</div>
     <div class="nav-item" onclick="nav('tasas')"><span class="nav-icon">⚙️</span>Tasas</div>
     <div class="nav-item" onclick="nav('manual')"><span class="nav-icon">📖</span>Manual</div>
 </div>
@@ -258,6 +293,7 @@
     window.onload = () => {
         loadTasas();
         renderLibro();
+        calcularConversor(); // Para que inicie en 0.00
     };
 
     function nav(id) {
@@ -267,10 +303,32 @@
         
         if(id !== 'operar') {
             document.querySelectorAll('.nav-item').forEach(i => {
-                if(i.innerText.toLowerCase().includes(id.toLowerCase())) i.classList.add('active');
+                if(i.innerText.toLowerCase().includes(id.toLowerCase().replace('calc', 'calcular'))) i.classList.add('active');
             });
         } else {
             document.querySelectorAll('.nav-item')[1].classList.add('active');
+        }
+    }
+
+    // LÓGICA DEL CONVERSOR RÁPIDO
+    function calcularConversor() {
+        let monto = parseFloat(document.getElementById('convMonto').value) || 0;
+        let modo = document.getElementById('convModo').value;
+        
+        let tBcvUsd = parseFloat(document.getElementById('tBcvUsd').value) || 1;
+        let tBcvEur = parseFloat(document.getElementById('tBcvEur').value) || 1;
+        let tUsdt = parseFloat(document.getElementById('tUsdtBs').value) || 1;
+
+        if (modo === 'div_bs') {
+            // Multiplica la divisa por la tasa para dar Bs
+            document.getElementById('resConvBcv').innerText = (monto * tBcvUsd).toLocaleString('es-VE', {minimumFractionDigits: 2, maximumFractionDigits: 2}) + " Bs";
+            document.getElementById('resConvEur').innerText = (monto * tBcvEur).toLocaleString('es-VE', {minimumFractionDigits: 2, maximumFractionDigits: 2}) + " Bs";
+            document.getElementById('resConvUsdt').innerText = (monto * tUsdt).toLocaleString('es-VE', {minimumFractionDigits: 2, maximumFractionDigits: 2}) + " Bs";
+        } else {
+            // Divide los Bs entre la tasa para dar la divisa
+            document.getElementById('resConvBcv').innerText = (monto / tBcvUsd).toLocaleString('es-VE', {minimumFractionDigits: 2, maximumFractionDigits: 2}) + " $";
+            document.getElementById('resConvEur').innerText = (monto / tBcvEur).toLocaleString('es-VE', {minimumFractionDigits: 2, maximumFractionDigits: 2}) + " €";
+            document.getElementById('resConvUsdt').innerText = (monto / tUsdt).toLocaleString('es-VE', {minimumFractionDigits: 2, maximumFractionDigits: 2}) + " USDT";
         }
     }
 
@@ -282,14 +340,12 @@
         btn.disabled = true;
 
         try {
-            // Extraer de DolarAPI (Estable y veloz)
             let resBcv = await fetch('https://ve.dolarapi.com/v1/dolares/oficial');
             let dataBcv = await resBcv.json();
 
             let resEur = await fetch('https://ve.dolarapi.com/v1/euros/oficial');
             let dataEur = await resEur.json();
 
-            // Usamos la tasa del Paralelo como referencia más cercana a Binance
             let resParalelo = await fetch('https://ve.dolarapi.com/v1/dolares/paralelo');
             let dataParalelo = await resParalelo.json();
 
@@ -306,7 +362,8 @@
                 document.getElementById('calcBin').value = dataParalelo.promedio;
             }
 
-            saveTasas(true); // Guardar silenciosamente en el almacenamiento local
+            saveTasas(true); 
+            calcularConversor(); // Actualiza el conversor con las nuevas tasas al sincronizar
             alert("✅ Tasas sincronizadas y guardadas con éxito.");
 
         } catch (error) {
@@ -328,7 +385,6 @@
             if(localStorage.getItem(f)) document.getElementById(f).value = localStorage.getItem(f);
         });
         
-        // Rellenar calculadora también si existen
         if(localStorage.getItem('tBcvUsd')) document.getElementById('calcBcv').value = localStorage.getItem('tBcvUsd');
         if(localStorage.getItem('tUsdtBs')) document.getElementById('calcBin').value = localStorage.getItem('tUsdtBs');
     }
@@ -340,7 +396,7 @@
             'tDolarElecBs', 'comBancoElec', 'comBinanceElec'
         ];
         fields.forEach(f => localStorage.setItem(f, document.getElementById(f).value));
-        
+        calcularConversor(); // Refresca el conversor si guarda manual
         if(!silent) alert("Tasas Guardadas ✅");
     }
 
