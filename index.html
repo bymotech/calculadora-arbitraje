@@ -204,8 +204,6 @@
                     <option value="paypal_bs">🅿️ PayPal ⮕ 🇻🇪 Bolívares</option>
                     <option value="paypal_usdt">🅿️ PayPal ⮕ 🟢 USDT</option>
                     <option value="ef_usdt">💵 Efectivo ⮕ 🟢 USDT</option>
-                    <option value="ef_bs">💵 Efectivo ⮕ 🇻🇪 Bs (COMPRA Efectivo)</option>
-                    <option value="bs_ef">🇻🇪 Bs ⮕ 💵 Efectivo (VENTA Efectivo)</option>
                     <option value="compra_venta_ef">🔄 Compra-Venta Efectivo (Rápida)</option>
                     <option value="usdt_cop">🟢 USDT ⮕ 🇨🇴 Pesos</option>
                     <option value="cop_usdt">🇨🇴 Pesos ⮕ 🟢 USDT</option>
@@ -444,10 +442,8 @@
         </details>
 
         <details>
-            <summary><span style="display:flex; align-items:center; gap:10px;"><b style="background:var(--input-bg); padding:6px; border-radius:6px;">💸</b> 2. Tipos de cambio (Nuevos Pares)</span></summary>
+            <summary><span style="display:flex; align-items:center; gap:10px;"><b style="background:var(--input-bg); padding:6px; border-radius:6px;">💸</b> 2. Tipos de cambio</span></summary>
             <div class="manual-body">
-                • <b>Compra de Efectivo (Efectivo a Bs):</b> El cliente te da billetes, tú le pasas bolívares. Utiliza la tasa de "Compra Efectivo Calle".<br>
-                • <b>Venta de Efectivo (Bs a Efectivo):</b> El cliente te transfiere bolívares, tú le das billetes. Utiliza la tasa de "Venta Efectivo Calle".<br>
                 • <b>Compra-Venta Efectivo (Rápida):</b> Para registrar una ganancia veloz. Colocas cuánto efectivo compraste y vendiste, y la app te saca el diferencial usando ambas tasas de la calle y te lo expresa en USDT.<br>
                 • <b>USDT a Pesos / Pesos a USDT:</b> Usa la Tasa Binance COP como costo real, y calcula tu ganancia en base a las tasas de Compra y Venta al cliente que asignaste en tu panel.<br>
                 • <b>Arbitraje BCV:</b> Vender USDT, comprar dólares electrónicos en el banco y regresarlos a Binance.<br>
@@ -510,7 +506,6 @@
     let ops = JSON.parse(localStorage.getItem('bymo_ops')) || [];
     let editId = null;
 
-    // Función mágica para leer números limpiando comas de iPhone/Android
     function num(id) {
         let val = document.getElementById(id).value;
         if(!val) return 0;
@@ -685,14 +680,6 @@
         } else if (tipo === 'ef_usdt') {
             let comEfUsdt = num('tEfUsdtCom') || 0;
             gain = monto * (comEfUsdt / 100); recibe = monto - gain; comiStr = `-${gain.toFixed(2)} USDT`;
-        } else if (tipo === 'ef_bs') {
-            gain = monto - ((monto * tEfCompra) / tUsdt); 
-            recibe = monto * tEfCompra; 
-            tasaApli = tEfCompra.toFixed(2); comiStr = "Precio Compra";
-        } else if (tipo === 'bs_ef') {
-            gain = ((monto * tEfVenta) / tUsdt) - monto; 
-            recibe = monto * tEfVenta; 
-            tasaApli = tEfVenta.toFixed(2); comiStr = "Precio Venta";
         } else if (tipo === 'compra_venta_ef') {
             let tEfCompraOp = num('opTasaCompra') || num('tBsEfCalle') || 1;
             let tEfVentaOp = num('opTasaVenta') || num('tEfBs') || 1;
@@ -755,12 +742,10 @@
         
         let cur = 'USDT';
         if(tipo.includes('bs') && !tipo.includes('bcv')) cur = 'Bs';
-        if(tipo === 'zelle_ef' || tipo === 'bs_ef') cur = 'USD Efectivo';
+        if(tipo === 'zelle_ef') cur = 'USD Efectivo';
         if(tipo.includes('cop')) cur = 'COP';
         if(tipo === 'ciclo_calle' || tipo === 'usdt_bcv_usdt') cur = 'Bs Recup.';
         
-        if(tipo === 'bs_ef') cur = 'Bs (Paga el cliente)';
-        if(tipo === 'ef_bs') cur = 'Bs (Recibe el cliente)';
         if(tipo === 'compra_venta_ef') cur = 'Bs (Ganancia Neta)';
         if(tipo === 'usdt_cop') cur = 'COP (Recibe el cliente)';
         if(tipo === 'cop_usdt') cur = 'COP (Paga el cliente)';
@@ -826,7 +811,6 @@
         document.getElementById('opConcepto').value = "";
         document.getElementById('opMonto').value = "";
         
-        // Reset dynamic inputs
         document.getElementById('opTasaCompra').value = "";
         document.getElementById('opTasaVenta').value = "";
         
