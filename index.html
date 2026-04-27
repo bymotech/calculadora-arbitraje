@@ -384,19 +384,9 @@
                 <label>🟢 Tasa Binance USDT (CLP/USDT)</label>
                 <input type="text" id="tBinanceClp" placeholder="Ej: 950" inputmode="decimal">
             </div>
-            <div class="input-group" style="margin-bottom:15px;">
+            <div class="input-group" style="margin-bottom:0;">
                 <label>🇨🇱 Tu Comisión de Ganancia (%)</label>
                 <input type="text" id="tClpComision" placeholder="Ej: 7" inputmode="decimal">
-            </div>
-            <div style="display:flex; gap:10px; margin-bottom:0;">
-                <div class="input-group" style="flex:1; margin-bottom:0;">
-                    <label>🇨🇱 COMPRA (Opcional)</label>
-                    <input type="text" id="tUsdtClpCompra" placeholder="Ej: 900" inputmode="decimal">
-                </div>
-                <div class="input-group" style="flex:1; margin-bottom:0;">
-                    <label>🇨🇱 VENTA (Opcional)</label>
-                    <input type="text" id="tUsdtClpVenta" placeholder="Ej: 1000" inputmode="decimal">
-                </div>
             </div>
         </div>
 
@@ -406,19 +396,9 @@
                 <label>🟢 Tasa Binance USDT (COP/USDT)</label>
                 <input type="text" id="tBinanceCop" placeholder="Ej: 3850" inputmode="decimal">
             </div>
-            <div class="input-group" style="margin-bottom:15px;">
+            <div class="input-group" style="margin-bottom:0;">
                 <label>🇨🇴 Tu Comisión de Ganancia (%)</label>
                 <input type="text" id="tCopComision" placeholder="Ej: 5" inputmode="decimal">
-            </div>
-            <div style="display:flex; gap:10px; margin-bottom:0;">
-                <div class="input-group" style="flex:1; margin-bottom:0;">
-                    <label>🇨🇴 COMPRA (Opcional)</label>
-                    <input type="text" id="tUsdtCopCompra" placeholder="Ej: 3700" inputmode="decimal">
-                </div>
-                <div class="input-group" style="flex:1; margin-bottom:0;">
-                    <label>🇨🇴 VENTA (Opcional)</label>
-                    <input type="text" id="tUsdtCopVenta" placeholder="Ej: 3900" inputmode="decimal">
-                </div>
             </div>
         </div>
 
@@ -518,7 +498,6 @@
     let ops = JSON.parse(localStorage.getItem('bymo_ops')) || [];
     let editId = null;
 
-    // Función para manejar comas de iPhone
     function num(id) {
         let val = document.getElementById(id).value;
         if(!val) return 0;
@@ -575,9 +554,9 @@
         const fields = [
             'tUsdtBs', 'tZelleCop', 'tZelleEf', 'tBcvUsd', 
             'tBcvEur', 'tZelleBs', 'tPaypalBs', 'tPaypalUsdtCom', 
-            'tCapitalBase', 'tZelleUsdtCom', 'tBsEfCalle', 'tEfBs', 'tEfUsdtCom',
-            'tBinanceCop', 'tCopComision', 'tUsdtCopCompra', 'tUsdtCopVenta',
-            'tBinanceClp', 'tClpComision', 'tUsdtClpCompra', 'tUsdtClpVenta',
+            'tCapitalBase', 'tZelleUsdtCom',
+            'tBinanceCop', 'tCopComision',
+            'tBinanceClp', 'tClpComision',
             'tDolarElecBs', 'comBancoElec', 'comBinanceElec'
         ];
         fields.forEach(f => {
@@ -593,9 +572,9 @@
         const fields = [
             'tUsdtBs', 'tZelleCop', 'tZelleEf', 'tBcvUsd', 
             'tBcvEur', 'tZelleBs', 'tPaypalBs', 'tPaypalUsdtCom', 
-            'tCapitalBase', 'tZelleUsdtCom', 'tBsEfCalle', 'tEfBs', 'tEfUsdtCom',
-            'tBinanceCop', 'tCopComision', 'tUsdtCopCompra', 'tUsdtCopVenta',
-            'tBinanceClp', 'tClpComision', 'tUsdtClpCompra', 'tUsdtClpVenta',
+            'tCapitalBase', 'tZelleUsdtCom',
+            'tBinanceCop', 'tCopComision',
+            'tBinanceClp', 'tClpComision',
             'tDolarElecBs', 'comBancoElec', 'comBinanceElec'
         ];
         fields.forEach(f => {
@@ -709,43 +688,44 @@
             let tEfCompraOp = num('opTasaCompra') || 1;
             let tEfVentaOp = num('opTasaVenta') || 1;
             let gananciaBs = (monto * tEfVentaOp) - (monto * tEfCompraOp);
-            gain = gananciaBs / tUsdt; recibe = gananciaBs; 
+            gain = gananciaBs / tUsdt;
+            recibe = gananciaBs; 
             tasaApli = `${tEfCompraOp} / ${tEfVentaOp}`; comiStr = "Diferencial";
         } else if (tipo === 'clp_usdt') {
             let tBinClp = num('tBinanceClp') || 1;
-            let tClpCom = num('tClpComision') || 0; 
-            let usdt_brutos = monto / tBinClp; 
+            let tClpCom = num('tClpComision') || 0;
+            let usdt_brutos = monto / tBinClp;
             gain = usdt_brutos * (tClpCom / 100);
             recibe = usdt_brutos - gain;
-            tasaApli = `${tBinClp}`; comiStr = `Com. ${tClpCom}%`;
+            tasaApli = tBinClp.toFixed(2); comiStr = `Com. ${tClpCom}%`;
         } else if (tipo === 'usdt_clp') {
             let tBinClp = num('tBinanceClp') || 1;
             let tClpCom = num('tClpComision') || 0;
-            gain = monto * (tClpCom / 100); 
+            gain = monto * (tClpCom / 100);
             let usdt_netos = monto - gain;
             recibe = usdt_netos * tBinClp;
-            tasaApli = `${tBinClp}`; comiStr = `Com. ${tClpCom}%`;
+            tasaApli = tBinClp.toFixed(2); comiStr = `Com. ${tClpCom}%`;
         } else if (tipo === 'cop_usdt') {
             let tBinCop = num('tBinanceCop') || 1;
-            let tCopCom = num('tCopComision') || 0; 
-            let usdt_brutos = monto / tBinCop; 
+            let tCopCom = num('tCopComision') || 0;
+            let usdt_brutos = monto / tBinCop;
             gain = usdt_brutos * (tCopCom / 100);
             recibe = usdt_brutos - gain;
-            tasaApli = `${tBinCop}`; comiStr = `Com. ${tCopCom}%`;
+            tasaApli = tBinCop.toFixed(2); comiStr = `Com. ${tCopCom}%`;
         } else if (tipo === 'usdt_cop') {
             let tBinCop = num('tBinanceCop') || 1;
             let tCopCom = num('tCopComision') || 0;
-            gain = monto * (tCopCom / 100); 
+            gain = monto * (tCopCom / 100);
             let usdt_netos = monto - gain;
             recibe = usdt_netos * tBinCop;
-            tasaApli = `${tBinCop}`; comiStr = `Com. ${tCopCom}%`;
+            tasaApli = tBinCop.toFixed(2); comiStr = `Com. ${tCopCom}%`;
         } else if (tipo === 'zelle_cop') {
             let tZelleCop = num('tZelleCop') || 3500;
             gain = monto * 0.02; recibe = monto * tZelleCop; tasaApli = tZelleCop; comiStr = "-";
         } else if (tipo === 'ciclo_calle') {
-            let tBsEfCompra = num('tBsEfCalle') || 1;
+            let tEfCompra = num('opTasaCompra') || 1;
             let comEfUsdt = num('tEfUsdtCom') || 0;
-            let bsInvertidos = monto * tBsEfCompra;
+            let bsInvertidos = monto * tEfCompra;
             let usdtNetoRecibido = monto * (1 - (comEfUsdt / 100));
             let bsRecuperados = usdtNetoRecibido * tUsdt;
             gain = (bsRecuperados - bsInvertidos) / tUsdt; recibe = bsRecuperados; tasaApli = "Ciclo"; comiStr = "Varios";
@@ -762,8 +742,9 @@
         
         let margin = 0;
         if(monto > 0) {
-            if(tipo === 'clp_usdt' || tipo === 'cop_usdt') {
-                margin = (gain / (monto / num(tipo === 'clp_usdt' ? 'tBinanceClp' : 'tBinanceCop'))) * 100;
+            if (tipo === 'clp_usdt' || tipo === 'cop_usdt') {
+                let tBin = tipo === 'clp_usdt' ? (num('tBinanceClp') || 1) : (num('tBinanceCop') || 1);
+                margin = (gain / (monto / tBin)) * 100;
             } else {
                 margin = (gain / monto) * 100; 
             }
@@ -774,11 +755,10 @@
 
     function updatePreview() {
         let tipo = document.getElementById('opTipo').value;
-        updateMontoLabel();
-        
-        document.getElementById('dynamicRates').style.display = (tipo === 'compra_venta_ef') ? 'flex' : 'none';
-        
         let monto = num('opMonto');
+        
+        document.getElementById('dynamicRates').style.display = (tipo === 'compra_venta_ef' || tipo === 'ciclo_calle') ? 'flex' : 'none';
+        
         let res = calculateLogic(tipo, monto);
         
         document.getElementById('prevTasa').innerText = res.tasaApli;
@@ -786,7 +766,7 @@
         
         let cur = 'USDT';
         if(tipo.includes('bs') && !tipo.includes('bcv')) cur = 'Bs';
-        if(tipo === 'zelle_ef') cur = 'USD Efectivo';
+        if(tipo === 'zelle_ef' || tipo === 'bs_ef') cur = 'USD Efectivo';
         
         if(tipo === 'compra_venta_ef') cur = 'Bs (Ganancia Neta)';
         if(tipo === 'clp_usdt') cur = 'USDT (A entregar)';
