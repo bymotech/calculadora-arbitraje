@@ -205,8 +205,10 @@
                     <option value="paypal_usdt">🅿️ PayPal ⮕ 🟢 USDT</option>
                     <option value="ef_usdt">💵 Efectivo ⮕ 🟢 USDT</option>
                     <option value="compra_venta_ef">🔄 Compra-Venta Efectivo (Rápida)</option>
-                    <option value="usdt_cop">🟢 USDT ⮕ 🇨🇴 Pesos</option>
-                    <option value="cop_usdt">🇨🇴 Pesos ⮕ 🟢 USDT</option>
+                    <option value="usdt_cop">🟢 USDT ⮕ 🇨🇴 Pesos COP</option>
+                    <option value="cop_usdt">🇨🇴 Pesos COP ⮕ 🟢 USDT</option>
+                    <option value="usdt_clp">🟢 USDT ⮕ 🇨🇱 Pesos CLP</option>
+                    <option value="clp_usdt">🇨🇱 Pesos CLP ⮕ 🟢 USDT</option>
                     <option value="zelle_cop">🇺🇸 Zelle ⮕ 🇨🇴 Pesos COP</option>
                     <option value="ciclo_calle">🔄 Arbitraje Efectivo: Bs ⮕ Efec ⮕ USDT</option>
                     <option value="usdt_bcv_usdt">🏦 Arbitraje BCV: USDT ⮕ Bs ⮕ USD ⮕ USDT</option>
@@ -400,13 +402,35 @@
             </div>
             <div style="display:flex; gap:10px; margin-bottom:0;">
                 <div class="input-group" style="flex:1; margin-bottom:0;">
-                    <label>🇨🇴 Tasa COMPRA USDT al cliente</label>
+                    <label>🇨🇴 Tasa COMPRA al cliente</label>
                     <input type="text" id="tUsdtCopCompra" placeholder="Ej: 3700" inputmode="decimal">
                 </div>
                 <div class="input-group" style="flex:1; margin-bottom:0;">
-                    <label>🇨🇴 Tasa VENTA USDT al cliente</label>
+                    <label>🇨🇴 Tasa VENTA al cliente</label>
                     <input type="text" id="tUsdtCopVenta" placeholder="Ej: 3900" inputmode="decimal">
                 </div>
+            </div>
+        </div>
+
+        <div class="card">
+            <h3>Pesos Chilenos (CLP)</h3>
+            <div class="input-group">
+                <label>🟢 Tasa Binance USDT (CLP/USDT)</label>
+                <input type="text" id="tBinanceClp" placeholder="Ej: 980" inputmode="decimal">
+            </div>
+            <div style="display:flex; gap:10px; margin-bottom:15px;">
+                <div class="input-group" style="flex:1; margin-bottom:0;">
+                    <label>🇨🇱 COMPRA al cliente</label>
+                    <input type="text" id="tUsdtClpCompra" placeholder="Ej: 950" inputmode="decimal">
+                </div>
+                <div class="input-group" style="flex:1; margin-bottom:0;">
+                    <label>🇨🇱 VENTA al cliente</label>
+                    <input type="text" id="tUsdtClpVenta" placeholder="Ej: 1000" inputmode="decimal">
+                </div>
+            </div>
+            <div class="input-group" style="margin-bottom:0;">
+                <label>🇨🇱 Comisión Transacción Binance (%)</label>
+                <input type="text" id="tClpComision" placeholder="Ej: 1" inputmode="decimal">
             </div>
         </div>
 
@@ -437,15 +461,16 @@
         <details>
             <summary><span style="display:flex; align-items:center; gap:10px;"><b style="background:var(--input-bg); padding:6px; border-radius:6px;">🔄</b> 1. Primer paso: tasas al día</span></summary>
             <div class="manual-body">
-                Lo primero apenas arranques. Ve a <b>Tasas</b> y presiona "Sincronizar Automático" para que la app baje los datos del BCV y Binance. La app utiliza un sistema de verificación doble (DolarAPI y pyDolarVenezuela) para que nunca te quedes sin tasas. Las demás comisiones (como PayPal, Pesos COP, comisiones de Zelle y efectivo) ajústalas tú mismo manualmente y dale <b>Guardar</b>. Si tienes iPhone y escribes una coma (,) la app la convertirá matemáticamente en un punto de manera automática.
+                Lo primero apenas arranques. Ve a <b>Tasas</b> y presiona "Sincronizar Automático" para que la app baje los datos del BCV y Binance. La app utiliza un sistema de verificación doble (DolarAPI y pyDolarVenezuela) para que nunca te quedes sin tasas. Las demás comisiones (como PayPal, Pesos COP/CLP, comisiones de Zelle y efectivo) ajústalas tú mismo manualmente y dale <b>Guardar</b>. Si tienes iPhone y escribes una coma (,) la app la convertirá matemáticamente en un punto de manera automática.
             </div>
         </details>
 
         <details>
-            <summary><span style="display:flex; align-items:center; gap:10px;"><b style="background:var(--input-bg); padding:6px; border-radius:6px;">💸</b> 2. Tipos de cambio</span></summary>
+            <summary><span style="display:flex; align-items:center; gap:10px;"><b style="background:var(--input-bg); padding:6px; border-radius:6px;">💸</b> 2. Tipos de cambio (Nuevos Pares)</span></summary>
             <div class="manual-body">
                 • <b>Compra-Venta Efectivo (Rápida):</b> Para registrar una ganancia veloz. Colocas cuánto efectivo compraste y vendiste, y la app te saca el diferencial usando ambas tasas de la calle y te lo expresa en USDT.<br>
-                • <b>USDT a Pesos / Pesos a USDT:</b> Usa la Tasa Binance COP como costo real, y calcula tu ganancia en base a las tasas de Compra y Venta al cliente que asignaste en tu panel.<br>
+                • <b>USDT a Pesos COP/CLP:</b> Usa la Tasa Binance como costo real, y calcula tu ganancia en base a las tasas de Compra y Venta al cliente que asignaste en tu panel.<br>
+                • <b>CLP a USDT (Remesas Chile):</b> El cliente te da CLP, tú compras USDT en Binance, la app le resta la comisión de transferencia y te arroja tu ganancia limpia en dólares.<br>
                 • <b>Arbitraje BCV:</b> Vender USDT, comprar dólares electrónicos en el banco y regresarlos a Binance.<br>
                 • <b>PayPal/Zelle a Bs o USDT:</b> El cliente transfiere y tú entregas Bolívares o USDT descontando tu margen de riesgo o ganando por la diferencia de tasa que configuraste.
             </div>
@@ -552,7 +577,8 @@
             'tBcvEur', 'tZelleBs', 'tBsEfCalle', 'tEfUsdtCom', 
             'tDolarElecBs', 'comBancoElec', 'comBinanceElec',
             'tPaypalBs', 'tPaypalUsdtCom', 'tCapitalBase', 'tZelleUsdtCom',
-            'tBinanceCop', 'tUsdtCopCompra', 'tUsdtCopVenta'
+            'tBinanceCop', 'tUsdtCopCompra', 'tUsdtCopVenta',
+            'tBinanceClp', 'tUsdtClpCompra', 'tUsdtClpVenta', 'tClpComision'
         ];
         fields.forEach(f => {
             let el = document.getElementById(f);
@@ -569,7 +595,8 @@
             'tBcvEur', 'tZelleBs', 'tBsEfCalle', 'tEfUsdtCom', 
             'tDolarElecBs', 'comBancoElec', 'comBinanceElec',
             'tPaypalBs', 'tPaypalUsdtCom', 'tCapitalBase', 'tZelleUsdtCom',
-            'tBinanceCop', 'tUsdtCopCompra', 'tUsdtCopVenta'
+            'tBinanceCop', 'tUsdtCopCompra', 'tUsdtCopVenta',
+            'tBinanceClp', 'tUsdtClpCompra', 'tUsdtClpVenta', 'tClpComision'
         ];
         fields.forEach(f => {
             let el = document.getElementById(f);
@@ -701,6 +728,24 @@
             gain = gananciaCop / tBinCop;
             recibe = monto * tCopVenta; 
             tasaApli = tCopVenta.toFixed(2); comiStr = "Dif. Tasa COP";
+        } else if (tipo === 'usdt_clp') {
+            let tClpCompra = num('tUsdtClpCompra') || 1;
+            let tBinClp = num('tBinanceClp') || 1;
+            let tClpCom = num('tClpComision') || 0;
+            let clpObtenidosBinance = (monto * (1 - (tClpCom / 100))) * tBinClp;
+            recibe = monto * tClpCompra;
+            let gananciaClp = clpObtenidosBinance - recibe;
+            gain = gananciaClp / tBinClp;
+            tasaApli = tClpCompra.toFixed(2); comiStr = `Bin+Com ${tClpCom}%`;
+        } else if (tipo === 'clp_usdt') {
+            let tClpVenta = num('tUsdtClpVenta') || 1;
+            let tBinClp = num('tBinanceClp') || 1;
+            let tClpCom = num('tClpComision') || 0;
+            recibe = monto * tClpVenta; 
+            let usdtCompradosBinance = recibe / tBinClp;
+            let usdtNetos = usdtCompradosBinance * (1 - (tClpCom / 100));
+            gain = usdtNetos - monto;
+            tasaApli = tClpVenta.toFixed(2); comiStr = `Bin+Com ${tClpCom}%`;
         } else if (tipo === 'zelle_cop') {
             let tZelleCop = num('tZelleCop') || 3500;
             gain = monto * 0.02; recibe = monto * tZelleCop; tasaApli = tZelleCop; comiStr = "-";
@@ -744,11 +789,14 @@
         if(tipo.includes('bs') && !tipo.includes('bcv')) cur = 'Bs';
         if(tipo === 'zelle_ef') cur = 'USD Efectivo';
         if(tipo.includes('cop')) cur = 'COP';
+        if(tipo.includes('clp')) cur = 'CLP';
         if(tipo === 'ciclo_calle' || tipo === 'usdt_bcv_usdt') cur = 'Bs Recup.';
         
         if(tipo === 'compra_venta_ef') cur = 'Bs (Ganancia Neta)';
         if(tipo === 'usdt_cop') cur = 'COP (Recibe el cliente)';
         if(tipo === 'cop_usdt') cur = 'COP (Paga el cliente)';
+        if(tipo === 'usdt_clp') cur = 'CLP (Recibe el cliente)';
+        if(tipo === 'clp_usdt') cur = 'CLP (Paga el cliente)';
         
         document.getElementById('prevRecibe').innerText = res.recibe.toLocaleString('es-VE', {minimumFractionDigits: 2, maximumFractionDigits:2}) + " " + cur;
         
