@@ -218,6 +218,17 @@
                 <label>Monto principal (Divisa Base operada)</label>
                 <input type="text" id="opMonto" placeholder="Ej: 100" inputmode="decimal" oninput="updatePreview()">
             </div>
+
+            <div id="dynamicRates" style="display: none; gap: 10px; margin-top: 15px;">
+                <div class="input-group" style="flex:1; margin-bottom: 0;">
+                    <label>Tasa Compra (Bs/$)</label>
+                    <input type="text" id="opTasaCompra" placeholder="Ej: 38.0" inputmode="decimal" oninput="updatePreview()">
+                </div>
+                <div class="input-group" style="flex:1; margin-bottom: 0;">
+                    <label>Tasa Venta (Bs/$)</label>
+                    <input type="text" id="opTasaVenta" placeholder="Ej: 39.5" inputmode="decimal" oninput="updatePreview()">
+                </div>
+            </div>
         </div>
 
         <h3 style="font-size: 13px; color:var(--text-muted);">2. Cálculo automático</h3>
@@ -651,8 +662,8 @@
 
     function calculateLogic(tipo, monto) {
         let tUsdt = num('tUsdtBs') || 1;
-        let tEfVenta = num('tEfBs') || 1; // Precio Venta Efectivo
-        let tEfCompra = num('tBsEfCalle') || 1; // Precio Compra Efectivo
+        let tEfVenta = num('tEfBs') || 1; 
+        let tEfCompra = num('tBsEfCalle') || 1; 
         let tZelleBs = num('tZelleBs') || 1;
         
         let gain = 0; let recibe = 0; let tasaApli = "1.00"; let comiStr = "-0.00";
@@ -675,23 +686,21 @@
             let comEfUsdt = num('tEfUsdtCom') || 0;
             gain = monto * (comEfUsdt / 100); recibe = monto - gain; comiStr = `-${gain.toFixed(2)} USDT`;
         } else if (tipo === 'ef_bs') {
-            // Cliente te da Efectivo, recibe Bs (Tú COMPRAS efectivo)
             gain = monto - ((monto * tEfCompra) / tUsdt); 
             recibe = monto * tEfCompra; 
             tasaApli = tEfCompra.toFixed(2); comiStr = "Precio Compra";
         } else if (tipo === 'bs_ef') {
-            // Cliente te da Bs, recibe Efectivo (Tú VENDES efectivo)
             gain = ((monto * tEfVenta) / tUsdt) - monto; 
-            recibe = monto * tEfVenta; // Refleja los Bs que el cliente debe pagar
+            recibe = monto * tEfVenta; 
             tasaApli = tEfVenta.toFixed(2); comiStr = "Precio Venta";
         } else if (tipo === 'compra_venta_ef') {
-            // Compraste y Vendiste efectivo (Ciclo rápido)
-            let gananciaBs = (monto * tEfVenta) - (monto * tEfCompra);
+            let tEfCompraOp = num('opTasaCompra') || num('tBsEfCalle') || 1;
+            let tEfVentaOp = num('opTasaVenta') || num('tEfBs') || 1;
+            let gananciaBs = (monto * tEfVentaOp) - (monto * tEfCompraOp);
             gain = gananciaBs / tUsdt;
             recibe = gananciaBs; 
-            tasaApli = `${tEfCompra} / ${tEfVenta}`; comiStr = "Diferencial";
+            tasaApli = `${tEfCompraOp} / ${tEfVentaOp}`; comiStr = "Diferencial";
         } else if (tipo === 'usdt_cop') {
-            // Cliente da USDT, recibe COP (Tú COMPRAS USDT con COP)
             let tCopCompra = num('tUsdtCopCompra') || 1;
             let tBinCop = num('tBinanceCop') || 1;
             let gananciaCop = monto * (tBinCop - tCopCompra);
@@ -699,7 +708,6 @@
             recibe = monto * tCopCompra;
             tasaApli = tCopCompra.toFixed(2); comiStr = "Dif. Tasa COP";
         } else if (tipo === 'cop_usdt') {
-            // Cliente da COP, recibe USDT (Tú VENDES USDT por COP)
             let tCopVenta = num('tUsdtCopVenta') || 1;
             let tBinCop = num('tBinanceCop') || 1;
             let gananciaCop = monto * (tCopVenta - tBinCop);
@@ -737,6 +745,9 @@
     function updatePreview() {
         let tipo = document.getElementById('opTipo').value;
         let monto = num('opMonto');
+        
+        document.getElementById('dynamicRates').style.display = (tipo === 'compra_venta_ef') ? 'flex' : 'none';
+        
         let res = calculateLogic(tipo, monto);
         
         document.getElementById('prevTasa').innerText = res.tasaApli;
@@ -748,7 +759,6 @@
         if(tipo.includes('cop')) cur = 'COP';
         if(tipo === 'ciclo_calle' || tipo === 'usdt_bcv_usdt') cur = 'Bs Recup.';
         
-        // Excepciones para la etiqueta de lo que se transfiere
         if(tipo === 'bs_ef') cur = 'Bs (Paga el cliente)';
         if(tipo === 'ef_bs') cur = 'Bs (Recibe el cliente)';
         if(tipo === 'compra_venta_ef') cur = 'Bs (Ganancia Neta)';
@@ -815,6 +825,10 @@
         
         document.getElementById('opConcepto').value = "";
         document.getElementById('opMonto').value = "";
+        
+        // Reset dynamic inputs
+        document.getElementById('opTasaCompra').value = "";
+        document.getElementById('opTasaVenta').value = "";
         
         renderLibro();
         renderHistorial();
