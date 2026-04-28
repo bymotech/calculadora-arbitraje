@@ -124,7 +124,6 @@
 <body>
 
 <div class="container">
-    
     <div class="btn-refresh" onclick="location.reload()" title="Refrescar App">🔄</div>
 
     <div class="header" id="mainHeader">
@@ -217,6 +216,7 @@
                     <option value="paypal_bs">🅿️ PayPal ⮕ 🇻🇪 Bolívares</option>
                     <option value="paypal_usdt">🅿️ PayPal ⮕ 🟢 USDT</option>
                     <option value="ef_usdt">💵 Efectivo ⮕ 🟢 USDT</option>
+                    <option value="usdt_ef">🟢 USDT ⮕ 💵 Efectivo</option>
                     <option value="compra_venta_ef">🔄 Compra-Venta Efectivo (Rápida)</option>
                     <option value="usdt_cop">🟢 USDT ⮕ 🇨🇴 Pesos COP</option>
                     <option value="cop_usdt">🇨🇴 Pesos COP ⮕ 🟢 USDT</option>
@@ -234,10 +234,10 @@
 
             <div id="dynamicRates" style="display: none; gap: 10px; margin-top: 15px;">
                 <div class="input-group" style="flex:1; margin-bottom: 0;">
-                    <label>Tasa Compra (Bs/$)</label>
+                    <label id="lblTasaCompra">Tasa Compra (Bs/$)</label>
                     <input type="text" id="opTasaCompra" placeholder="Ej: 38.0" inputmode="decimal" oninput="updatePreview()">
                 </div>
-                <div class="input-group" style="flex:1; margin-bottom: 0;">
+                <div class="input-group" id="wrapTasaVenta" style="flex:1; margin-bottom: 0;">
                     <label>Tasa Venta (Bs/$)</label>
                     <input type="text" id="opTasaVenta" placeholder="Ej: 39.5" inputmode="decimal" oninput="updatePreview()">
                 </div>
@@ -380,7 +380,7 @@
         </div>
 
         <div class="card">
-            <h3>Zelle y PayPal</h3>
+            <h3>Zelle, PayPal y Efectivo</h3>
             <div class="input-group">
                 <label>🇺🇸 Zelle ⮕ USDT (% Com)</label>
                 <input type="text" id="tZelleUsdtCom" inputmode="decimal">
@@ -397,9 +397,17 @@
                 <label>🅿️ PayPal ⮕ Bs Ref</label>
                 <input type="text" id="tPaypalBs" inputmode="decimal">
             </div>
-            <div class="input-group" style="margin-bottom:0;">
+            <div class="input-group">
                 <label>🅿️ PayPal ⮕ USDT (% Com)</label>
                 <input type="text" id="tPaypalUsdtCom" inputmode="decimal">
+            </div>
+            <div class="input-group">
+                <label>💵 Efectivo ⮕ USDT (% Com)</label>
+                <input type="text" id="tEfUsdtCom" inputmode="decimal">
+            </div>
+            <div class="input-group" style="margin-bottom:0;">
+                <label>🟢 USDT ⮕ Efectivo (% Com)</label>
+                <input type="text" id="tUsdtEfCom" inputmode="decimal">
             </div>
         </div>
 
@@ -577,6 +585,7 @@
         if(tipo === 'clp_usdt' || tipo === 'cop_usdt') lbl.innerText = `Monto en ${tipo.substring(0,3).toUpperCase()} (Que te entrega el cliente)`;
         else if(tipo === 'usdt_clp' || tipo === 'usdt_cop') lbl.innerText = "Monto en USDT (Que te entrega el cliente)";
         else if(tipo === 'compra_venta_ef') lbl.innerText = "Monto de Efectivo (Capital operado)";
+        else if(tipo === 'ciclo_calle') lbl.innerText = "Capital Inicial (USDT)";
         else lbl.innerText = "Monto principal (Divisa Base operada)";
     }
 
@@ -616,7 +625,8 @@
             'tCapitalBase', 'tZelleUsdtCom',
             'tBinanceCop', 'tCopComision',
             'tBinanceClp', 'tClpComision',
-            'tDolarElecBs', 'comBancoElec', 'comBinanceElec'
+            'tDolarElecBs', 'comBancoElec', 'comBinanceElec',
+            'tEfUsdtCom', 'tUsdtEfCom'
         ];
         fields.forEach(f => {
             let el = document.getElementById(f);
@@ -634,7 +644,8 @@
             'tCapitalBase', 'tZelleUsdtCom',
             'tBinanceCop', 'tCopComision',
             'tBinanceClp', 'tClpComision',
-            'tDolarElecBs', 'comBancoElec', 'comBinanceElec'
+            'tDolarElecBs', 'comBancoElec', 'comBinanceElec',
+            'tEfUsdtCom', 'tUsdtEfCom'
         ];
         fields.forEach(f => {
             let el = document.getElementById(f);
@@ -753,6 +764,9 @@
         } else if (tipo === 'ef_usdt') {
             let comEfUsdt = num('tEfUsdtCom') || 0;
             gain = monto * (comEfUsdt / 100); recibe = monto - gain; comiStr = `-${gain.toFixed(2)} USDT`;
+        } else if (tipo === 'usdt_ef') {
+            let comUsdtEf = num('tUsdtEfCom') || 0;
+            gain = monto * (comUsdtEf / 100); recibe = monto - gain; comiStr = `-${gain.toFixed(2)} USD`;
         } else if (tipo === 'compra_venta_ef') {
             let tEfCompraOp = num('opTasaCompra') || 1;
             let tEfVentaOp = num('opTasaVenta') || 1;
@@ -795,12 +809,18 @@
             let tZelleCop = num('tZelleCop') || 3500;
             gain = monto * 0.02; recibe = monto * tZelleCop; tasaApli = tZelleCop; comiStr = "-";
         } else if (tipo === 'ciclo_calle') {
-            let tBsEfCompra = num('opTasaCompra') || 1;
-            let comEfUsdt = num('tEfUsdtCom') || 0;
-            let bsInvertidos = monto * tBsEfCompra;
-            let usdtNetoRecibido = monto * (1 - (comEfUsdt / 100));
-            let bsRecuperados = usdtNetoRecibido * tUsdt;
-            gain = (bsRecuperados - bsInvertidos) / tUsdt; recibe = bsRecuperados; tasaApli = "Ciclo"; comiStr = "Varios";
+            // Arbitraje Real: Vendes USDT a Bs -> Compras Efectivo con Bs -> Vendes Efectivo a USDT
+            let tBsEfCompra = num('opTasaCompra') || 1; // Tasa calle a la que compras el Efectivo
+            let comEfUsdt = num('tEfUsdtCom') || 0; // Comisión para reponer efectivo a USDT
+            
+            let bsObtenidos = monto * tUsdt; 
+            let efectivoComprado = bsObtenidos / tBsEfCompra; 
+            let usdtFinal = efectivoComprado * (1 - (comEfUsdt / 100)); 
+            
+            gain = usdtFinal - monto; 
+            recibe = usdtFinal; 
+            tasaApli = `Calle: ${tBsEfCompra}`; 
+            comiStr = `Com: ${comEfUsdt}%`;
         } else if (tipo === 'usdt_bcv_usdt') {
             let tDolarElecBs = num('tDolarElecBs') || 1;
             let comBancoElec = num('comBancoElec') || 0;
@@ -830,6 +850,14 @@
         
         document.getElementById('dynamicRates').style.display = (tipo === 'compra_venta_ef' || tipo === 'ciclo_calle') ? 'flex' : 'none';
         
+        // Ajuste visual: Ocultar campo de Venta si es Ciclo de Calle
+        document.getElementById('wrapTasaVenta').style.display = (tipo === 'ciclo_calle') ? 'none' : 'block';
+        if (tipo === 'ciclo_calle') {
+            document.getElementById('lblTasaCompra').innerText = "Tasa Calle (Bs/$)";
+        } else {
+            document.getElementById('lblTasaCompra').innerText = "Tasa Compra (Bs/$)";
+        }
+        
         let monto = num('opMonto');
         let res = calculateLogic(tipo, monto);
         
@@ -838,14 +866,14 @@
         
         let cur = 'USDT';
         if(tipo.includes('bs') && !tipo.includes('bcv')) cur = 'Bs';
-        if(tipo === 'zelle_ef') cur = 'USD Efectivo';
+        if(tipo === 'zelle_ef' || tipo === 'usdt_ef') cur = 'USD Efectivo';
         
         if(tipo === 'compra_venta_ef') cur = 'Bs (Ganancia Neta)';
         if(tipo === 'clp_usdt') cur = 'USDT (A entregar)';
         if(tipo === 'usdt_clp') cur = 'CLP (A entregar)';
         if(tipo === 'cop_usdt') cur = 'USDT (A entregar)';
         if(tipo === 'usdt_cop') cur = 'COP (A entregar)';
-        if(tipo === 'ciclo_calle' || tipo === 'usdt_bcv_usdt') cur = 'Bs Recup.';
+        if(tipo === 'ciclo_calle' || tipo === 'usdt_bcv_usdt') cur = 'USDT (Recuperados)';
         
         document.getElementById('prevRecibe').innerText = res.recibe.toLocaleString('es-VE', {minimumFractionDigits: 2, maximumFractionDigits:2}) + " " + cur;
         
