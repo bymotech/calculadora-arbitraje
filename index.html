@@ -64,7 +64,7 @@
         .metric-box .sub { font-size: 10px; color: var(--text-muted); margin-top: 4px; }
 
         .input-group { margin-bottom: 15px; }
-        .input-group label { display: block; font-size: 13px; color: var(--text-muted); margin-bottom: 6px; }
+        .input-group label { display: block; font-size: 13px; color: var(--text-muted); margin-bottom: 6px; font-weight: bold; }
         input, select { width: 100%; background: var(--input-bg); border: 1px solid var(--card-border); color: var(--text-main); padding: 14px; border-radius: 10px; font-size: 15px; outline: none; transition: 0.2s; }
         input:focus, select:focus { border-color: var(--primary-green); }
         
@@ -204,11 +204,11 @@
         <h3 style="font-size: 13px; color:var(--text-muted);">1. Información básica</h3>
         <div class="card">
             <div class="input-group">
-                <label>Cliente / Concepto</label>
+                <label style="font-weight:normal;">Cliente / Concepto</label>
                 <input type="text" id="opConcepto" placeholder="Ej: Cambio Juan Perez">
             </div>
             <div class="input-group">
-                <label>Tipo de cambio</label>
+                <label style="font-weight:normal;">Tipo de cambio</label>
                 <select id="opTipo" onchange="updatePreview()">
                     <option value="zelle_usdt">🇺🇸 Zelle ⮕ 🟢 USDT</option>
                     <option value="zelle_ef">🇺🇸 Zelle ⮕ 💵 Efectivo</option>
@@ -228,17 +228,17 @@
                 </select>
             </div>
             <div class="input-group" style="margin-bottom: 0;">
-                <label id="lblMonto">Monto principal (Divisa Base operada)</label>
+                <label id="lblMonto">Monto principal (EL CLIENTE ENTREGA)</label>
                 <input type="text" id="opMonto" placeholder="Ej: 100" inputmode="decimal" oninput="updatePreview()">
             </div>
 
             <div id="dynamicRates" style="display: none; gap: 10px; margin-top: 15px;">
                 <div class="input-group" style="flex:1; margin-bottom: 0;">
-                    <label id="lblTasaCompra">Tasa Compra (Bs/$)</label>
+                    <label id="lblTasaCompra" style="font-weight:normal;">Tasa Compra (Bs/$)</label>
                     <input type="text" id="opTasaCompra" placeholder="Ej: 38.0" inputmode="decimal" oninput="updatePreview()">
                 </div>
                 <div class="input-group" id="wrapTasaVenta" style="flex:1; margin-bottom: 0;">
-                    <label>Tasa Venta (Bs/$)</label>
+                    <label style="font-weight:normal;">Tasa Venta (Bs/$)</label>
                     <input type="text" id="opTasaVenta" placeholder="Ej: 39.5" inputmode="decimal" oninput="updatePreview()">
                 </div>
             </div>
@@ -255,8 +255,8 @@
                 <span id="prevCom">-0.00</span>
             </div>
             
-            <div class="preview-card">
-                <div class="text-muted" id="labelRecibe">Aprox. Transacción</div>
+            <div class="preview-card" style="border: 1px solid var(--primary-green);">
+                <div class="text-muted" id="labelRecibe" style="font-weight:bold;">Aprox. Transacción (YO ENTREGO)</div>
                 <div class="big-result" id="prevRecibe">0.00</div>
             </div>
 
@@ -582,11 +582,21 @@
         let lbl = document.getElementById('lblMonto');
         if(!lbl) return;
         
-        if(tipo === 'clp_usdt' || tipo === 'cop_usdt') lbl.innerText = `Monto en ${tipo.substring(0,3).toUpperCase()} (Que te entrega el cliente)`;
-        else if(tipo === 'usdt_clp' || tipo === 'usdt_cop') lbl.innerText = "Monto en USDT (Que te entrega el cliente)";
-        else if(tipo === 'compra_venta_ef') lbl.innerText = "Monto de Efectivo (Capital operado)";
-        else if(tipo === 'ciclo_calle') lbl.innerText = "Capital Inicial (USDT)";
-        else lbl.innerText = "Monto principal (Divisa Base operada)";
+        let monedaEntrada = "Divisa";
+        if(tipo.startsWith('zelle')) monedaEntrada = "Zelle (USD)";
+        else if(tipo.startsWith('paypal')) monedaEntrada = "PayPal (USD)";
+        else if(tipo.startsWith('ef_')) monedaEntrada = "Efectivo (USD)";
+        else if(tipo.startsWith('usdt_') && tipo !== 'usdt_bcv_usdt') monedaEntrada = "USDT";
+        else if(tipo.startsWith('clp_')) monedaEntrada = "Pesos Chilenos (CLP)";
+        else if(tipo.startsWith('cop_')) monedaEntrada = "Pesos Colombianos (COP)";
+
+        if(tipo === 'compra_venta_ef') {
+            lbl.innerText = "Monto de Efectivo (Capital operado)";
+        } else if(tipo === 'ciclo_calle' || tipo === 'usdt_bcv_usdt') {
+            lbl.innerText = "Capital Inicial (USDT)";
+        } else {
+            lbl.innerText = `Monto en ${monedaEntrada} (EL CLIENTE ENTREGA)`;
+        }
     }
 
     function nav(id) {
@@ -865,16 +875,22 @@
         document.getElementById('prevCom').innerText = res.comiStr;
         
         let cur = 'USDT';
-        if(tipo.includes('bs') && !tipo.includes('bcv')) cur = 'Bs';
+        if(tipo.endsWith('_bs')) cur = 'Bs';
         if(tipo === 'zelle_ef' || tipo === 'usdt_ef') cur = 'USD Efectivo';
         
         if(tipo === 'compra_venta_ef') cur = 'Bs (Ganancia Neta)';
-        if(tipo === 'clp_usdt') cur = 'USDT (A entregar)';
-        if(tipo === 'usdt_clp') cur = 'CLP (A entregar)';
-        if(tipo === 'cop_usdt') cur = 'USDT (A entregar)';
-        if(tipo === 'usdt_cop') cur = 'COP (A entregar)';
+        if(tipo === 'clp_usdt' || tipo === 'cop_usdt' || tipo === 'ef_usdt' || tipo === 'zelle_usdt' || tipo === 'paypal_usdt') cur = 'USDT';
+        if(tipo === 'usdt_clp') cur = 'CLP';
+        if(tipo === 'usdt_cop' || tipo === 'zelle_cop') cur = 'COP';
         if(tipo === 'ciclo_calle' || tipo === 'usdt_bcv_usdt') cur = 'USDT (Recuperados)';
         
+        let labelRecibe = document.getElementById('labelRecibe');
+        if(tipo === 'compra_venta_ef' || tipo === 'ciclo_calle' || tipo === 'usdt_bcv_usdt') {
+            labelRecibe.innerText = "Resultado (YO RECIBO)";
+        } else {
+            labelRecibe.innerText = "Monto a Transferir (YO ENTREGO)";
+        }
+
         document.getElementById('prevRecibe').innerText = res.recibe.toLocaleString('es-VE', {minimumFractionDigits: 2, maximumFractionDigits:2}) + " " + cur;
         
         document.getElementById('prevGain').innerText = (res.gain >= 0 ? '+' : '') + res.gain.toFixed(2) + " USDT";
