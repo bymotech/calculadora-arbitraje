@@ -21,6 +21,19 @@
             --brand-yellow: #ffcc00;
         }
 
+        [data-theme="light"] {
+            --bg-dark: #f4f6f8;
+            --card-bg: #ffffff;
+            --card-border: #e1e4e8;
+            --text-main: #111418;
+            --text-muted: #6b7280;
+            --input-bg: #f9fafb;
+            --nav-bg: #ffffff;
+        }
+
+        [data-theme="light"] .btn { color: #ffffff; }
+        [data-theme="light"] .fab { color: #ffffff; }
+
         body { background-color: var(--bg-dark); color: var(--text-main); padding-bottom: 80px; overflow-x: hidden; }
         .container { max-width: 500px; margin: 0 auto; padding: 15px; width: 100%; min-height: 100vh; position: relative; }
         
@@ -333,6 +346,18 @@
         <button id="btnSync" class="btn" style="background:#007bff; color:#fff; margin-bottom:20px;" onclick="sincronizarTasasAPI()">🔄 Sincronizar Automático</button>
 
         <div class="card">
+            <h3>Apariencia de la App</h3>
+            <div class="input-group" style="margin-bottom:0;">
+                <label>Tema visual</label>
+                <select id="themeSelector" onchange="changeTheme()">
+                    <option value="auto">🤖 Automático (Según el celular)</option>
+                    <option value="dark">🌙 Modo Oscuro</option>
+                    <option value="light">☀️ Modo Claro</option>
+                </select>
+            </div>
+        </div>
+
+        <div class="card">
             <h3>Capital y Plataformas</h3>
             <div class="input-group">
                 <label>🏦 Capital Base Operativo (USDT)</label>
@@ -495,6 +520,39 @@
 </div>
 
 <script>
+    function initTheme() {
+        let savedTheme = localStorage.getItem('bymo_theme') || 'auto';
+        let themeSelect = document.getElementById('themeSelector');
+        if(themeSelect) themeSelect.value = savedTheme;
+        applyTheme(savedTheme);
+
+        window.matchMedia('(prefers-color-scheme: light)').addEventListener('change', e => {
+            if(localStorage.getItem('bymo_theme') === 'auto' || !localStorage.getItem('bymo_theme')) {
+                applyTheme('auto');
+            }
+        });
+    }
+
+    function changeTheme() {
+        let theme = document.getElementById('themeSelector').value;
+        localStorage.setItem('bymo_theme', theme);
+        applyTheme(theme);
+    }
+
+    function applyTheme(theme) {
+        if (theme === 'auto') {
+            if (window.matchMedia && window.matchMedia('(prefers-color-scheme: light)').matches) {
+                document.documentElement.setAttribute('data-theme', 'light');
+            } else {
+                document.documentElement.removeAttribute('data-theme');
+            }
+        } else if (theme === 'light') {
+            document.documentElement.setAttribute('data-theme', 'light');
+        } else {
+            document.documentElement.removeAttribute('data-theme');
+        }
+    }
+
     let ops = JSON.parse(localStorage.getItem('bymo_ops')) || [];
     let editId = null;
 
@@ -505,6 +563,7 @@
     }
 
     window.onload = () => {
+        initTheme();
         loadTasas();
         renderLibro();
         calcularConversor();
