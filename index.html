@@ -577,6 +577,18 @@
         calcularConversor();
     };
 
+    function getCurrencyStr(tipo) {
+        let cur = 'USDT';
+        if(tipo.endsWith('_bs')) cur = 'Bs';
+        if(tipo === 'zelle_ef' || tipo === 'usdt_ef') cur = 'USD Efectivo';
+        if(tipo === 'compra_venta_ef') cur = 'Bs (Ganancia Neta)';
+        if(tipo === 'clp_usdt' || tipo === 'cop_usdt' || tipo === 'ef_usdt' || tipo === 'zelle_usdt' || tipo === 'paypal_usdt') cur = 'USDT';
+        if(tipo === 'usdt_clp') cur = 'CLP';
+        if(tipo === 'usdt_cop' || tipo === 'zelle_cop') cur = 'COP';
+        if(tipo === 'ciclo_calle' || tipo === 'usdt_bcv_usdt') cur = 'USDT';
+        return cur;
+    }
+
     function updateMontoLabel() {
         let tipo = document.getElementById('opTipo').value;
         let lbl = document.getElementById('lblMonto');
@@ -865,15 +877,7 @@
         document.getElementById('prevTasa').innerText = res.tasaApli;
         document.getElementById('prevCom').innerText = res.comiStr;
         
-        let cur = 'USDT';
-        if(tipo.endsWith('_bs')) cur = 'Bs';
-        if(tipo === 'zelle_ef' || tipo === 'usdt_ef') cur = 'USD Efectivo';
-        
-        if(tipo === 'compra_venta_ef') cur = 'Bs (Ganancia Neta)';
-        if(tipo === 'clp_usdt' || tipo === 'cop_usdt' || tipo === 'ef_usdt' || tipo === 'zelle_usdt' || tipo === 'paypal_usdt') cur = 'USDT';
-        if(tipo === 'usdt_clp') cur = 'CLP';
-        if(tipo === 'usdt_cop' || tipo === 'zelle_cop') cur = 'COP';
-        if(tipo === 'ciclo_calle' || tipo === 'usdt_bcv_usdt') cur = 'USDT (Recuperados)';
+        let cur = getCurrencyStr(tipo);
         
         let labelRecibe = document.getElementById('labelRecibe');
         if(tipo === 'compra_venta_ef' || tipo === 'ciclo_calle' || tipo === 'usdt_bcv_usdt') {
@@ -916,6 +920,7 @@
         if(monto <= 0) return alert("Ingresa un monto válido");
 
         let res = calculateLogic(tipoVal, monto);
+        let cur = getCurrencyStr(tipoVal);
 
         if(editId) {
             let index = ops.findIndex(o => o.id === editId);
@@ -924,6 +929,9 @@
                 ops[index].tipo = tipoText;
                 ops[index].monto = monto;
                 ops[index].gain = res.gain;
+                ops[index].recibe = res.recibe;
+                ops[index].tasaApli = res.tasaApli;
+                ops[index].cur = cur;
             }
             editId = null;
             document.getElementById('btnRegistrarOp').innerText = "Registrar Operación";
@@ -934,7 +942,8 @@
 
             ops.unshift({
                 id: Date.now(), date: stringFecha, month: stringMes, time: d.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'}),
-                concepto: concepto, tipo: tipoText, monto: monto, gain: res.gain
+                concepto: concepto, tipo: tipoText, monto: monto, gain: res.gain,
+                recibe: res.recibe, tasaApli: res.tasaApli, cur: cur
             });
         }
         
@@ -948,6 +957,26 @@
         renderLibro();
         renderHistorial();
         nav('libro');
+    }
+
+    function enviarWhatsApp(id) {
+        let op = ops.find(o => o.id === id);
+        if(!op) return;
+        
+        let recibeStr = op.recibe !== undefined ? op.recibe.toLocaleString('es-VE', {minimumFractionDigits: 2, maximumFractionDigits:2}) : "N/D";
+        let tasaStr = op.tasaApli !== undefined ? op.tasaApli : "N/D";
+        let curStr = op.cur || "";
+
+        let texto = `*CONTABLE BM - Recibo de Operación* 📄\n\n`;
+        texto += `*Concepto:* ${op.concepto}\n`;
+        texto += `*Operación:* ${op.tipo}\n`;
+        texto += `*Monto Base:* ${op.monto}\n`;
+        texto += `*Tasa de Cambio Aplicada:* ${tasaStr}\n`;
+        texto += `*Monto a Recibir:* ${recibeStr} ${curStr}\n\n`;
+        texto += `_¡Gracias por tu confianza!_`;
+
+        let url = `https://wa.me/?text=${encodeURIComponent(texto)}`;
+        window.open(url, '_blank');
     }
 
     function getTodayStr() {
@@ -1051,8 +1080,9 @@
                 </div>
                 <div class="op-bot" style="margin-top:6px;">
                     <span>Base Inversión: ${o.monto||0}</span>
-                    <div>
-                        <span style="color:#007bff; cursor:pointer; font-weight:bold; margin-right:10px;" onclick="editar(${o.id})">Editar</span>
+                    <div style="display:flex; align-items:center; gap:10px;">
+                        <span style="color:#25D366; cursor:pointer; font-weight:bold;" onclick="enviarWhatsApp(${o.id})">📲 WhatsApp</span>
+                        <span style="color:#007bff; cursor:pointer; font-weight:bold;" onclick="editar(${o.id})">Editar</span>
                         <span style="color:#ff4d4f; cursor:pointer; font-weight:bold;" onclick="borrar(${o.id})">Borrar</span>
                     </div>
                 </div>
