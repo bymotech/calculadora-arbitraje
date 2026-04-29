@@ -1037,7 +1037,12 @@
             if(o.date === fechaSeleccionada) { dayGain += o.gain; dayCount++; }
             if(o.month === currentMonth) monthGain += o.gain;
             
-            totalVol += (o.monto || 0); 
+            let montoReal = o.monto || 0;
+            if (o.tipo && (o.tipo.includes('COP ⮕ 🟢 USDT') || o.tipo.includes('CLP ⮕ 🟢 USDT'))) {
+                let tasa = parseFloat(o.tasaApli);
+                if (tasa > 0) montoReal = montoReal / tasa;
+            }
+            totalVol += montoReal; 
             allGain += o.gain;
         });
 
