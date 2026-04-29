@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>ByMO Tech Suite</title>
+    <title>CONTABLE BM</title>
     <style>
         * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; }
 
@@ -41,8 +41,8 @@
         .btn-refresh:active { transform: rotate(180deg); }
 
         .header { text-align: center; padding-top: 10px; margin-bottom: 20px; }
-        .logo-img { height: 45px; width: auto; object-fit: contain; margin-bottom: 5px; filter: drop-shadow(0px 0px 2px rgba(0,0,0,0.2)); }
-        .header-title { font-size: 16px; font-weight: 600; letter-spacing: 0.5px; }
+        .logo-img { height: 60px; width: auto; object-fit: contain; margin-bottom: 8px; filter: drop-shadow(0px 0px 2px rgba(0,0,0,0.2)); }
+        .header-title { font-size: 18px; font-weight: 800; letter-spacing: 1px; color: var(--text-main); text-transform: uppercase; }
 
         h3 { font-size: 15px; font-weight: 600; margin-bottom: 12px; color: var(--text-main); }
         .text-green { color: var(--primary-green) !important; }
@@ -118,7 +118,7 @@
         .conv-row:last-child { border-bottom: none; }
         .conv-val { font-weight: bold; color: var(--primary-green); font-size: 16px; }
 
-        .footer-tag { text-align: center; font-size: 10px; opacity: 0.4; margin-top: 30px; padding-bottom: 20px; }
+        .footer-tag { text-align: center; font-size: 10px; opacity: 0.4; margin-top: 30px; padding-bottom: 20px; color: var(--text-muted); }
     </style>
 </head>
 <body>
@@ -127,8 +127,8 @@
     <div class="btn-refresh" onclick="location.reload()" title="Refrescar App">🔄</div>
 
     <div class="header" id="mainHeader">
-        <img src="logo.png" alt="ByMO Tech Logo" class="logo-img" onerror="this.style.display='none'">
-        <div class="header-title">ByMO Tech Suite</div>
+        <img src="logo_final.PNG" alt="CONTABLE BM Logo" class="logo-img" onerror="this.style.display='none'">
+        <div class="header-title">CONTABLE BM</div>
     </div>
 
     <div id="sec-libro" class="section active">
@@ -766,7 +766,7 @@
         } else if (tipo === 'zelle_bs') {
             gain = monto - ((monto * tZelleBs) / tUsdt); recibe = monto * tZelleBs; tasaApli = tZelleBs.toFixed(2); comiStr = "Dif. Tasa";
         } else if (tipo === 'paypal_bs') {
-            let tPaypalBs = num('tPaypalBs') || 1;
+            let tPaypalBs = num('tPaypalBs) || 1;
             gain = monto - ((monto * tPaypalBs) / tUsdt); recibe = monto * tPaypalBs; tasaApli = tPaypalBs.toFixed(2); comiStr = "Dif. Tasa";
         } else if (tipo === 'paypal_usdt') {
             let comPaypalUsdt = num('tPaypalUsdtCom') || 0;
@@ -784,7 +784,6 @@
             gain = gananciaBs / tUsdt; recibe = gananciaBs; 
             tasaApli = `${tEfCompraOp} / ${tEfVentaOp}`; comiStr = "Diferencial";
         } else if (tipo === 'clp_usdt') {
-            // Recibes CLP, das USDT
             let tBinClp = num('tBinanceClp') || 1;
             let tClpCom = num('tClpComision') || 0; 
             let usdt_brutos = monto / tBinClp; 
@@ -792,7 +791,6 @@
             recibe = usdt_brutos - gain;
             tasaApli = tBinClp.toFixed(2); comiStr = `Com. ${tClpCom}%`;
         } else if (tipo === 'usdt_clp') {
-            // Recibes USDT, das CLP
             let tBinClp = num('tBinanceClp') || 1;
             let tClpCom = num('tClpComision') || 0;
             gain = monto * (tClpCom / 100); 
@@ -800,7 +798,6 @@
             recibe = usdt_netos * tBinClp;
             tasaApli = tBinClp.toFixed(2); comiStr = `Com. ${tClpCom}%`;
         } else if (tipo === 'cop_usdt') {
-            // Recibes COP, das USDT
             let tBinCop = num('tBinanceCop') || 1;
             let tCopCom = num('tCopComision') || 0; 
             let usdt_brutos = monto / tBinCop; 
@@ -808,7 +805,6 @@
             recibe = usdt_brutos - gain;
             tasaApli = tBinCop.toFixed(2); comiStr = `Com. ${tCopCom}%`;
         } else if (tipo === 'usdt_cop') {
-            // Recibes USDT, das COP
             let tBinCop = num('tBinanceCop') || 1;
             let tCopCom = num('tCopComision') || 0;
             gain = monto * (tCopCom / 100); 
@@ -819,14 +815,11 @@
             let tZelleCop = num('tZelleCop') || 3500;
             gain = monto * 0.02; recibe = monto * tZelleCop; tasaApli = tZelleCop; comiStr = "-";
         } else if (tipo === 'ciclo_calle') {
-            // Arbitraje Real: Vendes USDT a Bs -> Compras Efectivo con Bs -> Vendes Efectivo a USDT
-            let tBsEfCompra = num('opTasaCompra') || 1; // Tasa calle a la que compras el Efectivo
-            let comEfUsdt = num('tEfUsdtCom') || 0; // Comisión para reponer efectivo a USDT
-            
+            let tBsEfCompra = num('opTasaCompra') || 1; 
+            let comEfUsdt = num('tEfUsdtCom') || 0; 
             let bsObtenidos = monto * tUsdt; 
             let efectivoComprado = bsObtenidos / tBsEfCompra; 
             let usdtFinal = efectivoComprado * (1 - (comEfUsdt / 100)); 
-            
             gain = usdtFinal - monto; 
             recibe = usdtFinal; 
             tasaApli = `Calle: ${tBsEfCompra}`; 
@@ -860,7 +853,6 @@
         
         document.getElementById('dynamicRates').style.display = (tipo === 'compra_venta_ef' || tipo === 'ciclo_calle') ? 'flex' : 'none';
         
-        // Ajuste visual: Ocultar campo de Venta si es Ciclo de Calle
         document.getElementById('wrapTasaVenta').style.display = (tipo === 'ciclo_calle') ? 'none' : 'block';
         if (tipo === 'ciclo_calle') {
             document.getElementById('lblTasaCompra').innerText = "Tasa Calle (Bs/$)";
