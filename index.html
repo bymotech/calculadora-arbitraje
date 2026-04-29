@@ -288,7 +288,7 @@
                 <div class="input-group">
                     <label>Tú envías</label>
                     <div style="display:flex; gap:10px;">
-                        <input type="text" id="convMonto" value="100" inputmode="decimal" oninput="calcularConversor()">
+                        <input type="text" id="convMonto" value="1" inputmode="decimal" oninput="calcularConversor()">
                         <select id="convModo" onchange="calcularConversor()" style="width: 120px; background:var(--card-bg);">
                             <option value="div_bs">🇺🇸 USD / €</option>
                             <option value="bs_div">🇻🇪 Bs</option>
@@ -304,6 +304,7 @@
                         <div class="conv-row"><span>🟢 USDT Binance</span><span class="conv-val" id="resConvUsdt">0.00 Bs</span></div>
                     </div>
                 </div>
+                <button class="btn" style="margin-top: 15px; background: #25D366; color: #fff;" onclick="compartirConversor()">📲 Compartir Cálculo</button>
             </div>
         </div>
 
@@ -979,6 +980,25 @@
         window.open(url, '_blank');
     }
 
+    function compartirConversor() {
+        let monto = document.getElementById('convMonto').value || 1;
+        let modo = document.getElementById('convModo').value;
+        let bcv = document.getElementById('resConvBcv').innerText;
+        let eur = document.getElementById('resConvEur').innerText;
+        let usdt = document.getElementById('resConvUsdt').innerText;
+
+        let texto = `*CONTABLE BM - Cálculo Rápido* 🧮\n\n`;
+        texto += `*Monto:* ${monto} ${modo === 'div_bs' ? 'USD/EUR' : 'Bs'}\n\n`;
+        texto += `*Equivalencias:*\n`;
+        texto += `🇺🇸 Dólar BCV: ${bcv}\n`;
+        texto += `🇪🇺 Euro BCV: ${eur}\n`;
+        texto += `🟢 USDT Binance: ${usdt}\n\n`;
+        texto += `_Calculado con la tasa del momento._`;
+
+        let url = `https://wa.me/?text=${encodeURIComponent(texto)}`;
+        window.open(url, '_blank');
+    }
+
     function getTodayStr() {
         let d = new Date(); return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
     }
@@ -1051,8 +1071,9 @@
                 </div>
                 <div class="op-bot">
                     <span>Base: ${o.monto||0}</span>
-                    <div>
-                        <span style="color:#007bff; cursor:pointer; font-weight:bold; margin-right:10px;" onclick="editar(${o.id})">Editar</span>
+                    <div style="display:flex; align-items:center; gap:10px;">
+                        <span style="color:#25D366; cursor:pointer; font-weight:bold;" onclick="enviarWhatsApp(${o.id})">📲 WA</span>
+                        <span style="color:#007bff; cursor:pointer; font-weight:bold;" onclick="editar(${o.id})">Editar</span>
                         <span style="color:#ff4d4f; cursor:pointer; font-weight:bold;" onclick="borrar(${o.id})">Borrar</span>
                     </div>
                 </div>
