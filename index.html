@@ -696,7 +696,6 @@
             } catch (err2) {}
         }
 
-        // Intento de llamar a la API privada de Vercel para COP y CLP
         try {
             let resInt = await fetch('/api/binance');
             let dataInt = await resInt.json();
@@ -766,7 +765,7 @@
         } else if (tipo === 'zelle_bs') {
             gain = monto - ((monto * tZelleBs) / tUsdt); recibe = monto * tZelleBs; tasaApli = tZelleBs.toFixed(2); comiStr = "Dif. Tasa";
         } else if (tipo === 'paypal_bs') {
-            let tPaypalBs = num('tPaypalBs) || 1;
+            let tPaypalBs = num('tPaypalBs') || 1;
             gain = monto - ((monto * tPaypalBs) / tUsdt); recibe = monto * tPaypalBs; tasaApli = tPaypalBs.toFixed(2); comiStr = "Dif. Tasa";
         } else if (tipo === 'paypal_usdt') {
             let comPaypalUsdt = num('tPaypalUsdtCom') || 0;
