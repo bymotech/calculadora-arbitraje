@@ -40,9 +40,14 @@
         .btn-refresh { position: absolute; top: 15px; right: 15px; font-size: 20px; cursor: pointer; z-index: 50; opacity: 0.8; transition: 0.2s; }
         .btn-refresh:active { transform: rotate(180deg); }
 
-        .header { text-align: center; padding-top: 10px; margin-bottom: 20px; }
+        .header { text-align: center; padding-top: 10px; margin-bottom: 15px; }
         .logo-img { height: 60px; width: auto; object-fit: contain; margin-bottom: 8px; filter: drop-shadow(0px 0px 2px rgba(0,0,0,0.2)); }
         .header-title { font-size: 18px; font-weight: 800; letter-spacing: 1px; color: var(--text-main); text-transform: uppercase; }
+
+        /* Switcher de Modos */
+        .mode-toggle { display: flex; background: var(--card-border); border-radius: 10px; margin-bottom: 20px; overflow: hidden; padding: 4px; border: 1px solid var(--card-border); }
+        .mode-btn { flex: 1; text-align: center; padding: 12px; font-size: 13px; font-weight: bold; color: var(--text-muted); cursor: pointer; border-radius: 8px; transition: 0.3s; border: none; background: transparent; }
+        .mode-btn.active { background: var(--primary-green); color: #000; box-shadow: 0 2px 8px rgba(32,201,116,0.3); }
 
         h3 { font-size: 15px; font-weight: 600; margin-bottom: 12px; color: var(--text-main); }
         .text-green { color: var(--primary-green) !important; }
@@ -61,6 +66,7 @@
         .metric-box .label { font-size: 10px; text-transform: uppercase; color: var(--text-muted); margin-bottom: 8px; }
         .metric-box .val { font-size: 18px; font-weight: bold; color: var(--primary-green); }
         .metric-box .val.neutral { color: var(--brand-yellow); }
+        .metric-box .val.negative { color: var(--danger-red); }
         .metric-box .sub { font-size: 10px; color: var(--text-muted); margin-top: 4px; }
 
         .input-group { margin-bottom: 15px; }
@@ -131,37 +137,46 @@
         <div class="header-title">CONTABLE BM</div>
     </div>
 
-    <div id="sec-libro" class="section active">
+    <!-- Switcher de Modos -->
+    <div class="mode-toggle" id="globalModeToggle">
+        <button class="mode-btn active" id="btnModeOps" onclick="switchAppMode('ops')">💼 Operaciones</button>
+        <button class="mode-btn" id="btnModeContab" onclick="switchAppMode('contab')">📊 Contabilidad</button>
+    </div>
+
+    <!-- ============================================== -->
+    <!-- MODO OPERACIONES (Original)                    -->
+    <!-- ============================================== -->
+    <div id="sec-libro-ops" class="section active">
         <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
-            <h3 style="font-size: 14px; margin: 0;">Consulta de Saldos</h3>
-            <select id="filtroFecha" onchange="renderLibro()" style="width: auto; padding: 4px; font-size: 12px; border-radius: 5px; border: 1px solid var(--card-border); background: var(--input-bg); color: var(--text-main); margin: 0;"></select>
+            <h3 style="font-size: 14px; margin: 0;">Consulta de Saldos (Cambios)</h3>
+            <select id="filtroFechaOps" onchange="renderLibroOps()" style="width: auto; padding: 4px; font-size: 12px; border-radius: 5px; border: 1px solid var(--card-border); background: var(--input-bg); color: var(--text-main); margin: 0;"></select>
         </div>
 
         <div class="dashboard-hero card">
-            <div class="label" id="tituloDashboard">UTILIDAD DEL DÍA</div>
-            <div class="amount" id="dashDayVal">+0.00 USDT</div>
-            <div class="subtitle" id="dashDayCount">0 operaciones</div>
+            <div class="label" id="tituloDashboardOps">UTILIDAD DEL DÍA</div>
+            <div class="amount" id="dashDayValOps">+0.00 USDT</div>
+            <div class="subtitle" id="dashDayCountOps">0 operaciones</div>
         </div>
 
         <div class="metrics-grid">
             <div class="metric-box">
                 <div class="label">UTILIDAD DEL MES</div>
-                <div class="val text-green" id="dashMonthVal">+0.00</div>
+                <div class="val text-green" id="dashMonthValOps">+0.00</div>
                 <div class="sub">USDT</div>
             </div>
             <div class="metric-box">
                 <div class="label">CAPITAL ACTUAL</div>
-                <div class="val neutral" id="dashCapVal">0.00</div>
+                <div class="val neutral" id="dashCapValOps">0.00</div>
                 <div class="sub">USDT</div>
             </div>
             <div class="metric-box">
                 <div class="label">VOLUMEN OPERADO</div>
-                <div class="val" id="dashVolVal" style="color:#ffffff;">0.00</div>
+                <div class="val" id="dashVolValOps" style="color:#ffffff;">0.00</div>
                 <div class="sub">USDT</div>
             </div>
             <div class="metric-box">
                 <div class="label">MARGEN PROMEDIO</div>
-                <div class="val text-green" id="dashMarginVal">0.00%</div>
+                <div class="val text-green" id="dashMarginValOps">0.00%</div>
                 <div class="sub">del capital</div>
             </div>
         </div>
@@ -171,36 +186,24 @@
             <a onclick="nav('historial')">Ver todas</a>
         </div>
         <div class="card" style="padding: 0;" id="recentOpsList"></div>
-        
         <div class="fab" onclick="nav('operar')">+</div>
     </div>
 
-    <div id="sec-historial" class="section">
+    <div id="sec-historial-ops" class="section">
         <div class="page-header">
             <div class="back-btn" onclick="nav('libro')">←</div>
             <h3 style="margin:0;">Historial de Operaciones</h3>
         </div>
-        
         <div class="metrics-grid">
-            <div class="metric-box">
-                <div class="label">Total Operaciones</div>
-                <div class="val" style="color:#fff;" id="histCount">0</div>
-            </div>
-            <div class="metric-box">
-                <div class="label">Utilidad Neta</div>
-                <div class="val text-green" id="histNet">+0.00 USDT</div>
-            </div>
+            <div class="metric-box"><div class="label">Total Operaciones</div><div class="val" style="color:#fff;" id="histCountOps">0</div></div>
+            <div class="metric-box"><div class="label">Utilidad Neta</div><div class="val text-green" id="histNetOps">+0.00 USDT</div></div>
         </div>
-
         <div id="fullOpsList"></div>
         <div class="fab" onclick="nav('operar')">+</div>
     </div>
 
-    <div id="sec-operar" class="section">
-        <div class="page-header">
-            <h3 style="margin:0; text-align:center; width:100%;">Registro de Operación</h3>
-        </div>
-        
+    <div id="sec-operar-ops" class="section">
+        <div class="page-header"><h3 style="margin:0; text-align:center; width:100%;">Registro de Cambio</h3></div>
         <h3 style="font-size: 13px; color:var(--text-muted);">1. Información básica</h3>
         <div class="card">
             <div class="input-group">
@@ -209,7 +212,7 @@
             </div>
             <div class="input-group">
                 <label style="font-weight:normal;">Tipo de cambio</label>
-                <select id="opTipo" onchange="updatePreview()">
+                <select id="opTipo" onchange="updatePreviewOps()">
                     <option value="zelle_usdt">🇺🇸 Zelle ⮕ 🟢 USDT</option>
                     <option value="zelle_ef">🇺🇸 Zelle ⮕ 💵 Efectivo</option>
                     <option value="zelle_bs">🇺🇸 Zelle ⮕ 🇻🇪 Bolívares</option>
@@ -229,52 +232,144 @@
             </div>
             <div class="input-group" style="margin-bottom: 0;">
                 <label id="lblMonto">Monto principal (EL CLIENTE ENTREGA)</label>
-                <input type="text" id="opMonto" placeholder="Ej: 100" inputmode="decimal" oninput="updatePreview()">
+                <input type="text" id="opMonto" placeholder="Ej: 100" inputmode="decimal" oninput="updatePreviewOps()">
             </div>
 
-            <div id="dynamicRates" style="display: none; gap: 10px; margin-top: 15px;">
+            <div id="dynamicRatesOps" style="display: none; gap: 10px; margin-top: 15px;">
                 <div class="input-group" style="flex:1; margin-bottom: 0;">
                     <label id="lblTasaCompra" style="font-weight:normal;">Tasa Compra (Bs/$)</label>
-                    <input type="text" id="opTasaCompra" placeholder="Ej: 38.0" inputmode="decimal" oninput="updatePreview()">
+                    <input type="text" id="opTasaCompra" placeholder="Ej: 38.0" inputmode="decimal" oninput="updatePreviewOps()">
                 </div>
                 <div class="input-group" id="wrapTasaVenta" style="flex:1; margin-bottom: 0;">
                     <label style="font-weight:normal;">Tasa Venta (Bs/$)</label>
-                    <input type="text" id="opTasaVenta" placeholder="Ej: 39.5" inputmode="decimal" oninput="updatePreview()">
+                    <input type="text" id="opTasaVenta" placeholder="Ej: 39.5" inputmode="decimal" oninput="updatePreviewOps()">
                 </div>
             </div>
         </div>
 
         <h3 style="font-size: 13px; color:var(--text-muted);">2. Cálculo automático</h3>
         <div class="card">
-            <div class="preview-row">
-                <span>Tasa / Referencia</span>
-                <span id="prevTasa">0.00</span>
-            </div>
-            <div class="preview-row">
-                <span>Indicador</span>
-                <span id="prevCom">-0.00</span>
-            </div>
-            
+            <div class="preview-row"><span>Tasa / Referencia</span><span id="prevTasaOps">0.00</span></div>
+            <div class="preview-row"><span>Indicador</span><span id="prevComOps">-0.00</span></div>
             <div class="preview-card" style="border: 1px solid var(--primary-green);">
-                <div class="text-muted" id="labelRecibe" style="font-weight:bold;">Aprox. Transacción (YO ENTREGO)</div>
-                <div class="big-result" id="prevRecibe">0.00</div>
+                <div class="text-muted" id="labelRecibeOps" style="font-weight:bold;">Aprox. Transacción (YO ENTREGO)</div>
+                <div class="big-result" id="prevRecibeOps">0.00</div>
             </div>
-
             <div class="preview-row" style="margin-bottom:0;">
                 <div style="display:flex; flex-direction:column; gap:4px;">
-                    <span>Ganancia estimada</span>
-                    <b class="text-green" id="prevGain">+0.00 USDT</b>
+                    <span>Ganancia estimada</span><b class="text-green" id="prevGainOps">+0.00 USDT</b>
                 </div>
                 <div style="display:flex; flex-direction:column; align-items:flex-end; gap:4px;">
-                    <span>Margen</span>
-                    <b class="text-green" id="prevMargin">0.00%</b>
+                    <span>Margen</span><b class="text-green" id="prevMarginOps">0.00%</b>
                 </div>
             </div>
         </div>
-        
-        <button class="btn" id="btnRegistrarOp" onclick="registrar()">Registrar Operación</button>
+        <button class="btn" id="btnRegistrarOp" onclick="registrarOp()">Registrar Operación</button>
     </div>
 
+    <!-- ============================================== -->
+    <!-- MODO CONTABLE (Nuevo)                          -->
+    <!-- ============================================== -->
+    <div id="sec-libro-contab" class="section">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
+            <h3 style="font-size: 14px; margin: 0;">Balance General</h3>
+            <select id="filtroMesContab" onchange="renderLibroContab()" style="width: auto; padding: 4px; font-size: 12px; border-radius: 5px; border: 1px solid var(--card-border); background: var(--input-bg); color: var(--text-main); margin: 0;"></select>
+        </div>
+
+        <div class="dashboard-hero card" style="border-color: #5882ff;">
+            <div class="label">SALDO CONTABLE ACTUAL</div>
+            <div class="amount" style="color: #ffffff;" id="cDashTotal">0.00 USDT</div>
+            <div class="subtitle">Calculado en base a ingresos y egresos</div>
+        </div>
+
+        <div class="metrics-grid">
+            <div class="metric-box" style="border-color: var(--primary-green);">
+                <div class="label">INGRESOS DEL MES</div>
+                <div class="val text-green" id="cDashIngresos">+0.00</div><div class="sub">USDT</div>
+            </div>
+            <div class="metric-box" style="border-color: var(--danger-red);">
+                <div class="label">EGRESOS DEL MES</div>
+                <div class="val negative" id="cDashEgresos">-0.00</div><div class="sub">USDT</div>
+            </div>
+        </div>
+
+        <div class="header-list">
+            <h3>Últimos Movimientos</h3>
+            <a onclick="nav('historial')">Ver todos</a>
+        </div>
+        <div class="card" style="padding: 0;" id="recentContabList"></div>
+        <div class="fab" onclick="nav('operar')">+</div>
+    </div>
+
+    <div id="sec-historial-contab" class="section">
+        <div class="page-header">
+            <div class="back-btn" onclick="nav('libro')">←</div>
+            <h3 style="margin:0;">Historial Contable</h3>
+        </div>
+        <div id="fullContabList"></div>
+        <div class="fab" onclick="nav('operar')">+</div>
+    </div>
+
+    <div id="sec-operar-contab" class="section">
+        <div class="page-header"><h3 style="margin:0; text-align:center; width:100%;">Registrar Movimiento</h3></div>
+        <div class="card">
+            <div class="input-group">
+                <label>Concepto / Detalle</label>
+                <input type="text" id="cConcepto" placeholder="Ej: Pago de Internet, Salario">
+            </div>
+            <div class="input-group">
+                <label>Tipo de Movimiento</label>
+                <select id="cTipo" onchange="updatePreviewContab()">
+                    <option value="egreso">🔴 Egreso (Gasto / Salida)</option>
+                    <option value="ingreso">🟢 Ingreso (Entrada)</option>
+                </select>
+            </div>
+            <div class="input-group">
+                <label>Moneda utilizada</label>
+                <select id="cMoneda" onchange="updatePreviewContab()">
+                    <option value="usdt">🟢 USDT</option>
+                    <option value="usd_bcv">🇺🇸 Dólar a tasa BCV (Gasto en Bs)</option>
+                    <option value="bs">🇻🇪 Bolívares (Monto directo en Bs)</option>
+                    <option value="cop">🇨🇴 Pesos COP</option>
+                </select>
+            </div>
+            <div class="input-group">
+                <label>Monto operado</label>
+                <input type="text" id="cMonto" placeholder="0.00" inputmode="decimal" oninput="updatePreviewContab()">
+            </div>
+            <div class="input-group" style="margin-bottom:0;">
+                <label>¿Es un movimiento fijo automático?</label>
+                <select id="cFrecuencia" onchange="toggleAutoSettings()">
+                    <option value="unico">No, solo esta vez</option>
+                    <option value="mensual">Sí, programar mensualmente</option>
+                </select>
+            </div>
+            <div id="wrapAutoSettings" style="display:none; gap:10px; margin-top:15px; border-top: 1px solid var(--card-border); padding-top: 15px;">
+                <div style="flex:1;">
+                    <label style="font-size:11px;">Día (1-31)</label>
+                    <input type="number" id="cDiaAuto" min="1" max="31" value="1">
+                </div>
+                <div style="flex:1;">
+                    <label style="font-size:11px;">Hora</label>
+                    <input type="time" id="cHoraAuto" value="12:00">
+                </div>
+            </div>
+        </div>
+
+        <div class="card">
+            <div class="preview-row"><span>Equivalencia referencial:</span><span id="cPrevRef">0.00</span></div>
+            <div class="preview-card" style="border: 1px solid #5882ff; padding:10px;">
+                <div class="text-muted" style="font-weight:bold;">Impacto Real en tu Saldo USDT</div>
+                <div class="big-result" id="cPrevUsdt" style="font-size:24px; color:#5882ff;">0.00 USDT</div>
+            </div>
+        </div>
+        
+        <button class="btn" style="background:#5882ff; color:#fff;" onclick="registrarContab()">Guardar Movimiento</button>
+    </div>
+
+    <!-- ============================================== -->
+    <!-- MÓDULOS GLOBALES (Calcular, Tasas, Manual)     -->
+    <!-- ============================================== -->
     <div id="sec-calc" class="section">
         <div class="page-header"><h3 style="margin:0; text-align:center; width:100%;">Calculadora Rápida</h3></div>
         
@@ -461,42 +556,23 @@
         <div class="page-header"><h3 style="margin:0; text-align:center; width:100%;">Manual de Operaciones</h3></div>
         
         <details>
-            <summary><span style="display:flex; align-items:center; gap:10px;"><b style="background:var(--input-bg); padding:6px; border-radius:6px;">🔄</b> 1. Primer paso: tasas al día</span></summary>
+            <summary><span style="display:flex; align-items:center; gap:10px;"><b style="background:var(--input-bg); padding:6px; border-radius:6px;">🔄</b> 1. Modos de Uso</span></summary>
             <div class="manual-body">
-                Lo primero apenas arranques. Ve a <b>Tasas</b> y presiona "Sincronizar Automático" para que la app baje los datos del BCV y Binance. Gracias a la API privada que configuramos en Vercel, la app raspa de forma invisible las tasas P2P de Binance para el Peso Chileno (CLP) y Colombiano (COP). Las demás comisiones (como PayPal y el diferencial de efectivo) ajústalas tú mismo y dale <b>Guardar</b>. Si usas iPhone, puedes escribir comas (,) con tranquilidad; la app las convierte a puntos matemáticos de forma automática.
+                Arriba tienes un interruptor para elegir entre <b>Operaciones</b> (tus negocios de cambio habituales) y <b>Contabilidad</b> (tus ingresos y gastos personales). Son dos libros separados para que mantengas tu capital de trabajo limpiecito.
             </div>
         </details>
 
         <details>
-            <summary><span style="display:flex; align-items:center; gap:10px;"><b style="background:var(--input-bg); padding:6px; border-radius:6px;">💸</b> 2. Tipos de cambio (Pares Racionales)</span></summary>
+            <summary><span style="display:flex; align-items:center; gap:10px;"><b style="background:var(--input-bg); padding:6px; border-radius:6px;">📊</b> 2. Gastos en Dólares a Tasa BCV</span></summary>
             <div class="manual-body">
-                • <b>Compra-Venta Efectivo (Rápida):</b> Para registrar una ganancia veloz. Colocas cuánto efectivo operaste, introduces la tasa a la que compraste y a la que vendiste, y la app te saca el diferencial de ganancia expresado en USDT.<br>
-                • <b>Remesas CLP / COP:</b> El modelo es de comisión directa. Si un cliente te entrega 10.000 CLP y quiere mandar USDT a Venezuela, colocas los 10.000 en el monto. La app busca tu tasa de Binance, lo divide y extrae tu porcentaje de ganancia. Te muestra limpiecito cuántos USDT mandarle y cuántos te quedaron de utilidad.<br>
-                • <b>Arbitraje BCV:</b> Vendes tus USDT a Bs, compras dólares electrónicos en el banco, y los regresas a Binance. La app resta las comisiones bancarias para tu ganancia real.<br>
-                • <b>PayPal/Zelle:</b> El cliente transfiere y tú entregas Bolívares o USDT descontando tu margen de riesgo.
+                Si estás en <i>Contabilidad</i> y compras un TV de 250$ pero pagas en Bs a la tasa del Banco Central, selecciona "Dólar a tasa BCV". La app calculará cuántos Bs gastaste y automáticamente descontará el equivalente exacto en USDT (Binance) para que tu saldo sea matemáticamente perfecto.
             </div>
         </details>
 
         <details>
-            <summary><span style="display:flex; align-items:center; gap:10px;"><b style="background:var(--input-bg); padding:6px; border-radius:6px;">📊</b> 3. Cómo llevar el libro (y editar)</span></summary>
+            <summary><span style="display:flex; align-items:center; gap:10px;"><b style="background:var(--input-bg); padding:6px; border-radius:6px;">🤖</b> 3. Gastos Fijos (Automáticos)</span></summary>
             <div class="manual-body">
-                Registra cada negocio en <b>Operar</b>. Puedes pulsar el botón verde flotante <b>"+"</b> en cualquier momento. La casilla de "Monto principal" cambiará su nombre para orientarte si debes colocar Pesos, Bolívares o Dólares según lo que elijas. Revisa siempre la previsualización verde antes de apretar "Registrar".<br><br>
-                ¿Te equivocaste en un registro? En el historial dale a <b>"Editar"</b> y la app te devolverá los datos para que los corrijas. La app guarda todo automáticamente; a las 12 AM el panel del día arranca en cero, pero tu historial y tu "Utilidad del Mes" siguen acumulando.
-            </div>
-        </details>
-
-        <details>
-            <summary><span style="display:flex; align-items:center; gap:10px;"><b style="background:var(--input-bg); padding:6px; border-radius:6px;">🧮</b> 4. Calcular y Conversor</span></summary>
-            <div class="manual-body">
-                Usa el <b>Conversor Rápido</b> para ver montos a las 3 tasas principales (BCV Dólar, BCV Euro, Binance USDT) de un solo golpe sin salir de la app.<br><br>
-                Usa la pestaña <b>Calculadora de Ahorro</b> para convencer a clientes de pagar en USDT en tiendas que cobran a BCV mostrando el porcentaje y cantidad exacta de dinero que se ahorran.
-            </div>
-        </details>
-
-        <details>
-            <summary><span style="display:flex; align-items:center; gap:10px;"><b style="background:var(--input-bg); padding:6px; border-radius:6px;">⚡</b> 5. Actualización Rápida</span></summary>
-            <div class="manual-body">
-                En la esquina superior derecha de tu pantalla siempre tendrás el botón de <b>Refrescar (🔄)</b>. Úsalo si necesitas recargar la aplicación rápidamente.
+                Puedes programar pagos como el Internet o el Salario. Selecciona "Sí, programar mensualmente", pon el día y la hora. Cada vez que abras la app, el motor revisará si ya pasó esa fecha e inyectará la transacción por ti sin que muevas un dedo.
             </div>
         </details>
 
@@ -529,6 +605,11 @@
 </div>
 
 <script>
+    let appMode = localStorage.getItem('bymo_app_mode') || 'ops';
+    let ops = JSON.parse(localStorage.getItem('bymo_ops')) || [];
+    let contabilidad = JSON.parse(localStorage.getItem('bymo_contab')) || [];
+    let editId = null;
+
     function initTheme() {
         let savedTheme = localStorage.getItem('bymo_theme') || 'auto';
         let themeSelect = document.getElementById('themeSelector');
@@ -562,9 +643,6 @@
         }
     }
 
-    let ops = JSON.parse(localStorage.getItem('bymo_ops')) || [];
-    let editId = null;
-
     function num(id) {
         let val = document.getElementById(id).value;
         if(!val) return 0;
@@ -574,71 +652,94 @@
     window.onload = () => {
         initTheme();
         loadTasas();
-        renderLibro();
+        procesarContabAuto(); 
+        switchAppMode(appMode, true);
         calcularConversor();
     };
 
-    function getCurrencyStr(tipo) {
-        let cur = 'USDT';
-        if(tipo.endsWith('_bs')) cur = 'Bs';
-        if(tipo === 'zelle_ef' || tipo === 'usdt_ef') cur = 'USD Efectivo';
-        if(tipo === 'compra_venta_ef') cur = 'Bs (Ganancia Neta)';
-        if(tipo === 'clp_usdt' || tipo === 'cop_usdt' || tipo === 'ef_usdt' || tipo === 'zelle_usdt' || tipo === 'paypal_usdt') cur = 'USDT';
-        if(tipo === 'usdt_clp') cur = 'CLP';
-        if(tipo === 'usdt_cop' || tipo === 'zelle_cop') cur = 'COP';
-        if(tipo === 'ciclo_calle' || tipo === 'usdt_bcv_usdt') cur = 'USDT';
-        return cur;
+    function switchAppMode(mode, initialLoad = false) {
+        appMode = mode;
+        localStorage.setItem('bymo_app_mode', mode);
+        document.getElementById('btnModeOps').classList.toggle('active', mode === 'ops');
+        document.getElementById('btnModeContab').classList.toggle('active', mode === 'contab');
+        
+        if(!initialLoad) { editId = null; nav('libro'); }
+        else nav('libro');
     }
 
-    function updateMontoLabel() {
-        let tipo = document.getElementById('opTipo').value;
-        let lbl = document.getElementById('lblMonto');
-        if(!lbl) return;
-        
-        let monedaEntrada = "Divisa";
-        if(tipo.startsWith('zelle')) monedaEntrada = "Zelle (USD)";
-        else if(tipo.startsWith('paypal')) monedaEntrada = "PayPal (USD)";
-        else if(tipo.startsWith('ef_')) monedaEntrada = "Efectivo (USD)";
-        else if(tipo.startsWith('usdt_') && tipo !== 'usdt_bcv_usdt') monedaEntrada = "USDT";
-        else if(tipo.startsWith('clp_')) monedaEntrada = "Pesos Chilenos (CLP)";
-        else if(tipo.startsWith('cop_')) monedaEntrada = "Pesos Colombianos (COP)";
+    function procesarContabAuto() {
+        let fijos = JSON.parse(localStorage.getItem('bymo_contab_fijos')) || [];
+        let now = new Date();
+        let changed = false;
 
-        if(tipo === 'compra_venta_ef') {
-            lbl.innerText = "Monto de Efectivo (Capital operado)";
-        } else if(tipo === 'ciclo_calle' || tipo === 'usdt_bcv_usdt') {
-            lbl.innerText = "Capital Inicial (USDT)";
-        } else {
-            lbl.innerText = `Monto en ${monedaEntrada} (EL CLIENTE ENTREGA)`;
+        fijos.forEach(f => {
+            if(!f.nextRun) return;
+            let currentTarget = new Date(f.nextRun);
+            
+            while(now >= currentTarget) {
+                let eq = calcularEquivUsdtContab(f.moneda, f.monto);
+                contabilidad.unshift({
+                    id: Date.now() + Math.random(),
+                    date: currentTarget.toISOString().split('T')[0],
+                    month: `${currentTarget.getFullYear()}-${String(currentTarget.getMonth()+1).padStart(2,'0')}`,
+                    time: currentTarget.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'}),
+                    concepto: f.concepto + ' (Auto)',
+                    tipo: f.tipo,
+                    moneda: f.moneda,
+                    monto: f.monto,
+                    usdtValue: eq.usdtValue,
+                    tasaRef: eq.tasaRef
+                });
+                currentTarget.setMonth(currentTarget.getMonth() + 1);
+                changed = true;
+            }
+            f.nextRun = currentTarget.getTime();
+        });
+
+        if(changed) {
+            localStorage.setItem('bymo_contab', JSON.stringify(contabilidad));
+            localStorage.setItem('bymo_contab_fijos', JSON.stringify(fijos));
         }
     }
 
     function nav(id) {
         document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
         document.querySelectorAll('.nav-item').forEach(i => i.classList.remove('active'));
-        document.getElementById('sec-' + id).classList.add('active');
         
+        let targetId = id;
+        if(id === 'libro' || id === 'operar' || id === 'historial') {
+            targetId = id + '-' + appMode;
+        }
+
+        let sec = document.getElementById('sec-' + targetId);
+        if(sec) sec.classList.add('active');
+        
+        document.getElementById('globalModeToggle').style.display = (id === 'libro' || id === 'operar' || id === 'historial') ? 'flex' : 'none';
         document.getElementById('mainHeader').style.display = (id === 'libro') ? 'block' : 'none';
 
-        if(id === 'historial') {
-            document.querySelectorAll('.nav-item')[0].classList.add('active');
-            renderHistorial();
-        } else {
-            let matched = Array.from(document.querySelectorAll('.nav-item')).find(i => i.innerText.toLowerCase().includes(id.toLowerCase().replace('calc', 'calcular')));
-            if(matched) matched.classList.add('active');
-        }
+        let navIconId = id;
+        if(id === 'historial') navIconId = 'libro';
+        let matched = Array.from(document.querySelectorAll('.nav-item')).find(i => i.innerText.toLowerCase().includes(navIconId.toLowerCase().replace('calc', 'calcular')));
+        if(matched) matched.classList.add('active');
 
         if(id === 'operar') {
-            if(!editId) document.getElementById('btnRegistrarOp').innerText = "Registrar Operación";
-            updateMontoLabel();
-            updatePreview();
+            if(appMode === 'ops') {
+                if(!editId) document.getElementById('btnRegistrarOp').innerText = "Registrar Operación";
+                updatePreviewOps();
+            } else {
+                updatePreviewContab();
+            }
         }
-    }
-
-    function switchCalcTab(tabId) {
-        document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
-        document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
-        document.getElementById('tab-btn-' + tabId).classList.add('active');
-        document.getElementById('calc-tab-' + tabId).classList.add('active');
+        
+        if(id === 'libro') {
+            if(appMode === 'ops') renderLibroOps();
+            else renderLibroContab();
+        }
+        
+        if(id === 'historial') {
+            if(appMode === 'ops') renderHistorialOps();
+            else renderHistorialContab();
+        }
     }
 
     function loadTasas() {
@@ -675,7 +776,7 @@
             if(el) localStorage.setItem(f, el.value);
         });
         calcularConversor();
-        renderLibro();
+        if(appMode === 'ops') renderLibroOps(); else renderLibroContab();
         if(!silent) alert("Tasas Guardadas ✅");
     }
 
@@ -714,9 +815,7 @@
             let dataInt = await resInt.json();
             if(dataInt.cop) document.getElementById('tBinanceCop').value = dataInt.cop;
             if(dataInt.clp) document.getElementById('tBinanceClp').value = dataInt.clp;
-        } catch (e) {
-            console.log("Aviso: No se pudo conectar a la API privada de Vercel (/api/binance).");
-        }
+        } catch (e) {}
 
         if(bcvUsd > 0) { document.getElementById('tBcvUsd').value = bcvUsd; document.getElementById('tDolarElecBs').value = bcvUsd; document.getElementById('calcBcv').value = bcvUsd; }
         if(bcvEur > 0) document.getElementById('tBcvEur').value = bcvEur;
@@ -724,6 +823,13 @@
 
         if(bcvUsd > 0 || binanceUsdt > 0) { saveTasas(true); alert("✅ Tasas sincronizadas."); } else { alert("❌ Error de conexión principal."); }
         btn.innerText = originalText; btn.disabled = false;
+    }
+
+    function switchCalcTab(tabId) {
+        document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+        document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+        document.getElementById('tab-btn-' + tabId).classList.add('active');
+        document.getElementById('calc-tab-' + tabId).classList.add('active');
     }
 
     function calcularConversor() {
@@ -763,223 +869,6 @@
         document.getElementById('calcResDiff').innerText = "+" + diffUsdt.toFixed(2) + " USDT (" + diff.toFixed(2) + "%)";
     }
 
-    function calculateLogic(tipo, monto) {
-        let tUsdt = num('tUsdtBs') || 1;
-        let tZelleBs = num('tZelleBs') || 1;
-        
-        let gain = 0; let recibe = 0; let tasaApli = "1.00"; let comiStr = "-0.00";
-
-        if (tipo === 'zelle_usdt') {
-            let com = num('tZelleUsdtCom') || 0;
-            gain = monto * (com / 100); recibe = monto - gain; comiStr = `-${gain.toFixed(2)} USDT`;
-        } else if (tipo === 'zelle_ef') {
-            let com = num('tZelleEf') || 0;
-            gain = monto * (com / 100); recibe = monto - gain; comiStr = `-${gain.toFixed(2)} USD`;
-        } else if (tipo === 'zelle_bs') {
-            gain = monto - ((monto * tZelleBs) / tUsdt); recibe = monto * tZelleBs; tasaApli = tZelleBs.toFixed(2); comiStr = "Dif. Tasa";
-        } else if (tipo === 'paypal_bs') {
-            let tPaypalBs = num('tPaypalBs') || 1;
-            gain = monto - ((monto * tPaypalBs) / tUsdt); recibe = monto * tPaypalBs; tasaApli = tPaypalBs.toFixed(2); comiStr = "Dif. Tasa";
-        } else if (tipo === 'paypal_usdt') {
-            let comPaypalUsdt = num('tPaypalUsdtCom') || 0;
-            gain = monto * (comPaypalUsdt / 100); recibe = monto - gain; comiStr = `-${gain.toFixed(2)} USDT`;
-        } else if (tipo === 'ef_usdt') {
-            let comEfUsdt = num('tEfUsdtCom') || 0;
-            gain = monto * (comEfUsdt / 100); recibe = monto - gain; comiStr = `-${gain.toFixed(2)} USDT`;
-        } else if (tipo === 'usdt_ef') {
-            let comUsdtEf = num('tUsdtEfCom') || 0;
-            gain = monto * (comUsdtEf / 100); recibe = monto - gain; comiStr = `-${gain.toFixed(2)} USD`;
-        } else if (tipo === 'compra_venta_ef') {
-            let tEfCompraOp = num('opTasaCompra') || 1;
-            let tEfVentaOp = num('opTasaVenta') || 1;
-            let gananciaBs = (monto * tEfVentaOp) - (monto * tEfCompraOp);
-            gain = gananciaBs / tUsdt; recibe = gananciaBs; 
-            tasaApli = `${tEfCompraOp} / ${tEfVentaOp}`; comiStr = "Diferencial";
-        } else if (tipo === 'clp_usdt') {
-            let tBinClp = num('tBinanceClp') || 1;
-            let tClpCom = num('tClpComision') || 0; 
-            let usdt_brutos = monto / tBinClp; 
-            gain = usdt_brutos * (tClpCom / 100);
-            recibe = usdt_brutos - gain;
-            tasaApli = tBinClp.toFixed(2); comiStr = `Com. ${tClpCom}%`;
-        } else if (tipo === 'usdt_clp') {
-            let tBinClp = num('tBinanceClp') || 1;
-            let tClpCom = num('tClpComision') || 0;
-            gain = monto * (tClpCom / 100); 
-            let usdt_netos = monto - gain;
-            recibe = usdt_netos * tBinClp;
-            tasaApli = tBinClp.toFixed(2); comiStr = `Com. ${tClpCom}%`;
-        } else if (tipo === 'cop_usdt') {
-            let tBinCop = num('tBinanceCop') || 1;
-            let tCopCom = num('tCopComision') || 0; 
-            let usdt_brutos = monto / tBinCop; 
-            gain = usdt_brutos * (tCopCom / 100);
-            recibe = usdt_brutos - gain;
-            tasaApli = tBinCop.toFixed(2); comiStr = `Com. ${tCopCom}%`;
-        } else if (tipo === 'usdt_cop') {
-            let tBinCop = num('tBinanceCop') || 1;
-            let tCopCom = num('tCopComision') || 0;
-            gain = monto * (tCopCom / 100); 
-            let usdt_netos = monto - gain;
-            recibe = usdt_netos * tBinCop;
-            tasaApli = tBinCop.toFixed(2); comiStr = `Com. ${tCopCom}%`;
-        } else if (tipo === 'zelle_cop') {
-            let tZelleCop = num('tZelleCop') || 3500;
-            gain = monto * 0.02; recibe = monto * tZelleCop; tasaApli = tZelleCop; comiStr = "-";
-        } else if (tipo === 'ciclo_calle') {
-            let tBsEfCompra = num('opTasaCompra') || 1; 
-            let comEfUsdt = num('tEfUsdtCom') || 0; 
-            let bsObtenidos = monto * tUsdt; 
-            let efectivoComprado = bsObtenidos / tBsEfCompra; 
-            let usdtFinal = efectivoComprado * (1 - (comEfUsdt / 100)); 
-            gain = usdtFinal - monto; 
-            recibe = usdtFinal; 
-            tasaApli = `Calle: ${tBsEfCompra}`; 
-            comiStr = `Com: ${comEfUsdt}%`;
-        } else if (tipo === 'usdt_bcv_usdt') {
-            let tDolarElecBs = num('tDolarElecBs') || 1;
-            let comBancoElec = num('comBancoElec') || 0;
-            let comBinanceElec = num('comBinanceElec') || 0;
-            let bsObtenidos = monto * tUsdt; 
-            let costoPorUsdBanco = tDolarElecBs * (1 + (comBancoElec / 100));
-            let usdBancoComprados = bsObtenidos / costoPorUsdBanco;
-            let usdtFinal = usdBancoComprados * (1 - (comBinanceElec / 100));
-            gain = usdtFinal - monto; recibe = usdtFinal; tasaApli = "Ciclo"; comiStr = "Bco+Bin";
-        }
-        
-        let margin = 0;
-        if(monto > 0) {
-            if(tipo === 'clp_usdt' || tipo === 'cop_usdt') {
-                margin = (gain / (monto / num(tipo === 'clp_usdt' ? 'tBinanceClp' : 'tBinanceCop'))) * 100;
-            } else {
-                margin = (gain / monto) * 100; 
-            }
-        }
-
-        return { gain, recibe, tasaApli, comiStr, margin };
-    }
-
-    function updatePreview() {
-        let tipo = document.getElementById('opTipo').value;
-        updateMontoLabel();
-        
-        document.getElementById('dynamicRates').style.display = (tipo === 'compra_venta_ef' || tipo === 'ciclo_calle') ? 'flex' : 'none';
-        
-        document.getElementById('wrapTasaVenta').style.display = (tipo === 'ciclo_calle') ? 'none' : 'block';
-        if (tipo === 'ciclo_calle') {
-            document.getElementById('lblTasaCompra').innerText = "Tasa Calle (Bs/$)";
-        } else {
-            document.getElementById('lblTasaCompra').innerText = "Tasa Compra (Bs/$)";
-        }
-        
-        let monto = num('opMonto');
-        let res = calculateLogic(tipo, monto);
-        
-        document.getElementById('prevTasa').innerText = res.tasaApli;
-        document.getElementById('prevCom').innerText = res.comiStr;
-        
-        let cur = getCurrencyStr(tipo);
-        
-        let labelRecibe = document.getElementById('labelRecibe');
-        if(tipo === 'compra_venta_ef' || tipo === 'ciclo_calle' || tipo === 'usdt_bcv_usdt') {
-            labelRecibe.innerText = "Resultado (YO RECIBO)";
-        } else {
-            labelRecibe.innerText = "Monto a Transferir (YO ENTREGO)";
-        }
-
-        document.getElementById('prevRecibe').innerText = res.recibe.toLocaleString('es-VE', {minimumFractionDigits: 2, maximumFractionDigits:2}) + " " + cur;
-        
-        document.getElementById('prevGain').innerText = (res.gain >= 0 ? '+' : '') + res.gain.toFixed(2) + " USDT";
-        document.getElementById('prevGain').className = res.gain >= 0 ? "text-green" : "text-red";
-        
-        document.getElementById('prevMargin').innerText = res.margin.toFixed(2) + "%";
-        document.getElementById('prevMargin').className = res.margin >= 0 ? "text-green" : "text-red";
-    }
-
-    function editar(id) {
-        let op = ops.find(o => o.id === id);
-        if(!op) return;
-        
-        document.getElementById('opConcepto').value = op.concepto;
-        document.getElementById('opMonto').value = op.monto;
-        
-        let select = document.getElementById('opTipo');
-        for(let i=0; i<select.options.length; i++){
-            if(select.options[i].text === op.tipo) select.selectedIndex = i;
-        }
-        
-        editId = id;
-        document.getElementById('btnRegistrarOp').innerText = "Actualizar Operación";
-        nav('operar');
-    }
-
-    function registrar() {
-        let concepto = document.getElementById('opConcepto').value || "Varios";
-        let tipoVal = document.getElementById('opTipo').value;
-        let tipoText = document.getElementById('opTipo').options[document.getElementById('opTipo').selectedIndex].text;
-        let monto = num('opMonto');
-        if(monto <= 0) return alert("Ingresa un monto válido");
-
-        let res = calculateLogic(tipoVal, monto);
-        let cur = getCurrencyStr(tipoVal);
-
-        if(editId) {
-            let index = ops.findIndex(o => o.id === editId);
-            if(index !== -1) {
-                ops[index].concepto = concepto;
-                ops[index].tipo = tipoText;
-                ops[index].monto = monto;
-                ops[index].gain = res.gain;
-                ops[index].recibe = res.recibe;
-                ops[index].tasaApli = res.tasaApli;
-                ops[index].cur = cur;
-            }
-            editId = null;
-            document.getElementById('btnRegistrarOp').innerText = "Registrar Operación";
-        } else {
-            let d = new Date();
-            let stringFecha = `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
-            let stringMes = `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}`;
-
-            ops.unshift({
-                id: Date.now(), date: stringFecha, month: stringMes, time: d.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'}),
-                concepto: concepto, tipo: tipoText, monto: monto, gain: res.gain,
-                recibe: res.recibe, tasaApli: res.tasaApli, cur: cur
-            });
-        }
-        
-        localStorage.setItem('bymo_ops', JSON.stringify(ops));
-        
-        document.getElementById('opConcepto').value = "";
-        document.getElementById('opMonto').value = "";
-        document.getElementById('opTasaCompra').value = "";
-        document.getElementById('opTasaVenta').value = "";
-        
-        renderLibro();
-        renderHistorial();
-        nav('libro');
-    }
-
-    function enviarWhatsApp(id) {
-        let op = ops.find(o => o.id === id);
-        if(!op) return;
-        
-        let recibeStr = op.recibe !== undefined ? op.recibe.toLocaleString('es-VE', {minimumFractionDigits: 2, maximumFractionDigits:2}) : "N/D";
-        let tasaStr = op.tasaApli !== undefined ? op.tasaApli : "N/D";
-        let curStr = op.cur || "";
-
-        let texto = `*CONTABLE BM - Recibo de Operación* 📄\n\n`;
-        texto += `*Concepto:* ${op.concepto}\n`;
-        texto += `*Operación:* ${op.tipo}\n`;
-        texto += `*Monto Base:* ${op.monto}\n`;
-        texto += `*Tasa de Cambio Aplicada:* ${tasaStr}\n`;
-        texto += `*Monto a Recibir:* ${recibeStr} ${curStr}\n\n`;
-        texto += `_¡Gracias por tu confianza!_`;
-
-        let url = `https://wa.me/?text=${encodeURIComponent(texto)}`;
-        window.open(url, '_blank');
-    }
-
     function compartirConversor() {
         let monto = document.getElementById('convMonto').value || 1;
         let modo = document.getElementById('convModo').value;
@@ -994,22 +883,124 @@
         texto += `🇪🇺 Euro BCV: ${eur}\n`;
         texto += `🟢 USDT Binance: ${usdt}\n\n`;
         texto += `_Calculado con la tasa del momento._`;
-
-        let url = `https://wa.me/?text=${encodeURIComponent(texto)}`;
-        window.open(url, '_blank');
+        window.open(`https://wa.me/?text=${encodeURIComponent(texto)}`, '_blank');
     }
 
-    function getTodayStr() {
-        let d = new Date(); return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
-    }
-    function getMonthStr() {
-        let d = new Date(); return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}`;
+    function getTodayStr() { let d = new Date(); return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`; }
+    function getMonthStr() { let d = new Date(); return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}`; }
+
+    // ==========================================
+    // LOGICA MODO OPERACIONES
+    // ==========================================
+    function getCurrencyStr(tipo) {
+        let cur = 'USDT';
+        if(tipo.endsWith('_bs')) cur = 'Bs';
+        if(tipo === 'zelle_ef' || tipo === 'usdt_ef') cur = 'USD Efectivo';
+        if(tipo === 'compra_venta_ef') cur = 'Bs (Ganancia Neta)';
+        if(tipo === 'clp_usdt' || tipo === 'cop_usdt' || tipo === 'ef_usdt' || tipo === 'zelle_usdt' || tipo === 'paypal_usdt') cur = 'USDT';
+        if(tipo === 'usdt_clp') cur = 'CLP';
+        if(tipo === 'usdt_cop' || tipo === 'zelle_cop') cur = 'COP';
+        if(tipo === 'ciclo_calle' || tipo === 'usdt_bcv_usdt') cur = 'USDT';
+        return cur;
     }
 
-    function renderLibro() {
-        let selectFecha = document.getElementById('filtroFecha');
-        let today = getTodayStr();
-        let currentMonth = getMonthStr();
+    function calculateLogicOps(tipo, monto) {
+        let tUsdt = num('tUsdtBs') || 1;
+        let tZelleBs = num('tZelleBs') || 1;
+        
+        let gain = 0; let recibe = 0; let tasaApli = "1.00"; let comiStr = "-0.00";
+
+        if (tipo === 'zelle_usdt') { let com = num('tZelleUsdtCom') || 0; gain = monto * (com / 100); recibe = monto - gain; comiStr = `-${gain.toFixed(2)} USDT`; }
+        else if (tipo === 'zelle_ef') { let com = num('tZelleEf') || 0; gain = monto * (com / 100); recibe = monto - gain; comiStr = `-${gain.toFixed(2)} USD`; }
+        else if (tipo === 'zelle_bs') { gain = monto - ((monto * tZelleBs) / tUsdt); recibe = monto * tZelleBs; tasaApli = tZelleBs.toFixed(2); comiStr = "Dif. Tasa"; }
+        else if (tipo === 'paypal_bs') { let tPaypalBs = num('tPaypalBs') || 1; gain = monto - ((monto * tPaypalBs) / tUsdt); recibe = monto * tPaypalBs; tasaApli = tPaypalBs.toFixed(2); comiStr = "Dif. Tasa"; }
+        else if (tipo === 'paypal_usdt') { let comPaypalUsdt = num('tPaypalUsdtCom') || 0; gain = monto * (comPaypalUsdt / 100); recibe = monto - gain; comiStr = `-${gain.toFixed(2)} USDT`; }
+        else if (tipo === 'ef_usdt') { let comEfUsdt = num('tEfUsdtCom') || 0; gain = monto * (comEfUsdt / 100); recibe = monto - gain; comiStr = `-${gain.toFixed(2)} USDT`; }
+        else if (tipo === 'usdt_ef') { let comUsdtEf = num('tUsdtEfCom') || 0; gain = monto * (comUsdtEf / 100); recibe = monto - gain; comiStr = `-${gain.toFixed(2)} USD`; }
+        else if (tipo === 'compra_venta_ef') { let tEfCompraOp = num('opTasaCompra') || 1; let tEfVentaOp = num('opTasaVenta') || 1; let gananciaBs = (monto * tEfVentaOp) - (monto * tEfCompraOp); gain = gananciaBs / tUsdt; recibe = gananciaBs; tasaApli = `${tEfCompraOp} / ${tEfVentaOp}`; comiStr = "Diferencial"; }
+        else if (tipo === 'clp_usdt') { let tBinClp = num('tBinanceClp') || 1; let tClpCom = num('tClpComision') || 0; let usdt_brutos = monto / tBinClp; gain = usdt_brutos * (tClpCom / 100); recibe = usdt_brutos - gain; tasaApli = tBinClp.toFixed(2); comiStr = `Com. ${tClpCom}%`; }
+        else if (tipo === 'usdt_clp') { let tBinClp = num('tBinanceClp') || 1; let tClpCom = num('tClpComision') || 0; gain = monto * (tClpCom / 100); let usdt_netos = monto - gain; recibe = usdt_netos * tBinClp; tasaApli = tBinClp.toFixed(2); comiStr = `Com. ${tClpCom}%`; }
+        else if (tipo === 'cop_usdt') { let tBinCop = num('tBinanceCop') || 1; let tCopCom = num('tCopComision') || 0; let usdt_brutos = monto / tBinCop; gain = usdt_brutos * (tCopCom / 100); recibe = usdt_brutos - gain; tasaApli = tBinCop.toFixed(2); comiStr = `Com. ${tCopCom}%`; }
+        else if (tipo === 'usdt_cop') { let tBinCop = num('tBinanceCop') || 1; let tCopCom = num('tCopComision') || 0; gain = monto * (tCopCom / 100); let usdt_netos = monto - gain; recibe = usdt_netos * tBinCop; tasaApli = tBinCop.toFixed(2); comiStr = `Com. ${tCopCom}%`; }
+        else if (tipo === 'zelle_cop') { let tZelleCop = num('tZelleCop') || 3500; gain = monto * 0.02; recibe = monto * tZelleCop; tasaApli = tZelleCop; comiStr = "-"; }
+        else if (tipo === 'ciclo_calle') { let tBsEfCompra = num('opTasaCompra') || 1; let comEfUsdt = num('tEfUsdtCom') || 0; let bsObtenidos = monto * tUsdt; let efectivoComprado = bsObtenidos / tBsEfCompra; let usdtFinal = efectivoComprado * (1 - (comEfUsdt / 100)); gain = usdtFinal - monto; recibe = usdtFinal; tasaApli = `Calle: ${tBsEfCompra}`; comiStr = `Com: ${comEfUsdt}%`; }
+        else if (tipo === 'usdt_bcv_usdt') { let tDolarElecBs = num('tDolarElecBs') || 1; let comBancoElec = num('comBancoElec') || 0; let comBinanceElec = num('comBinanceElec') || 0; let bsObtenidos = monto * tUsdt; let costoPorUsdBanco = tDolarElecBs * (1 + (comBancoElec / 100)); let usdBancoComprados = bsObtenidos / costoPorUsdBanco; let usdtFinal = usdBancoComprados * (1 - (comBinanceElec / 100)); gain = usdtFinal - monto; recibe = usdtFinal; tasaApli = "Ciclo"; comiStr = "Bco+Bin"; }
+        
+        let margin = 0;
+        if(monto > 0) {
+            if(tipo === 'clp_usdt' || tipo === 'cop_usdt') { margin = (gain / (monto / num(tipo === 'clp_usdt' ? 'tBinanceClp' : 'tBinanceCop'))) * 100; }
+            else { margin = (gain / monto) * 100; }
+        }
+        return { gain, recibe, tasaApli, comiStr, margin };
+    }
+
+    function updatePreviewOps() {
+        let tipo = document.getElementById('opTipo').value;
+        let lbl = document.getElementById('lblMonto');
+        let monedaEntrada = "Divisa";
+        if(tipo.startsWith('zelle')) monedaEntrada = "Zelle (USD)";
+        else if(tipo.startsWith('paypal')) monedaEntrada = "PayPal (USD)";
+        else if(tipo.startsWith('ef_')) monedaEntrada = "Efectivo (USD)";
+        else if(tipo.startsWith('usdt_') && tipo !== 'usdt_bcv_usdt') monedaEntrada = "USDT";
+        else if(tipo.startsWith('clp_')) monedaEntrada = "Pesos Chilenos (CLP)";
+        else if(tipo.startsWith('cop_')) monedaEntrada = "Pesos Colombianos (COP)";
+
+        if(tipo === 'compra_venta_ef') lbl.innerText = "Monto de Efectivo (Capital operado)";
+        else if(tipo === 'ciclo_calle' || tipo === 'usdt_bcv_usdt') lbl.innerText = "Capital Inicial (USDT)";
+        else lbl.innerText = `Monto en ${monedaEntrada} (EL CLIENTE ENTREGA)`;
+
+        document.getElementById('dynamicRatesOps').style.display = (tipo === 'compra_venta_ef' || tipo === 'ciclo_calle') ? 'flex' : 'none';
+        document.getElementById('wrapTasaVenta').style.display = (tipo === 'ciclo_calle') ? 'none' : 'block';
+        document.getElementById('lblTasaCompra').innerText = (tipo === 'ciclo_calle') ? "Tasa Calle (Bs/$)" : "Tasa Compra (Bs/$)";
+        
+        let monto = num('opMonto');
+        let res = calculateLogicOps(tipo, monto);
+        
+        document.getElementById('prevTasaOps').innerText = res.tasaApli;
+        document.getElementById('prevComOps').innerText = res.comiStr;
+        
+        let cur = getCurrencyStr(tipo);
+        let labelRecibe = document.getElementById('labelRecibeOps');
+        if(tipo === 'compra_venta_ef' || tipo === 'ciclo_calle' || tipo === 'usdt_bcv_usdt') labelRecibe.innerText = "Resultado (YO RECIBO)";
+        else labelRecibe.innerText = "Monto a Transferir (YO ENTREGO)";
+
+        document.getElementById('prevRecibeOps').innerText = res.recibe.toLocaleString('es-VE', {minimumFractionDigits: 2, maximumFractionDigits:2}) + " " + cur;
+        document.getElementById('prevGainOps').innerText = (res.gain >= 0 ? '+' : '') + res.gain.toFixed(2) + " USDT";
+        document.getElementById('prevGainOps').className = res.gain >= 0 ? "text-green" : "text-red";
+        document.getElementById('prevMarginOps').innerText = res.margin.toFixed(2) + "%";
+        document.getElementById('prevMarginOps').className = res.margin >= 0 ? "text-green" : "text-red";
+    }
+
+    function registrarOp() {
+        let concepto = document.getElementById('opConcepto').value || "Varios";
+        let tipoVal = document.getElementById('opTipo').value;
+        let tipoText = document.getElementById('opTipo').options[document.getElementById('opTipo').selectedIndex].text;
+        let monto = num('opMonto');
+        if(monto <= 0) return alert("Ingresa un monto válido");
+
+        let res = calculateLogicOps(tipoVal, monto);
+        let cur = getCurrencyStr(tipoVal);
+
+        if(editId) {
+            let index = ops.findIndex(o => o.id === editId);
+            if(index !== -1) { ops[index].concepto = concepto; ops[index].tipo = tipoText; ops[index].monto = monto; ops[index].gain = res.gain; ops[index].recibe = res.recibe; ops[index].tasaApli = res.tasaApli; ops[index].cur = cur; }
+            editId = null;
+        } else {
+            let d = new Date();
+            ops.unshift({
+                id: Date.now(), date: getTodayStr(), month: getMonthStr(), time: d.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'}),
+                concepto: concepto, tipo: tipoText, monto: monto, gain: res.gain, recibe: res.recibe, tasaApli: res.tasaApli, cur: cur
+            });
+        }
+        localStorage.setItem('bymo_ops', JSON.stringify(ops));
+        
+        document.getElementById('opConcepto').value = ""; document.getElementById('opMonto').value = ""; document.getElementById('opTasaCompra').value = ""; document.getElementById('opTasaVenta').value = "";
+        nav('libro');
+    }
+
+    function renderLibroOps() {
+        let selectFecha = document.getElementById('filtroFechaOps');
+        let today = getTodayStr(); let currentMonth = getMonthStr();
         
         let fechasUnicas = [...new Set(ops.map(o => o.date))];
         if (!fechasUnicas.includes(today)) fechasUnicas.unshift(today);
@@ -1025,10 +1016,9 @@
         });
         fechaSeleccionada = selectFecha.value;
         
-        document.getElementById('tituloDashboard').innerText = (fechaSeleccionada === today) ? "UTILIDAD DEL DÍA" : "UTILIDAD (FECHA)";
+        document.getElementById('tituloDashboardOps').innerText = (fechaSeleccionada === today) ? "UTILIDAD DEL DÍA" : "UTILIDAD (FECHA)";
 
-        let dayGain = 0; let dayCount = 0;
-        let monthGain = 0; let totalVol = 0; let allGain = 0;
+        let dayGain = 0; let dayCount = 0; let monthGain = 0; let totalVol = 0; let allGain = 0;
 
         ops.forEach(o => {
             if(!o.date) o.date = today;
@@ -1046,88 +1036,204 @@
             allGain += o.gain;
         });
 
-        document.getElementById('dashDayVal').innerText = (dayGain>=0?'+':'') + dayGain.toFixed(2) + " USDT";
-        document.getElementById('dashDayVal').className = "amount " + (dayGain>=0?"text-green":"text-red");
-        document.getElementById('dashDayCount').innerText = dayCount + " operaciones";
+        document.getElementById('dashDayValOps').innerText = (dayGain>=0?'+':'') + dayGain.toFixed(2) + " USDT";
+        document.getElementById('dashDayValOps').className = "amount " + (dayGain>=0?"text-green":"text-red");
+        document.getElementById('dashDayCountOps').innerText = dayCount + " operaciones";
 
-        document.getElementById('dashMonthVal').innerText = (monthGain>=0?'+':'') + monthGain.toFixed(2);
-        document.getElementById('dashMonthVal').className = "val " + (monthGain>=0?"text-green":"text-red");
+        document.getElementById('dashMonthValOps').innerText = (monthGain>=0?'+':'') + monthGain.toFixed(2);
+        document.getElementById('dashMonthValOps').className = "val " + (monthGain>=0?"text-green":"text-red");
         
         let capBase = num('tCapitalBase') || 0;
-        let capActual = capBase + allGain;
-        document.getElementById('dashCapVal').innerText = capActual.toFixed(2);
-
-        document.getElementById('dashVolVal').innerText = totalVol.toFixed(2);
-        
+        document.getElementById('dashCapValOps').innerText = (capBase + allGain).toFixed(2);
+        document.getElementById('dashVolValOps').innerText = totalVol.toFixed(2);
         let avgMargin = totalVol > 0 ? (allGain / totalVol) * 100 : 0;
-        document.getElementById('dashMarginVal').innerText = avgMargin.toFixed(2) + "%";
+        document.getElementById('dashMarginValOps').innerText = avgMargin.toFixed(2) + "%";
 
-        let opsFiltradas = ops.filter(o => o.date === fechaSeleccionada);
-        let recents = opsFiltradas.slice(0, 3);
-        let listHtml = "";
-        if(recents.length === 0) listHtml = "<p class='text-muted' style='text-align:center; padding:20px;'>No hay operaciones.</p>";
-        recents.forEach(o => {
-            listHtml += `
-            <div class="op-item">
-                <div class="op-top"><span>${o.time} • ${o.concepto}</span></div>
-                <div class="op-mid">
-                    <div class="op-title">${o.tipo.split(' ⮕ ')[0]} ⮕ ${o.tipo.split(' ⮕ ')[1]||o.tipo}</div>
-                    <div class="op-gain ${o.gain>=0?'text-green':'text-red'}">${o.gain>=0?'+':''}${o.gain.toFixed(2)}</div>
-                </div>
-                <div class="op-bot">
-                    <span>Base: ${o.monto||0}</span>
-                    <div style="display:flex; align-items:center; gap:10px;">
-                        <span style="color:#25D366; cursor:pointer; font-weight:bold;" onclick="enviarWhatsApp(${o.id})">📲 WA</span>
-                        <span style="color:#007bff; cursor:pointer; font-weight:bold;" onclick="editar(${o.id})">Editar</span>
-                        <span style="color:#ff4d4f; cursor:pointer; font-weight:bold;" onclick="borrar(${o.id})">Borrar</span>
-                    </div>
-                </div>
-            </div>`;
+        let opsFiltradas = ops.filter(o => o.date === fechaSeleccionada).slice(0, 3);
+        let listHtml = opsFiltradas.length === 0 ? "<p class='text-muted' style='text-align:center; padding:20px;'>No hay operaciones.</p>" : "";
+        opsFiltradas.forEach(o => {
+            listHtml += `<div class="op-item"><div class="op-top"><span>${o.time} • ${o.concepto}</span></div><div class="op-mid"><div class="op-title">${o.tipo.split(' ⮕ ')[0]} ⮕ ${o.tipo.split(' ⮕ ')[1]||o.tipo}</div><div class="op-gain ${o.gain>=0?'text-green':'text-red'}">${o.gain>=0?'+':''}${o.gain.toFixed(2)}</div></div><div class="op-bot"><span>Base: ${o.monto||0}</span><div style="display:flex; align-items:center; gap:10px;"><span style="color:#25D366; cursor:pointer; font-weight:bold;" onclick="enviarWhatsAppOps(${o.id})">📲 WA</span><span style="color:#007bff; cursor:pointer; font-weight:bold;" onclick="editarOps(${o.id})">Editar</span><span style="color:#ff4d4f; cursor:pointer; font-weight:bold;" onclick="borrarOps(${o.id})">Borrar</span></div></div></div>`;
         });
         document.getElementById('recentOpsList').innerHTML = listHtml;
     }
 
-    function renderHistorial() {
-        let selectFecha = document.getElementById('filtroFecha');
-        let fechaSeleccionada = selectFecha.value || getTodayStr();
-
+    function renderHistorialOps() {
+        let selectFecha = document.getElementById('filtroFechaOps');
+        let fechaSeleccionada = selectFecha ? selectFecha.value : getTodayStr();
         let opsFiltradas = ops.filter(o => o.date === fechaSeleccionada);
-        let totalGain = 0;
-        
-        let html = "";
+        let totalGain = 0; let html = "";
         opsFiltradas.forEach(o => {
             totalGain += o.gain;
-            html += `
-            <div class="card" style="padding:12px; border-left:4px solid ${o.gain>=0?'var(--primary-green)':'var(--danger-red)'}; margin-bottom:10px;">
-                <div class="op-top"><span>${o.time} • ${o.concepto}</span></div>
-                <div class="op-mid">
-                    <div class="op-title">${o.tipo}</div>
-                    <div class="op-gain ${o.gain>=0?'text-green':'text-red'}">${o.gain>=0?'+':''}${o.gain.toFixed(2)} USDT</div>
-                </div>
-                <div class="op-bot" style="margin-top:6px;">
-                    <span>Base Inversión: ${o.monto||0}</span>
-                    <div style="display:flex; align-items:center; gap:10px;">
-                        <span style="color:#25D366; cursor:pointer; font-weight:bold;" onclick="enviarWhatsApp(${o.id})">📲 WhatsApp</span>
-                        <span style="color:#007bff; cursor:pointer; font-weight:bold;" onclick="editar(${o.id})">Editar</span>
-                        <span style="color:#ff4d4f; cursor:pointer; font-weight:bold;" onclick="borrar(${o.id})">Borrar</span>
-                    </div>
-                </div>
-            </div>`;
+            html += `<div class="card" style="padding:12px; border-left:4px solid ${o.gain>=0?'var(--primary-green)':'var(--danger-red)'}; margin-bottom:10px;"><div class="op-top"><span>${o.time} • ${o.concepto}</span></div><div class="op-mid"><div class="op-title">${o.tipo}</div><div class="op-gain ${o.gain>=0?'text-green':'text-red'}">${o.gain>=0?'+':''}${o.gain.toFixed(2)} USDT</div></div><div class="op-bot" style="margin-top:6px;"><span>Base Inversión: ${o.monto||0}</span><div style="display:flex; align-items:center; gap:10px;"><span style="color:#25D366; cursor:pointer; font-weight:bold;" onclick="enviarWhatsAppOps(${o.id})">📲 WhatsApp</span><span style="color:#007bff; cursor:pointer; font-weight:bold;" onclick="editarOps(${o.id})">Editar</span><span style="color:#ff4d4f; cursor:pointer; font-weight:bold;" onclick="borrarOps(${o.id})">Borrar</span></div></div></div>`;
         });
-        
         if(opsFiltradas.length === 0) html = "<p class='text-muted' style='text-align:center;'>No hay operaciones en esta fecha.</p>";
         document.getElementById('fullOpsList').innerHTML = html;
-        document.getElementById('histCount').innerText = opsFiltradas.length;
-        document.getElementById('histNet').innerText = (totalGain>=0?'+':'') + totalGain.toFixed(2) + " USDT";
-        document.getElementById('histNet').className = "val " + (totalGain>=0?"text-green":"text-red");
+        document.getElementById('histCountOps').innerText = opsFiltradas.length;
+        document.getElementById('histNetOps').innerText = (totalGain>=0?'+':'') + totalGain.toFixed(2) + " USDT";
+        document.getElementById('histNetOps').className = "val " + (totalGain>=0?"text-green":"text-red");
     }
 
-    function borrar(id) {
+    function editarOps(id) {
+        let op = ops.find(o => o.id === id);
+        if(!op) return;
+        document.getElementById('opConcepto').value = op.concepto;
+        document.getElementById('opMonto').value = op.monto;
+        let select = document.getElementById('opTipo');
+        for(let i=0; i<select.options.length; i++){ if(select.options[i].text === op.tipo) select.selectedIndex = i; }
+        editId = id; document.getElementById('btnRegistrarOp').innerText = "Actualizar Operación"; nav('operar');
+    }
+
+    function borrarOps(id) {
         if(confirm("¿Seguro que quieres borrar este registro?")) {
-            ops = ops.filter(o => o.id !== id);
-            localStorage.setItem('bymo_ops', JSON.stringify(ops));
-            renderHistorial();
-            renderLibro();
+            ops = ops.filter(o => o.id !== id); localStorage.setItem('bymo_ops', JSON.stringify(ops));
+            nav('historial');
+        }
+    }
+
+    function enviarWhatsAppOps(id) {
+        let op = ops.find(o => o.id === id); if(!op) return;
+        let recibeStr = op.recibe !== undefined ? op.recibe.toLocaleString('es-VE', {minimumFractionDigits: 2, maximumFractionDigits:2}) : "N/D";
+        let tasaStr = op.tasaApli !== undefined ? op.tasaApli : "N/D";
+        let texto = `*CONTABLE BM - Recibo de Operación* 📄\n\n*Concepto:* ${op.concepto}\n*Operación:* ${op.tipo}\n*Monto Base:* ${op.monto}\n*Tasa Aplicada:* ${tasaStr}\n*Monto a Recibir:* ${recibeStr} ${op.cur||""}\n\n_¡Gracias por tu confianza!_`;
+        window.open(`https://wa.me/?text=${encodeURIComponent(texto)}`, '_blank');
+    }
+
+    // ==========================================
+    // LOGICA MODO CONTABLE (NUEVO)
+    // ==========================================
+    function calcularEquivUsdtContab(moneda, monto) {
+        let tUsdt = num('tUsdtBs') || 1;
+        let tBcv = num('tBcvUsd') || 1;
+        let tCop = num('tBinanceCop') || 1;
+
+        if(moneda === 'usdt') return { usdtValue: monto, tasaRef: '1:1' };
+        if(moneda === 'usd_bcv') {
+            let bs = monto * tBcv;
+            return { usdtValue: bs / tUsdt, tasaRef: `BCV:${tBcv} | Bin:${tUsdt}` };
+        }
+        if(moneda === 'bs') return { usdtValue: monto / tUsdt, tasaRef: `Bin:${tUsdt}` };
+        if(moneda === 'cop') return { usdtValue: monto / tCop, tasaRef: `Bin:${tCop}` };
+        return { usdtValue: 0, tasaRef: '-' };
+    }
+
+    function toggleAutoSettings() {
+        let f = document.getElementById('cFrecuencia').value;
+        document.getElementById('wrapAutoSettings').style.display = (f === 'mensual') ? 'flex' : 'none';
+    }
+
+    function updatePreviewContab() {
+        let moneda = document.getElementById('cMoneda').value;
+        let monto = num('cMonto');
+        let tipo = document.getElementById('cTipo').value;
+        
+        let eq = calcularEquivUsdtContab(moneda, monto);
+        document.getElementById('cPrevRef').innerText = eq.tasaRef;
+        document.getElementById('cPrevUsdt').innerText = (tipo==='egreso'?'-':'+') + eq.usdtValue.toFixed(2) + " USDT";
+        document.getElementById('cPrevUsdt').style.color = (tipo==='egreso') ? 'var(--danger-red)' : 'var(--primary-green)';
+    }
+
+    function registrarContab() {
+        let concepto = document.getElementById('cConcepto').value || "Movimiento General";
+        let tipo = document.getElementById('cTipo').value;
+        let moneda = document.getElementById('cMoneda').value;
+        let monto = num('cMonto');
+        let freq = document.getElementById('cFrecuencia').value;
+
+        if(monto <= 0) return alert("Ingresa un monto válido");
+
+        let eq = calcularEquivUsdtContab(moneda, monto);
+
+        if(freq === 'mensual') {
+            let dia = parseInt(document.getElementById('cDiaAuto').value) || 1;
+            let hora = document.getElementById('cHoraAuto').value || "12:00";
+            let fijos = JSON.parse(localStorage.getItem('bymo_contab_fijos')) || [];
+            
+            let now = new Date();
+            let nextR = new Date(now.getFullYear(), now.getMonth(), dia, hora.split(':')[0], hora.split(':')[1]);
+            if(now > nextR) nextR.setMonth(nextR.getMonth() + 1);
+
+            fijos.push({
+                concepto, tipo, moneda, monto, dia, hora, nextRun: nextR.getTime()
+            });
+            localStorage.setItem('bymo_contab_fijos', JSON.stringify(fijos));
+            alert("✅ Movimiento automático programado.");
+        }
+
+        let d = new Date();
+        contabilidad.unshift({
+            id: Date.now(), date: getTodayStr(), month: getMonthStr(), time: d.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'}),
+            concepto: concepto, tipo: tipo, moneda: moneda, monto: monto, usdtValue: eq.usdtValue, tasaRef: eq.tasaRef
+        });
+
+        localStorage.setItem('bymo_contab', JSON.stringify(contabilidad));
+        
+        document.getElementById('cConcepto').value = ""; document.getElementById('cMonto').value = "";
+        document.getElementById('cFrecuencia').value = "unico"; toggleAutoSettings();
+        
+        nav('libro');
+    }
+
+    function renderLibroContab() {
+        let selectMes = document.getElementById('filtroMesContab');
+        let currentMonth = getMonthStr();
+        
+        let mesesUnicos = [...new Set(contabilidad.map(c => c.month))];
+        if (!mesesUnicos.includes(currentMonth)) mesesUnicos.unshift(currentMonth);
+        mesesUnicos.sort((a, b) => new Date(b) - new Date(a));
+
+        let mesSel = selectMes.value || currentMonth;
+        selectMes.innerHTML = "";
+        mesesUnicos.forEach(m => {
+            let opt = document.createElement('option'); opt.value = m; opt.innerText = (m === currentMonth) ? "Este Mes" : m;
+            if(m === mesSel) opt.selected = true; selectMes.appendChild(opt);
+        });
+        mesSel = selectMes.value;
+
+        let totalUsdt = 0; let ingMes = 0; let egMes = 0;
+
+        contabilidad.forEach(c => {
+            if(c.tipo === 'ingreso') {
+                totalUsdt += c.usdtValue;
+                if(c.month === mesSel) ingMes += c.usdtValue;
+            } else {
+                totalUsdt -= c.usdtValue;
+                if(c.month === mesSel) egMes += c.usdtValue;
+            }
+        });
+
+        document.getElementById('cDashTotal').innerText = totalUsdt.toFixed(2) + " USDT";
+        document.getElementById('cDashIngresos').innerText = "+" + ingMes.toFixed(2);
+        document.getElementById('cDashEgresos').innerText = "-" + egMes.toFixed(2);
+
+        let contabMes = contabilidad.filter(c => c.month === mesSel).slice(0, 4);
+        let listHtml = contabMes.length === 0 ? "<p class='text-muted' style='text-align:center; padding:20px;'>No hay movimientos contables.</p>" : "";
+        
+        contabMes.forEach(c => {
+            let sym = c.tipo === 'ingreso' ? '+' : '-';
+            let color = c.tipo === 'ingreso' ? 'text-green' : 'text-red';
+            let curStr = c.moneda==='usdt'?'USDT':c.moneda==='usd_bcv'?'$ (Pagado en Bs)':c.moneda==='bs'?'Bs':'COP';
+            listHtml += `<div class="op-item"><div class="op-top"><span>${c.date} ${c.time}</span></div><div class="op-mid"><div class="op-title">${c.concepto}</div><div class="op-gain ${color}">${sym}${c.usdtValue.toFixed(2)} USDT</div></div><div class="op-bot"><span>Operado: ${c.monto} ${curStr}</span><div style="display:flex; align-items:center; gap:10px;"><span style="color:#ff4d4f; cursor:pointer; font-weight:bold;" onclick="borrarContab(${c.id})">Borrar</span></div></div></div>`;
+        });
+        document.getElementById('recentContabList').innerHTML = listHtml;
+    }
+
+    function renderHistorialContab() {
+        let html = "";
+        contabilidad.forEach(c => {
+            let sym = c.tipo === 'ingreso' ? '+' : '-';
+            let color = c.tipo === 'ingreso' ? 'var(--primary-green)' : 'var(--danger-red)';
+            let curStr = c.moneda==='usdt'?'USDT':c.moneda==='usd_bcv'?'$ a BCV':c.moneda==='bs'?'Bs':'COP';
+            html += `<div class="card" style="padding:12px; border-left:4px solid ${color}; margin-bottom:10px;"><div class="op-top"><span>${c.date} ${c.time} • ${curStr}</span></div><div class="op-mid"><div class="op-title">${c.concepto}</div><div class="op-gain" style="color:${color}">${sym}${c.usdtValue.toFixed(2)} USDT</div></div><div class="op-bot" style="margin-top:6px;"><span>Monto Original: ${c.monto}</span><div><span style="color:#ff4d4f; cursor:pointer; font-weight:bold;" onclick="borrarContab(${c.id})">Borrar</span></div></div></div>`;
+        });
+        if(contabilidad.length === 0) html = "<p class='text-muted' style='text-align:center;'>No hay registros contables.</p>";
+        document.getElementById('fullContabList').innerHTML = html;
+    }
+
+    function borrarContab(id) {
+        if(confirm("¿Seguro que quieres borrar este registro contable?")) {
+            contabilidad = contabilidad.filter(c => c.id !== id);
+            localStorage.setItem('bymo_contab', JSON.stringify(contabilidad));
+            nav('historial');
         }
     }
 </script>
