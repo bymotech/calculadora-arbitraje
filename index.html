@@ -113,9 +113,9 @@
         details { background: var(--card-bg); border: 1px solid var(--card-border); border-radius: 12px; margin-bottom: 10px; overflow: hidden; }
         summary { padding: 15px; font-size: 14px; font-weight: 600; display: flex; align-items: center; justify-content: space-between; cursor: pointer; list-style: none; outline: none; }
         summary::-webkit-details-marker { display: none; }
-        summary::after { content: '+'; font-size: 18px; color: var(--primary-green); }
-        details[open] summary::after { content: '−'; }
-        .manual-body { padding: 0 15px 15px 15px; font-size: 13px; color: var(--text-muted); line-height: 1.5; border-top: 1px solid var(--card-border); margin-top: 5px; padding-top: 10px; }
+        summary::after { content: '▼'; font-size: 14px; color: var(--primary-green); }
+        details[open] summary::after { content: '▲'; }
+        .manual-body { padding: 15px; font-size: 13px; color: var(--text-muted); line-height: 1.5; border-top: 1px solid var(--card-border); background: var(--bg-dark); }
 
         .page-header { display: flex; align-items: center; gap: 15px; margin-bottom: 20px; }
         .back-btn { font-size: 20px; cursor: pointer; padding: 5px; }
@@ -125,6 +125,16 @@
         .conv-val { font-weight: bold; color: var(--primary-green); font-size: 16px; }
 
         .footer-tag { text-align: center; font-size: 10px; opacity: 0.4; margin-top: 30px; padding-bottom: 20px; color: var(--text-muted); }
+
+        /* Estilos Categorías */
+        .tag-list { display: flex; flex-wrap: wrap; margin-bottom: 15px; }
+        .tag-item { display: inline-flex; align-items: center; background: var(--input-bg); border: 1px solid var(--card-border); padding: 6px 12px; border-radius: 20px; font-size: 12px; margin: 4px; color: var(--text-main); }
+        .tag-item span { margin-left: 8px; color: var(--danger-red); cursor: pointer; font-weight: bold; font-size: 14px; }
+
+        /* Gráfico Pastel */
+        .pie-chart { width: 140px; height: 140px; border-radius: 50%; margin: 10px auto 20px auto; border: 2px solid var(--card-border); box-shadow: 0 4px 10px rgba(0,0,0,0.2); }
+        .legend-item { display: flex; align-items: center; justify-content: space-between; font-size: 13px; margin-bottom: 8px; border-bottom: 1px solid var(--card-border); padding-bottom: 4px; }
+        .legend-color { width: 12px; height: 12px; border-radius: 3px; margin-right: 8px; }
     </style>
 </head>
 <body>
@@ -272,7 +282,10 @@
     <!-- ============================================== -->
     <div id="sec-libro-contab" class="section">
         <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
-            <h3 style="font-size: 14px; margin: 0;">Balance General</h3>
+            <h3 style="font-size: 14px; margin: 0; display:flex; align-items:center; gap:8px;">
+                Balance General
+                <span style="background:var(--primary-green); color:#000; padding:3px 10px; border-radius:12px; font-size:11px; cursor:pointer;" onclick="nav('stats-contab')">📊 Stats</span>
+            </h3>
             <select id="filtroMesContab" onchange="renderLibroContab()" style="width: auto; padding: 4px; font-size: 12px; border-radius: 5px; border: 1px solid var(--card-border); background: var(--input-bg); color: var(--text-main); margin: 0;"></select>
         </div>
 
@@ -293,13 +306,6 @@
             </div>
         </div>
 
-        <div class="card" id="cardDesgloseEgresos" style="margin-bottom: 25px;">
-            <h3 style="font-size:13px; margin-bottom:15px; color:var(--text-muted); text-transform:uppercase;">Desglose de Egresos</h3>
-            <div id="contabStatsList">
-                <!-- Se llena con JS -->
-            </div>
-        </div>
-
         <div class="header-list">
             <h3>Últimos Movimientos</h3>
             <a onclick="nav('historial')">Ver todos</a>
@@ -315,6 +321,37 @@
         </div>
         <div id="fullContabList"></div>
         <div class="fab" onclick="nav('operar')">+</div>
+    </div>
+
+    <!-- SECCIÓN DE ESTADÍSTICAS (NUEVA) -->
+    <div id="sec-stats-contab" class="section">
+        <div class="page-header">
+            <div class="back-btn" onclick="nav('libro')">←</div>
+            <h3 style="margin:0;">Estadísticas de Balance</h3>
+        </div>
+        
+        <div class="card">
+            <div class="input-group" style="margin-bottom:0;">
+                <label>Selecciona el periodo</label>
+                <select id="filtroPeriodoStats" onchange="renderStatsContab()">
+                    <option value="semana">Esta Semana</option>
+                    <option value="mes" selected>Este Mes</option>
+                    <option value="año">Este Año</option>
+                </select>
+            </div>
+        </div>
+
+        <div class="card" id="statsIngresosCard">
+            <h3 style="font-size:14px; text-align:center; color:var(--primary-green);">Distribución de Ingresos</h3>
+            <div id="pieIngresos" class="pie-chart"></div>
+            <div id="legendIngresos"></div>
+        </div>
+
+        <div class="card" id="statsEgresosCard">
+            <h3 style="font-size:14px; text-align:center; color:var(--danger-red);">Distribución de Egresos</h3>
+            <div id="pieEgresos" class="pie-chart"></div>
+            <div id="legendEgresos"></div>
+        </div>
     </div>
 
     <div id="sec-operar-contab" class="section">
@@ -381,7 +418,7 @@
     </div>
 
     <!-- ============================================== -->
-    <!-- MÓDULOS GLOBALES (Calcular, Tasas, Manual)     -->
+    <!-- MÓDULOS GLOBALES (Calcular, Config)            -->
     <!-- ============================================== -->
     <div id="sec-calc" class="section">
         <div class="page-header"><h3 style="margin:0; text-align:center; width:100%;">Calculadora Rápida</h3></div>
@@ -449,160 +486,149 @@
         </div>
     </div>
 
+    <!-- CONFIGURACIÓN REESTRUCTURADA -->
     <div id="sec-tasas" class="section">
         <div class="page-header"><h3 style="margin:0; text-align:center; width:100%;">Configuración General</h3></div>
         
-        <button id="btnSync" class="btn" style="background:#007bff; color:#fff; margin-bottom:20px;" onclick="sincronizarTasasAPI()">🔄 Sincronizar Automático</button>
+        <button id="btnSync" class="btn" style="background:#007bff; color:#fff; margin-bottom:20px;" onclick="sincronizarTasasAPI()">🔄 Sincronizar Tasas Online</button>
 
-        <div class="card">
-            <h3>Apariencia de la App</h3>
-            <div class="input-group" style="margin-bottom:0;">
-                <label>Tema visual</label>
-                <select id="themeSelector" onchange="changeTheme()">
-                    <option value="auto">🤖 Automático (Según el celular)</option>
-                    <option value="dark">🌙 Modo Oscuro</option>
-                    <option value="light">☀️ Modo Claro</option>
-                </select>
-            </div>
-        </div>
-
-        <div class="card">
-            <h3>Categorías Contables</h3>
-            <div class="input-group">
-                <label>Categorías de Ingreso (separadas por coma)</label>
-                <input type="text" id="tCatIngresos" placeholder="Salario, Ventas, Otros">
-            </div>
-            <div class="input-group" style="margin-bottom:0;">
-                <label>Categorías de Egreso (separadas por coma)</label>
-                <input type="text" id="tCatEgresos" placeholder="Comida, Internet, Carro">
-            </div>
-        </div>
-
-        <div class="card">
-            <h3>Capital y Plataformas</h3>
-            <div class="input-group">
-                <label>🏦 Capital Base Operativo (USDT)</label>
-                <input type="text" id="tCapitalBase" placeholder="Ej: 5000" inputmode="decimal">
-            </div>
-            <div class="input-group">
-                <label>🟢 Binance USDT (Bs/USDT)</label>
-                <input type="text" id="tUsdtBs" inputmode="decimal">
-            </div>
-            <div style="display:flex; gap:10px;">
-                <div class="input-group" style="flex:1;">
-                    <label>🇺🇸 BCV USD</label>
-                    <input type="text" id="tBcvUsd" inputmode="decimal">
+        <details>
+            <summary>Categorías Contables</summary>
+            <div class="manual-body">
+                <label style="font-size:12px; font-weight:bold; color:var(--primary-green);">+ Categorías de Ingreso</label>
+                <div style="display:flex; gap:5px; margin-top:5px; margin-bottom:10px;">
+                    <input type="text" id="newCatIng" placeholder="Ej: Salario">
+                    <button class="btn" style="width:auto; padding:0 15px;" onclick="addCat('ingreso')">Añadir</button>
                 </div>
-                <div class="input-group" style="flex:1;">
-                    <label>🇪🇺 BCV EUR</label>
-                    <input type="text" id="tBcvEur" inputmode="decimal">
+                <div class="tag-list" id="listCatIng"></div>
+
+                <label style="font-size:12px; font-weight:bold; color:var(--danger-red); margin-top:15px; display:block;">- Categorías de Egreso</label>
+                <div style="display:flex; gap:5px; margin-top:5px; margin-bottom:10px;">
+                    <input type="text" id="newCatEg" placeholder="Ej: Comida">
+                    <button class="btn" style="width:auto; padding:0 15px;" onclick="addCat('egreso')">Añadir</button>
+                </div>
+                <div class="tag-list" id="listCatEg"></div>
+            </div>
+        </details>
+
+        <details>
+            <summary>Apariencia y Sistema</summary>
+            <div class="manual-body">
+                <div class="input-group" style="margin-bottom:0;">
+                    <label>Tema visual</label>
+                    <select id="themeSelector" onchange="changeTheme()">
+                        <option value="auto">🤖 Automático (Según el celular)</option>
+                        <option value="dark">🌙 Modo Oscuro</option>
+                        <option value="light">☀️ Modo Claro</option>
+                    </select>
                 </div>
             </div>
-        </div>
+        </details>
 
-        <div class="card">
-            <h3>Zelle, PayPal y Efectivo</h3>
-            <div class="input-group">
-                <label>🇺🇸 Zelle ⮕ USDT (% Com)</label>
-                <input type="text" id="tZelleUsdtCom" inputmode="decimal">
-            </div>
-            <div class="input-group">
-                <label>🇺🇸 Zelle ⮕ Efectivo (% Com)</label>
-                <input type="text" id="tZelleEf" inputmode="decimal">
-            </div>
-            <div class="input-group">
-                <label>🇺🇸 Zelle ⮕ Bs Ref</label>
-                <input type="text" id="tZelleBs" inputmode="decimal">
-            </div>
-            <div class="input-group">
-                <label>🅿️ PayPal ⮕ Bs Ref</label>
-                <input type="text" id="tPaypalBs" inputmode="decimal">
-            </div>
-            <div class="input-group">
-                <label>🅿️ PayPal ⮕ USDT (% Com)</label>
-                <input type="text" id="tPaypalUsdtCom" inputmode="decimal">
-            </div>
-            <div class="input-group">
-                <label>💵 Efectivo ⮕ USDT (% Com)</label>
-                <input type="text" id="tEfUsdtCom" inputmode="decimal">
-            </div>
-            <div class="input-group" style="margin-bottom:0;">
-                <label>🟢 USDT ⮕ Efectivo (% Com)</label>
-                <input type="text" id="tUsdtEfCom" inputmode="decimal">
-            </div>
-        </div>
-
-        <div class="card">
-            <h3>Pesos Chilenos (CLP)</h3>
-            <div class="input-group">
-                <label>🟢 Tasa Binance USDT (CLP/USDT)</label>
-                <input type="text" id="tBinanceClp" placeholder="Ej: 950" inputmode="decimal">
-            </div>
-            <div class="input-group" style="margin-bottom:0;">
-                <label>🇨🇱 Tu Comisión de Ganancia (%)</label>
-                <input type="text" id="tClpComision" placeholder="Ej: 7" inputmode="decimal">
-            </div>
-        </div>
-
-        <div class="card">
-            <h3>Pesos Colombianos (COP)</h3>
-            <div class="input-group">
-                <label>🟢 Tasa Binance USDT (COP/USDT)</label>
-                <input type="text" id="tBinanceCop" placeholder="Ej: 3850" inputmode="decimal">
-            </div>
-            <div class="input-group" style="margin-bottom:0;">
-                <label>🇨🇴 Tu Comisión de Ganancia (%)</label>
-                <input type="text" id="tCopComision" placeholder="Ej: 5" inputmode="decimal">
-            </div>
-        </div>
-
-        <div class="card">
-            <h3>Dólares Electrónicos (Banco)</h3>
-            <div class="input-group">
-                <label>🏦 Dólar Electrónico BCV (Bs/$)</label>
-                <input type="text" id="tDolarElecBs" inputmode="decimal">
-            </div>
-            <div style="display:flex; gap:10px; margin-bottom:0;">
-                <div class="input-group" style="flex:1; margin-bottom:0;">
-                    <label>🏦 Com Banco %</label>
-                    <input type="text" id="comBancoElec" inputmode="decimal">
+        <details>
+            <summary>Capital y Tasas Principales</summary>
+            <div class="manual-body">
+                <div class="input-group">
+                    <label>🏦 Capital Base Operativo (USDT)</label>
+                    <input type="text" id="tCapitalBase" placeholder="Ej: 5000" inputmode="decimal">
                 </div>
-                <div class="input-group" style="flex:1; margin-bottom:0;">
-                    <label>🟡 Com Binance %</label>
-                    <input type="text" id="comBinanceElec" inputmode="decimal">
+                <div class="input-group">
+                    <label>🟢 Binance USDT (Bs/USDT)</label>
+                    <input type="text" id="tUsdtBs" inputmode="decimal">
+                </div>
+                <div style="display:flex; gap:10px;">
+                    <div class="input-group" style="flex:1;">
+                        <label>🇺🇸 BCV USD</label>
+                        <input type="text" id="tBcvUsd" inputmode="decimal">
+                    </div>
+                    <div class="input-group" style="flex:1;">
+                        <label>🇪🇺 BCV EUR</label>
+                        <input type="text" id="tBcvEur" inputmode="decimal">
+                    </div>
                 </div>
             </div>
-        </div>
+        </details>
 
-        <button class="btn btn-secondary" onclick="saveTasas()">Guardar Cambios Manuales</button>
+        <details>
+            <summary>Comisiones: Zelle, PayPal y Efectivo</summary>
+            <div class="manual-body">
+                <div class="input-group">
+                    <label>🇺🇸 Zelle ⮕ USDT (% Com)</label>
+                    <input type="text" id="tZelleUsdtCom" inputmode="decimal">
+                </div>
+                <div class="input-group">
+                    <label>🇺🇸 Zelle ⮕ Efectivo (% Com)</label>
+                    <input type="text" id="tZelleEf" inputmode="decimal">
+                </div>
+                <div class="input-group">
+                    <label>🇺🇸 Zelle ⮕ Bs Ref</label>
+                    <input type="text" id="tZelleBs" inputmode="decimal">
+                </div>
+                <div class="input-group">
+                    <label>🅿️ PayPal ⮕ Bs Ref</label>
+                    <input type="text" id="tPaypalBs" inputmode="decimal">
+                </div>
+                <div class="input-group">
+                    <label>🅿️ PayPal ⮕ USDT (% Com)</label>
+                    <input type="text" id="tPaypalUsdtCom" inputmode="decimal">
+                </div>
+                <div class="input-group">
+                    <label>💵 Efectivo ⮕ USDT (% Com)</label>
+                    <input type="text" id="tEfUsdtCom" inputmode="decimal">
+                </div>
+                <div class="input-group" style="margin-bottom:0;">
+                    <label>🟢 USDT ⮕ Efectivo (% Com)</label>
+                    <input type="text" id="tUsdtEfCom" inputmode="decimal">
+                </div>
+            </div>
+        </details>
+
+        <details>
+            <summary>Tasas Internacionales (CLP y COP)</summary>
+            <div class="manual-body">
+                <div class="input-group">
+                    <label>🟢 Tasa Binance USDT (CLP/USDT)</label>
+                    <input type="text" id="tBinanceClp" placeholder="Ej: 950" inputmode="decimal">
+                </div>
+                <div class="input-group">
+                    <label>🇨🇱 Tu Comisión de Ganancia (%)</label>
+                    <input type="text" id="tClpComision" placeholder="Ej: 7" inputmode="decimal">
+                </div>
+                <div class="input-group">
+                    <label>🟢 Tasa Binance USDT (COP/USDT)</label>
+                    <input type="text" id="tBinanceCop" placeholder="Ej: 3850" inputmode="decimal">
+                </div>
+                <div class="input-group" style="margin-bottom:0;">
+                    <label>🇨🇴 Tu Comisión de Ganancia (%)</label>
+                    <input type="text" id="tCopComision" placeholder="Ej: 5" inputmode="decimal">
+                </div>
+            </div>
+        </details>
+
+        <details style="margin-bottom:20px;">
+            <summary>Dólares Electrónicos (Banco)</summary>
+            <div class="manual-body">
+                <div class="input-group">
+                    <label>🏦 Dólar Electrónico BCV (Bs/$)</label>
+                    <input type="text" id="tDolarElecBs" inputmode="decimal">
+                </div>
+                <div style="display:flex; gap:10px; margin-bottom:0;">
+                    <div class="input-group" style="flex:1; margin-bottom:0;">
+                        <label>🏦 Com Banco %</label>
+                        <input type="text" id="comBancoElec" inputmode="decimal">
+                    </div>
+                    <div class="input-group" style="flex:1; margin-bottom:0;">
+                        <label>🟡 Com Binance %</label>
+                        <input type="text" id="comBinanceElec" inputmode="decimal">
+                    </div>
+                </div>
+            </div>
+        </details>
+
+        <button class="btn btn-secondary" onclick="saveTasas()">Guardar Configuraciones</button>
     </div>
 
-    <div id="sec-manual" class="section">
-        <div class="page-header"><h3 style="margin:0; text-align:center; width:100%;">Manual de Operaciones</h3></div>
-        
-        <details>
-            <summary><span style="display:flex; align-items:center; gap:10px;"><b style="background:var(--input-bg); padding:6px; border-radius:6px;">🔄</b> 1. Modos de Uso</span></summary>
-            <div class="manual-body">
-                Arriba tienes un interruptor para elegir entre <b>Operaciones</b> (tus negocios de cambio habituales) y <b>Contabilidad</b> (tus ingresos y gastos personales). Son dos libros separados para que mantengas tu capital de trabajo limpiecito.
-            </div>
-        </details>
-
-        <details>
-            <summary><span style="display:flex; align-items:center; gap:10px;"><b style="background:var(--input-bg); padding:6px; border-radius:6px;">📊</b> 2. Gastos en Dólares a Tasa BCV</span></summary>
-            <div class="manual-body">
-                Si estás en <i>Contabilidad</i> y compras un TV de 250$ pero pagas en Bs a la tasa del Banco Central, selecciona "Dólar a tasa BCV". La app calculará cuántos Bs gastaste y automáticamente descontará el equivalente exacto en USDT (Binance) para que tu saldo sea matemáticamente perfecto.
-            </div>
-        </details>
-
-        <details>
-            <summary><span style="display:flex; align-items:center; gap:10px;"><b style="background:var(--input-bg); padding:6px; border-radius:6px;">🤖</b> 3. Gastos Fijos (Automáticos)</span></summary>
-            <div class="manual-body">
-                Puedes programar pagos como el Internet o el Salario. Selecciona "Sí, programar mensualmente", pon el día y la hora. Cada vez que abras la app, el motor revisará si ya pasó esa fecha e inyectará la transacción por ti sin que muevas un dedo.
-            </div>
-        </details>
-
-    </div>
-
+    <!-- ============================================== -->
     <div class="footer-tag"><i>by PEDRO MOTA for ByMO Technology</i></div>
 </div>
 
@@ -621,11 +647,7 @@
     </div>
     <div class="nav-item" onclick="nav('tasas')">
         <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="4" stroke="currentColor" stroke-width="2" fill="none"/><path d="M12 4v2M12 18v2M4 12h2M18 12h2" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
-        Tasas
-    </div>
-    <div class="nav-item" onclick="nav('manual')">
-        <svg viewBox="0 0 24 24"><path d="M4 19V5a2 2 0 012-2h12a2 2 0 012 2v14M4 19a2 2 0 002 2h12a2 2 0 002-2M4 19h16" stroke="currentColor" stroke-width="2" fill="none"/></svg>
-        Manual
+        Config.
     </div>
 </div>
 
@@ -633,8 +655,12 @@
     let appMode = localStorage.getItem('bymo_app_mode') || 'ops';
     let ops = JSON.parse(localStorage.getItem('bymo_ops')) || [];
     let contabilidad = JSON.parse(localStorage.getItem('bymo_contab')) || [];
+    let catIngresos = JSON.parse(localStorage.getItem('bymo_cat_ingresos')) || ['Salario', 'Ventas', 'Otros'];
+    let catEgresos = JSON.parse(localStorage.getItem('bymo_cat_egresos')) || ['Comida', 'Internet', 'Carro', 'Servicios', 'Entretenimiento', 'Otros'];
     let editId = null;
     let editIdContab = null;
+
+    const pieColors = ['#20c974', '#5882ff', '#ffcc00', '#ff4d4f', '#a855f7', '#13c2c2', '#fa8c16', '#eb2f96'];
 
     function initTheme() {
         let savedTheme = localStorage.getItem('bymo_theme') || 'auto';
@@ -678,6 +704,7 @@
     window.onload = () => {
         initTheme();
         loadTasas();
+        renderCategoriasUI();
         procesarContabAuto(); 
         switchAppMode(appMode, true);
         calcularConversor();
@@ -693,42 +720,9 @@
         else nav('libro');
     }
 
-    function procesarContabAuto() {
-        let fijos = JSON.parse(localStorage.getItem('bymo_contab_fijos')) || [];
-        let now = new Date();
-        let changed = false;
-
-        fijos.forEach(f => {
-            if(!f.nextRun) return;
-            let currentTarget = new Date(f.nextRun);
-            
-            while(now >= currentTarget) {
-                let eq = calcularEquivUsdtContab(f.moneda, f.monto);
-                contabilidad.unshift({
-                    id: Date.now() + Math.random(),
-                    date: currentTarget.toISOString().split('T')[0],
-                    month: `${currentTarget.getFullYear()}-${String(currentTarget.getMonth()+1).padStart(2,'0')}`,
-                    time: currentTarget.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'}),
-                    concepto: f.concepto + ' (Auto)',
-                    tipo: f.tipo,
-                    categoria: f.categoria || 'Otros',
-                    moneda: f.moneda,
-                    monto: f.monto,
-                    usdtValue: eq.usdtValue,
-                    tasaRef: eq.tasaRef
-                });
-                currentTarget.setMonth(currentTarget.getMonth() + 1);
-                changed = true;
-            }
-            f.nextRun = currentTarget.getTime();
-        });
-
-        if(changed) {
-            localStorage.setItem('bymo_contab', JSON.stringify(contabilidad));
-            localStorage.setItem('bymo_contab_fijos', JSON.stringify(fijos));
-        }
-    }
-
+    // ==========================================
+    // NAVEGACION Y CARGA GLOBAL
+    // ==========================================
     function nav(id) {
         document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
         document.querySelectorAll('.nav-item').forEach(i => i.classList.remove('active'));
@@ -741,12 +735,12 @@
         let sec = document.getElementById('sec-' + targetId);
         if(sec) sec.classList.add('active');
         
-        document.getElementById('globalModeToggle').style.display = (id === 'libro' || id === 'operar' || id === 'historial') ? 'flex' : 'none';
+        document.getElementById('globalModeToggle').style.display = (id === 'libro' || id === 'operar' || id === 'historial' || id === 'stats-contab') ? 'flex' : 'none';
         document.getElementById('mainHeader').style.display = (id === 'libro') ? 'block' : 'none';
 
         let navIconId = id;
-        if(id === 'historial') navIconId = 'libro';
-        let matched = Array.from(document.querySelectorAll('.nav-item')).find(i => i.innerText.toLowerCase().includes(navIconId.toLowerCase().replace('calc', 'calcular')));
+        if(id === 'historial' || id === 'stats-contab') navIconId = 'libro';
+        let matched = Array.from(document.querySelectorAll('.nav-item')).find(i => i.innerText.toLowerCase().includes(navIconId.toLowerCase().replace('calc', 'calcular').replace('tasas','config')));
         if(matched) matched.classList.add('active');
 
         if(id === 'operar') {
@@ -773,6 +767,10 @@
             if(appMode === 'ops') renderHistorialOps();
             else renderHistorialContab();
         }
+
+        if(id === 'stats-contab') {
+            renderStatsContab();
+        }
     }
 
     function loadTasas() {
@@ -783,20 +781,14 @@
             'tBinanceCop', 'tCopComision',
             'tBinanceClp', 'tClpComision',
             'tDolarElecBs', 'comBancoElec', 'comBinanceElec',
-            'tEfUsdtCom', 'tUsdtEfCom', 'tCatIngresos', 'tCatEgresos'
+            'tEfUsdtCom', 'tUsdtEfCom'
         ];
         fields.forEach(f => {
             let el = document.getElementById(f);
             if(el && localStorage.getItem(f)) el.value = localStorage.getItem(f);
         });
-        
-        if(!localStorage.getItem('tCatIngresos')) document.getElementById('tCatIngresos').value = "Salario, Ventas, Otros";
-        if(!localStorage.getItem('tCatEgresos')) document.getElementById('tCatEgresos').value = "Comida, Internet, Carro, Servicios, Entretenimiento, Otros";
-
         if(localStorage.getItem('tBcvUsd')) document.getElementById('calcBcv').value = localStorage.getItem('tBcvUsd');
         if(localStorage.getItem('tUsdtBs')) document.getElementById('calcBin').value = localStorage.getItem('tUsdtBs');
-
-        updateCategoriaDropdown();
     }
 
     function saveTasas(silent = false) {
@@ -807,13 +799,12 @@
             'tBinanceCop', 'tCopComision',
             'tBinanceClp', 'tClpComision',
             'tDolarElecBs', 'comBancoElec', 'comBinanceElec',
-            'tEfUsdtCom', 'tUsdtEfCom', 'tCatIngresos', 'tCatEgresos'
+            'tEfUsdtCom', 'tUsdtEfCom'
         ];
         fields.forEach(f => {
             let el = document.getElementById(f);
             if(el) localStorage.setItem(f, el.value);
         });
-        updateCategoriaDropdown();
         calcularConversor();
         if(appMode === 'ops') renderLibroOps(); else renderLibroContab();
         if(!silent) alert("Ajustes Guardados ✅");
@@ -837,7 +828,6 @@
                 let dataEur2 = await resEur2.json(); bcvEur = dataEur2.promedio;
             } catch (err2) {}
         }
-
         try {
             let resBin1 = await fetch('https://pydolarvenezuela-api.vercel.app/api/v1/dollar?page=binance');
             let dataBin1 = await resBin1.json();
@@ -864,6 +854,46 @@
         btn.innerText = originalText; btn.disabled = false;
     }
 
+    // ==========================================
+    // GESTION DE CATEGORIAS
+    // ==========================================
+    function renderCategoriasUI() {
+        document.getElementById('listCatIng').innerHTML = catIngresos.map((c, i) => `<div class="tag-item">${c} <span onclick="delCat('ingreso', ${i})">x</span></div>`).join('');
+        document.getElementById('listCatEg').innerHTML = catEgresos.map((c, i) => `<div class="tag-item">${c} <span onclick="delCat('egreso', ${i})">x</span></div>`).join('');
+        updateCategoriaDropdown();
+    }
+
+    function addCat(tipo) {
+        let input = document.getElementById(tipo === 'ingreso' ? 'newCatIng' : 'newCatEg');
+        let val = input.value.trim();
+        if(val) {
+            if(tipo === 'ingreso') catIngresos.push(val); else catEgresos.push(val);
+            localStorage.setItem('bymo_cat_' + tipo + 's', JSON.stringify(tipo === 'ingreso' ? catIngresos : catEgresos));
+            input.value = "";
+            renderCategoriasUI();
+        }
+    }
+
+    function delCat(tipo, idx) {
+        if(tipo === 'ingreso') { catIngresos.splice(idx, 1); localStorage.setItem('bymo_cat_ingresos', JSON.stringify(catIngresos)); }
+        else { catEgresos.splice(idx, 1); localStorage.setItem('bymo_cat_egresos', JSON.stringify(catEgresos)); }
+        renderCategoriasUI();
+    }
+
+    function updateCategoriaDropdown() {
+        let tipo = document.getElementById('cTipo');
+        let select = document.getElementById('cCategoria');
+        if(!select || !tipo) return;
+        select.innerHTML = '';
+        let arr = tipo.value === 'ingreso' ? catIngresos : catEgresos;
+        arr.forEach(c => {
+            let opt = document.createElement('option'); opt.value = c; opt.innerText = c; select.appendChild(opt);
+        });
+    }
+
+    // ==========================================
+    // LOGICA CALCULADORA
+    // ==========================================
     function switchCalcTab(tabId) {
         document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
         document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
@@ -874,9 +904,7 @@
     function calcularConversor() {
         let monto = num('convMonto');
         let modo = document.getElementById('convModo').value;
-        let tBcvUsd = num('tBcvUsd') || 1;
-        let tBcvEur = num('tBcvEur') || 1;
-        let tUsdt = num('tUsdtBs') || 1;
+        let tBcvUsd = num('tBcvUsd') || 1; let tBcvEur = num('tBcvEur') || 1; let tUsdt = num('tUsdtBs') || 1;
 
         if (modo === 'div_bs') {
             document.getElementById('resConvBcv').innerText = (monto * tBcvUsd).toLocaleString('es-VE', {minimumFractionDigits: 2}) + " Bs";
@@ -896,13 +924,8 @@
     }
 
     function execCalc() {
-        let p = num('calcPrice');
-        let bcv = num('calcBcv') || 1;
-        let bin = num('calcBin') || 1;
-        let usdt = (p * bcv) / bin;
-        let diff = ((bin - bcv) / bin) * 100;
-        let diffUsdt = (p) - usdt;
-
+        let p = num('calcPrice'); let bcv = num('calcBcv') || 1; let bin = num('calcBin') || 1;
+        let usdt = (p * bcv) / bin; let diff = ((bin - bcv) / bin) * 100; let diffUsdt = (p) - usdt;
         document.getElementById('calcResCard').style.display = 'block';
         document.getElementById('calcResVal').innerText = usdt.toFixed(2) + " USDT";
         document.getElementById('calcResDiff').innerText = "+" + diffUsdt.toFixed(2) + " USDT (" + diff.toFixed(2) + "%)";
@@ -915,18 +938,22 @@
         let eur = document.getElementById('resConvEur').innerText;
         let usdt = document.getElementById('resConvUsdt').innerText;
 
-        let texto = `*CONTABLE BM - Cálculo Rápido* 🧮\n\n`;
-        texto += `*Monto:* ${monto} ${modo === 'div_bs' ? 'USD/EUR' : 'Bs'}\n\n`;
-        texto += `*Equivalencias:*\n`;
-        texto += `🇺🇸 Dólar BCV: ${bcv}\n`;
-        texto += `🇪🇺 Euro BCV: ${eur}\n`;
-        texto += `🟢 USDT Binance: ${usdt}\n\n`;
-        texto += `_Calculado con la tasa del momento._`;
+        let texto = `*CONTABLE BM - Cálculo Rápido* 🧮\n\n*Monto:* ${monto} ${modo === 'div_bs' ? 'USD/EUR' : 'Bs'}\n\n*Equivalencias:*\n🇺🇸 Dólar BCV: ${bcv}\n🇪🇺 Euro BCV: ${eur}\n🟢 USDT Binance: ${usdt}\n\n_Calculado con la tasa del momento._`;
         window.open(`https://wa.me/?text=${encodeURIComponent(texto)}`, '_blank');
     }
 
+    // ==========================================
+    // UTILS FECHAS
+    // ==========================================
     function getTodayStr() { let d = new Date(); return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`; }
     function getMonthStr() { let d = new Date(); return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}`; }
+    function getWeekNumber(d) {
+        d = new Date(Date.UTC(d.getFullYear(), d.getMonth(), d.getDate()));
+        d.setUTCDate(d.getUTCDate() + 4 - (d.getUTCDay()||7));
+        var yearStart = new Date(Date.UTC(d.getUTCFullYear(),0,1));
+        var weekNo = Math.ceil(( ( (d - yearStart) / 86400000) + 1)/7);
+        return d.getUTCFullYear() + "-W" + weekNo;
+    }
 
     // ==========================================
     // LOGICA MODO OPERACIONES
@@ -944,9 +971,7 @@
     }
 
     function calculateLogicOps(tipo, monto) {
-        let tUsdt = num('tUsdtBs') || 1;
-        let tZelleBs = num('tZelleBs') || 1;
-        
+        let tUsdt = num('tUsdtBs') || 1; let tZelleBs = num('tZelleBs') || 1;
         let gain = 0; let recibe = 0; let tasaApli = "1.00"; let comiStr = "-0.00";
 
         if (tipo === 'zelle_usdt') { let com = num('tZelleUsdtCom') || 0; gain = monto * (com / 100); recibe = monto - gain; comiStr = `-${gain.toFixed(2)} USDT`; }
@@ -1138,36 +1163,34 @@
     }
 
     // ==========================================
-    // LOGICA MODO CONTABLE
+    // LOGICA MODO CONTABLE Y ESTADISTICAS
     // ==========================================
-    function updateCategoriaDropdown() {
-        let tipo = document.getElementById('cTipo');
-        let select = document.getElementById('cCategoria');
-        if(!select || !tipo) return;
-        select.innerHTML = '';
-        
-        let raw = tipo.value === 'ingreso' ? 
-            (document.getElementById('tCatIngresos').value || 'Salario, Ventas, Otros') : 
-            (document.getElementById('tCatEgresos').value || 'Comida, Internet, Carro, Servicios, Entretenimiento, Otros');
-            
-        let cats = raw.split(',').map(c => c.trim()).filter(c => c);
-        cats.forEach(c => {
-            let opt = document.createElement('option');
-            opt.value = c; opt.innerText = c;
-            select.appendChild(opt);
+    function procesarContabAuto() {
+        let fijos = JSON.parse(localStorage.getItem('bymo_contab_fijos')) || [];
+        let now = new Date(); let changed = false;
+        fijos.forEach(f => {
+            if(!f.nextRun) return;
+            let currentTarget = new Date(f.nextRun);
+            while(now >= currentTarget) {
+                let eq = calcularEquivUsdtContab(f.moneda, f.monto);
+                contabilidad.unshift({
+                    id: Date.now() + Math.random(), date: currentTarget.toISOString().split('T')[0],
+                    month: `${currentTarget.getFullYear()}-${String(currentTarget.getMonth()+1).padStart(2,'0')}`,
+                    time: currentTarget.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'}),
+                    concepto: f.concepto + ' (Auto)', tipo: f.tipo, categoria: f.categoria || 'Otros',
+                    moneda: f.moneda, monto: f.monto, usdtValue: eq.usdtValue, tasaRef: eq.tasaRef
+                });
+                currentTarget.setMonth(currentTarget.getMonth() + 1); changed = true;
+            }
+            f.nextRun = currentTarget.getTime();
         });
+        if(changed) { localStorage.setItem('bymo_contab', JSON.stringify(contabilidad)); localStorage.setItem('bymo_contab_fijos', JSON.stringify(fijos)); }
     }
 
     function calcularEquivUsdtContab(moneda, monto) {
-        let tUsdt = num('tUsdtBs') || 1;
-        let tBcv = num('tBcvUsd') || 1;
-        let tCop = num('tBinanceCop') || 1;
-
+        let tUsdt = num('tUsdtBs') || 1; let tBcv = num('tBcvUsd') || 1; let tCop = num('tBinanceCop') || 1;
         if(moneda === 'usdt') return { usdtValue: monto, tasaRef: '1:1' };
-        if(moneda === 'usd_bcv') {
-            let bs = monto * tBcv;
-            return { usdtValue: bs / tUsdt, tasaRef: `BCV:${tBcv} | Bin:${tUsdt}` };
-        }
+        if(moneda === 'usd_bcv') return { usdtValue: (monto * tBcv) / tUsdt, tasaRef: `BCV:${tBcv} | Bin:${tUsdt}` };
         if(moneda === 'bs') return { usdtValue: monto / tUsdt, tasaRef: `Bin:${tUsdt}` };
         if(moneda === 'cop') return { usdtValue: monto / tCop, tasaRef: `Bin:${tCop}` };
         return { usdtValue: 0, tasaRef: '-' };
@@ -1179,10 +1202,7 @@
     }
 
     function updatePreviewContab() {
-        let moneda = document.getElementById('cMoneda').value;
-        let monto = num('cMonto');
-        let tipo = document.getElementById('cTipo').value;
-        
+        let moneda = document.getElementById('cMoneda').value; let monto = num('cMonto'); let tipo = document.getElementById('cTipo').value;
         let eq = calcularEquivUsdtContab(moneda, monto);
         document.getElementById('cPrevRef').innerText = eq.tasaRef;
         document.getElementById('cPrevUsdt').innerText = (tipo==='egreso'?'-':'+') + eq.usdtValue.toFixed(2) + " USDT";
@@ -1204,13 +1224,8 @@
         if(editIdContab) {
             let index = contabilidad.findIndex(c => c.id === editIdContab);
             if(index !== -1) {
-                contabilidad[index].concepto = concepto;
-                contabilidad[index].tipo = tipo;
-                contabilidad[index].categoria = categoria;
-                contabilidad[index].moneda = moneda;
-                contabilidad[index].monto = monto;
-                contabilidad[index].usdtValue = eq.usdtValue;
-                contabilidad[index].tasaRef = eq.tasaRef;
+                contabilidad[index].concepto = concepto; contabilidad[index].tipo = tipo; contabilidad[index].categoria = categoria;
+                contabilidad[index].moneda = moneda; contabilidad[index].monto = monto; contabilidad[index].usdtValue = eq.usdtValue; contabilidad[index].tasaRef = eq.tasaRef;
             }
             editIdContab = null;
         } else {
@@ -1218,7 +1233,6 @@
                 let dia = parseInt(document.getElementById('cDiaAuto').value) || 1;
                 let hora = document.getElementById('cHoraAuto').value || "12:00";
                 let fijos = JSON.parse(localStorage.getItem('bymo_contab_fijos')) || [];
-                
                 let now = new Date();
                 let nextR = new Date(now.getFullYear(), now.getMonth(), dia, hora.split(':')[0], hora.split(':')[1]);
                 if(now > nextR) nextR.setMonth(nextR.getMonth() + 1);
@@ -1227,44 +1241,34 @@
                 localStorage.setItem('bymo_contab_fijos', JSON.stringify(fijos));
                 alert("✅ Movimiento automático programado.");
             }
-
             let d = new Date();
             contabilidad.unshift({
                 id: Date.now(), date: getTodayStr(), month: getMonthStr(), time: d.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'}),
                 concepto: concepto, tipo: tipo, categoria: categoria, moneda: moneda, monto: monto, usdtValue: eq.usdtValue, tasaRef: eq.tasaRef
             });
         }
-
         localStorage.setItem('bymo_contab', JSON.stringify(contabilidad));
-        
         document.getElementById('cConcepto').value = ""; document.getElementById('cMonto').value = "";
         document.getElementById('cFrecuencia').value = "unico"; toggleAutoSettings();
-        
         nav('libro');
     }
 
     function editarContab(id) {
-        let op = contabilidad.find(o => o.id === id);
-        if(!op) return;
+        let op = contabilidad.find(o => o.id === id); if(!op) return;
         document.getElementById('cConcepto').value = op.concepto;
         document.getElementById('cTipo').value = op.tipo;
-        
         updateCategoriaDropdown();
         setTimeout(() => { document.getElementById('cCategoria').value = op.categoria || "Otros"; }, 50);
-
         document.getElementById('cMoneda').value = op.moneda;
         document.getElementById('cMonto').value = op.monto;
-        
         editIdContab = id;
         document.getElementById('btnRegistrarContab').innerText = "Actualizar Movimiento";
-        updatePreviewContab();
-        nav('operar');
+        updatePreviewContab(); nav('operar');
     }
 
     function renderLibroContab() {
         let selectMes = document.getElementById('filtroMesContab');
         let currentMonth = getMonthStr();
-        
         let mesesUnicos = [...new Set(contabilidad.map(c => c.month))];
         if (!mesesUnicos.includes(currentMonth)) mesesUnicos.unshift(currentMonth);
         mesesUnicos.sort((a, b) => new Date(b) - new Date(a));
@@ -1278,43 +1282,16 @@
         mesSel = selectMes.value;
 
         let totalUsdt = 0; let ingMes = 0; let egMes = 0;
-        let catStats = {}; // Para estadísticas de egresos
 
         contabilidad.forEach(c => {
-            if(c.tipo === 'ingreso') {
-                totalUsdt += c.usdtValue;
-                if(c.month === mesSel) ingMes += c.usdtValue;
-            } else {
-                totalUsdt -= c.usdtValue;
-                if(c.month === mesSel) {
-                    egMes += c.usdtValue;
-                    let catName = c.categoria || 'Otros';
-                    catStats[catName] = (catStats[catName] || 0) + c.usdtValue;
-                }
-            }
+            if(c.tipo === 'ingreso') { totalUsdt += c.usdtValue; if(c.month === mesSel) ingMes += c.usdtValue; } 
+            else { totalUsdt -= c.usdtValue; if(c.month === mesSel) egMes += c.usdtValue; }
         });
 
         document.getElementById('cDashTotal').innerText = totalUsdt.toFixed(2) + " USDT";
         document.getElementById('cDashIngresos').innerText = "+" + ingMes.toFixed(2);
         document.getElementById('cDashEgresos').innerText = "-" + egMes.toFixed(2);
 
-        // Render Estadísticas
-        let statsHtml = "";
-        if(egMes > 0) {
-            let sortedCats = Object.entries(catStats).sort((a,b) => b[1] - a[1]);
-            sortedCats.forEach(([cat, val]) => {
-                let pct = ((val / egMes) * 100).toFixed(1);
-                statsHtml += `<div style="display:flex; justify-content:space-between; margin-bottom:5px; font-size:12px; color:var(--text-main);"><span>${cat}</span><b>${pct}% (${val.toFixed(2)}$)</b></div>`;
-                statsHtml += `<div style="width:100%; background:var(--card-border); height:6px; border-radius:3px; margin-bottom:12px; overflow:hidden;"><div style="width:${pct}%; background:var(--danger-red); height:100%; border-radius:3px;"></div></div>`;
-            });
-            document.getElementById('cardDesgloseEgresos').style.display = 'block';
-        } else {
-            statsHtml = "<p class='text-muted' style='text-align:center;'>No hay egresos este mes.</p>";
-            document.getElementById('cardDesgloseEgresos').style.display = 'none'; // Ocultar tarjeta si no hay egresos
-        }
-        document.getElementById('contabStatsList').innerHTML = statsHtml;
-
-        // Render lista reciente
         let contabMes = contabilidad.filter(c => c.month === mesSel).slice(0, 4);
         let listHtml = contabMes.length === 0 ? "<p class='text-muted' style='text-align:center; padding:20px;'>No hay movimientos contables.</p>" : "";
         
@@ -1343,8 +1320,57 @@
         if(confirm("¿Seguro que quieres borrar este registro contable?")) {
             contabilidad = contabilidad.filter(c => c.id !== id);
             localStorage.setItem('bymo_contab', JSON.stringify(contabilidad));
-            renderLibroContab(); // Si borra desde el libro, que actualice allí
-            renderHistorialContab();
+            renderLibroContab(); renderHistorialContab();
+        }
+    }
+
+    // STATS
+    function drawPieChart(data, tipo, pieId, legendId, cardId) {
+        let subset = data.filter(d => d.tipo === tipo);
+        let total = subset.reduce((sum, d) => sum + d.usdtValue, 0);
+        
+        if(total === 0) { document.getElementById(cardId).style.display = 'none'; return; }
+        document.getElementById(cardId).style.display = 'block';
+
+        let stats = {};
+        subset.forEach(d => { let cat = d.categoria || 'Otros'; stats[cat] = (stats[cat] || 0) + d.usdtValue; });
+        let sortedCats = Object.entries(stats).sort((a,b) => b[1] - a[1]);
+        
+        let conicStr = []; let legendHtml = ""; let currentAngle = 0;
+
+        sortedCats.forEach(([cat, val], index) => {
+            let color = pieColors[index % pieColors.length];
+            let pct = (val / total) * 100;
+            let angle = (pct / 100) * 360;
+            conicStr.push(`${color} ${currentAngle}deg ${currentAngle + angle}deg`);
+            currentAngle += angle;
+            legendHtml += `<div class="legend-item"><div style="display:flex; align-items:center;"><div class="legend-color" style="background:${color};"></div><span style="color:var(--text-main);">${cat}</span></div><div><b style="color:var(--text-main);">${pct.toFixed(1)}%</b> <span class="text-muted">(${val.toFixed(2)}$)</span></div></div>`;
+        });
+
+        document.getElementById(pieId).style.background = `conic-gradient(${conicStr.join(', ')})`;
+        document.getElementById(legendId).innerHTML = legendHtml;
+    }
+
+    function renderStatsContab() {
+        let periodo = document.getElementById('filtroPeriodoStats').value;
+        let now = new Date();
+        let currentWeek = getWeekNumber(now);
+        let currentMonth = getMonthStr();
+        let currentYear = now.getFullYear().toString();
+
+        let filtered = contabilidad.filter(c => {
+            if(periodo === 'semana') return getWeekNumber(new Date(c.date)) === currentWeek;
+            if(periodo === 'mes') return c.month === currentMonth;
+            if(periodo === 'año') return c.date.startsWith(currentYear);
+            return true;
+        });
+
+        drawPieChart(filtered, 'ingreso', 'pieIngresos', 'legendIngresos', 'statsIngresosCard');
+        drawPieChart(filtered, 'egreso', 'pieEgresos', 'legendEgresos', 'statsEgresosCard');
+        
+        if (filtered.length === 0) {
+            document.getElementById('statsIngresosCard').style.display = 'none';
+            document.getElementById('statsEgresosCard').style.display = 'none';
         }
     }
 </script>
