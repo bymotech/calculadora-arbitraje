@@ -61,7 +61,7 @@
         .dashboard-hero .amount { font-size: 34px; font-weight: bold; color: var(--primary-green); margin-bottom: 5px; }
         .dashboard-hero .subtitle { font-size: 12px; color: var(--text-muted); }
         
-        .metrics-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 25px; }
+        .metrics-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 15px; }
         .metric-box { background: var(--card-bg); border: 1px solid var(--card-border); border-radius: 12px; padding: 12px; text-align: center; }
         .metric-box .label { font-size: 10px; text-transform: uppercase; color: var(--text-muted); margin-bottom: 8px; }
         .metric-box .val { font-size: 18px; font-weight: bold; color: var(--primary-green); }
@@ -144,7 +144,7 @@
     </div>
 
     <!-- ============================================== -->
-    <!-- MODO OPERACIONES (Original)                    -->
+    <!-- MODO OPERACIONES                               -->
     <!-- ============================================== -->
     <div id="sec-libro-ops" class="section active">
         <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
@@ -158,7 +158,7 @@
             <div class="subtitle" id="dashDayCountOps">0 operaciones</div>
         </div>
 
-        <div class="metrics-grid">
+        <div class="metrics-grid" style="margin-bottom: 25px;">
             <div class="metric-box">
                 <div class="label">UTILIDAD DEL MES</div>
                 <div class="val text-green" id="dashMonthValOps">+0.00</div>
@@ -268,7 +268,7 @@
     </div>
 
     <!-- ============================================== -->
-    <!-- MODO CONTABLE (Nuevo)                          -->
+    <!-- MODO CONTABLE                                  -->
     <!-- ============================================== -->
     <div id="sec-libro-contab" class="section">
         <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
@@ -290,6 +290,13 @@
             <div class="metric-box" style="border-color: var(--danger-red);">
                 <div class="label">EGRESOS DEL MES</div>
                 <div class="val negative" id="cDashEgresos">-0.00</div><div class="sub">USDT</div>
+            </div>
+        </div>
+
+        <div class="card" id="cardDesgloseEgresos" style="margin-bottom: 25px;">
+            <h3 style="font-size:13px; margin-bottom:15px; color:var(--text-muted); text-transform:uppercase;">Desglose de Egresos</h3>
+            <div id="contabStatsList">
+                <!-- Se llena con JS -->
             </div>
         </div>
 
@@ -315,14 +322,20 @@
         <div class="card">
             <div class="input-group">
                 <label>Concepto / Detalle</label>
-                <input type="text" id="cConcepto" placeholder="Ej: Pago de Internet, Salario">
+                <input type="text" id="cConcepto" placeholder="Ej: Compra de mercancía, Cena">
             </div>
-            <div class="input-group">
-                <label>Tipo de Movimiento</label>
-                <select id="cTipo" onchange="updatePreviewContab()">
-                    <option value="egreso">🔴 Egreso (Gasto / Salida)</option>
-                    <option value="ingreso">🟢 Ingreso (Entrada)</option>
-                </select>
+            <div style="display:flex; gap:10px;">
+                <div class="input-group" style="flex:1;">
+                    <label>Tipo</label>
+                    <select id="cTipo" onchange="updateCategoriaDropdown(); updatePreviewContab();">
+                        <option value="egreso">🔴 Egreso</option>
+                        <option value="ingreso">🟢 Ingreso</option>
+                    </select>
+                </div>
+                <div class="input-group" style="flex:1;">
+                    <label>Categoría</label>
+                    <select id="cCategoria"></select>
+                </div>
             </div>
             <div class="input-group">
                 <label>Moneda utilizada</label>
@@ -337,7 +350,7 @@
                 <label>Monto operado</label>
                 <input type="text" id="cMonto" placeholder="0.00" inputmode="decimal" oninput="updatePreviewContab()">
             </div>
-            <div class="input-group" style="margin-bottom:0;">
+            <div class="input-group" style="margin-bottom:0;" id="wrapFreq">
                 <label>¿Es un movimiento fijo automático?</label>
                 <select id="cFrecuencia" onchange="toggleAutoSettings()">
                     <option value="unico">No, solo esta vez</option>
@@ -364,7 +377,7 @@
             </div>
         </div>
         
-        <button class="btn" style="background:#5882ff; color:#fff;" onclick="registrarContab()">Guardar Movimiento</button>
+        <button class="btn" id="btnRegistrarContab" style="background:#5882ff; color:#fff;" onclick="registrarContab()">Guardar Movimiento</button>
     </div>
 
     <!-- ============================================== -->
@@ -437,7 +450,7 @@
     </div>
 
     <div id="sec-tasas" class="section">
-        <div class="page-header"><h3 style="margin:0; text-align:center; width:100%;">Configuración de Tasas</h3></div>
+        <div class="page-header"><h3 style="margin:0; text-align:center; width:100%;">Configuración General</h3></div>
         
         <button id="btnSync" class="btn" style="background:#007bff; color:#fff; margin-bottom:20px;" onclick="sincronizarTasasAPI()">🔄 Sincronizar Automático</button>
 
@@ -450,6 +463,18 @@
                     <option value="dark">🌙 Modo Oscuro</option>
                     <option value="light">☀️ Modo Claro</option>
                 </select>
+            </div>
+        </div>
+
+        <div class="card">
+            <h3>Categorías Contables</h3>
+            <div class="input-group">
+                <label>Categorías de Ingreso (separadas por coma)</label>
+                <input type="text" id="tCatIngresos" placeholder="Salario, Ventas, Otros">
+            </div>
+            <div class="input-group" style="margin-bottom:0;">
+                <label>Categorías de Egreso (separadas por coma)</label>
+                <input type="text" id="tCatEgresos" placeholder="Comida, Internet, Carro">
             </div>
         </div>
 
@@ -609,6 +634,7 @@
     let ops = JSON.parse(localStorage.getItem('bymo_ops')) || [];
     let contabilidad = JSON.parse(localStorage.getItem('bymo_contab')) || [];
     let editId = null;
+    let editIdContab = null;
 
     function initTheme() {
         let savedTheme = localStorage.getItem('bymo_theme') || 'auto';
@@ -663,7 +689,7 @@
         document.getElementById('btnModeOps').classList.toggle('active', mode === 'ops');
         document.getElementById('btnModeContab').classList.toggle('active', mode === 'contab');
         
-        if(!initialLoad) { editId = null; nav('libro'); }
+        if(!initialLoad) { editId = null; editIdContab = null; nav('libro'); }
         else nav('libro');
     }
 
@@ -685,6 +711,7 @@
                     time: currentTarget.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'}),
                     concepto: f.concepto + ' (Auto)',
                     tipo: f.tipo,
+                    categoria: f.categoria || 'Otros',
                     moneda: f.moneda,
                     monto: f.monto,
                     usdtValue: eq.usdtValue,
@@ -727,6 +754,12 @@
                 if(!editId) document.getElementById('btnRegistrarOp').innerText = "Registrar Operación";
                 updatePreviewOps();
             } else {
+                if(!editIdContab) {
+                    document.getElementById('btnRegistrarContab').innerText = "Guardar Movimiento";
+                    document.getElementById('wrapFreq').style.display = 'block';
+                } else {
+                    document.getElementById('wrapFreq').style.display = 'none';
+                }
                 updatePreviewContab();
             }
         }
@@ -750,15 +783,20 @@
             'tBinanceCop', 'tCopComision',
             'tBinanceClp', 'tClpComision',
             'tDolarElecBs', 'comBancoElec', 'comBinanceElec',
-            'tEfUsdtCom', 'tUsdtEfCom'
+            'tEfUsdtCom', 'tUsdtEfCom', 'tCatIngresos', 'tCatEgresos'
         ];
         fields.forEach(f => {
             let el = document.getElementById(f);
             if(el && localStorage.getItem(f)) el.value = localStorage.getItem(f);
         });
         
+        if(!localStorage.getItem('tCatIngresos')) document.getElementById('tCatIngresos').value = "Salario, Ventas, Otros";
+        if(!localStorage.getItem('tCatEgresos')) document.getElementById('tCatEgresos').value = "Comida, Internet, Carro, Servicios, Entretenimiento, Otros";
+
         if(localStorage.getItem('tBcvUsd')) document.getElementById('calcBcv').value = localStorage.getItem('tBcvUsd');
         if(localStorage.getItem('tUsdtBs')) document.getElementById('calcBin').value = localStorage.getItem('tUsdtBs');
+
+        updateCategoriaDropdown();
     }
 
     function saveTasas(silent = false) {
@@ -769,15 +807,16 @@
             'tBinanceCop', 'tCopComision',
             'tBinanceClp', 'tClpComision',
             'tDolarElecBs', 'comBancoElec', 'comBinanceElec',
-            'tEfUsdtCom', 'tUsdtEfCom'
+            'tEfUsdtCom', 'tUsdtEfCom', 'tCatIngresos', 'tCatEgresos'
         ];
         fields.forEach(f => {
             let el = document.getElementById(f);
             if(el) localStorage.setItem(f, el.value);
         });
+        updateCategoriaDropdown();
         calcularConversor();
         if(appMode === 'ops') renderLibroOps(); else renderLibroContab();
-        if(!silent) alert("Tasas Guardadas ✅");
+        if(!silent) alert("Ajustes Guardados ✅");
     }
 
     async function sincronizarTasasAPI() {
@@ -1099,8 +1138,26 @@
     }
 
     // ==========================================
-    // LOGICA MODO CONTABLE (NUEVO)
+    // LOGICA MODO CONTABLE
     // ==========================================
+    function updateCategoriaDropdown() {
+        let tipo = document.getElementById('cTipo');
+        let select = document.getElementById('cCategoria');
+        if(!select || !tipo) return;
+        select.innerHTML = '';
+        
+        let raw = tipo.value === 'ingreso' ? 
+            (document.getElementById('tCatIngresos').value || 'Salario, Ventas, Otros') : 
+            (document.getElementById('tCatEgresos').value || 'Comida, Internet, Carro, Servicios, Entretenimiento, Otros');
+            
+        let cats = raw.split(',').map(c => c.trim()).filter(c => c);
+        cats.forEach(c => {
+            let opt = document.createElement('option');
+            opt.value = c; opt.innerText = c;
+            select.appendChild(opt);
+        });
+    }
+
     function calcularEquivUsdtContab(moneda, monto) {
         let tUsdt = num('tUsdtBs') || 1;
         let tBcv = num('tBcvUsd') || 1;
@@ -1135,6 +1192,7 @@
     function registrarContab() {
         let concepto = document.getElementById('cConcepto').value || "Movimiento General";
         let tipo = document.getElementById('cTipo').value;
+        let categoria = document.getElementById('cCategoria').value || "Otros";
         let moneda = document.getElementById('cMoneda').value;
         let monto = num('cMonto');
         let freq = document.getElementById('cFrecuencia').value;
@@ -1143,27 +1201,39 @@
 
         let eq = calcularEquivUsdtContab(moneda, monto);
 
-        if(freq === 'mensual') {
-            let dia = parseInt(document.getElementById('cDiaAuto').value) || 1;
-            let hora = document.getElementById('cHoraAuto').value || "12:00";
-            let fijos = JSON.parse(localStorage.getItem('bymo_contab_fijos')) || [];
-            
-            let now = new Date();
-            let nextR = new Date(now.getFullYear(), now.getMonth(), dia, hora.split(':')[0], hora.split(':')[1]);
-            if(now > nextR) nextR.setMonth(nextR.getMonth() + 1);
+        if(editIdContab) {
+            let index = contabilidad.findIndex(c => c.id === editIdContab);
+            if(index !== -1) {
+                contabilidad[index].concepto = concepto;
+                contabilidad[index].tipo = tipo;
+                contabilidad[index].categoria = categoria;
+                contabilidad[index].moneda = moneda;
+                contabilidad[index].monto = monto;
+                contabilidad[index].usdtValue = eq.usdtValue;
+                contabilidad[index].tasaRef = eq.tasaRef;
+            }
+            editIdContab = null;
+        } else {
+            if(freq === 'mensual') {
+                let dia = parseInt(document.getElementById('cDiaAuto').value) || 1;
+                let hora = document.getElementById('cHoraAuto').value || "12:00";
+                let fijos = JSON.parse(localStorage.getItem('bymo_contab_fijos')) || [];
+                
+                let now = new Date();
+                let nextR = new Date(now.getFullYear(), now.getMonth(), dia, hora.split(':')[0], hora.split(':')[1]);
+                if(now > nextR) nextR.setMonth(nextR.getMonth() + 1);
 
-            fijos.push({
-                concepto, tipo, moneda, monto, dia, hora, nextRun: nextR.getTime()
+                fijos.push({ concepto, tipo, categoria, moneda, monto, dia, hora, nextRun: nextR.getTime() });
+                localStorage.setItem('bymo_contab_fijos', JSON.stringify(fijos));
+                alert("✅ Movimiento automático programado.");
+            }
+
+            let d = new Date();
+            contabilidad.unshift({
+                id: Date.now(), date: getTodayStr(), month: getMonthStr(), time: d.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'}),
+                concepto: concepto, tipo: tipo, categoria: categoria, moneda: moneda, monto: monto, usdtValue: eq.usdtValue, tasaRef: eq.tasaRef
             });
-            localStorage.setItem('bymo_contab_fijos', JSON.stringify(fijos));
-            alert("✅ Movimiento automático programado.");
         }
-
-        let d = new Date();
-        contabilidad.unshift({
-            id: Date.now(), date: getTodayStr(), month: getMonthStr(), time: d.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'}),
-            concepto: concepto, tipo: tipo, moneda: moneda, monto: monto, usdtValue: eq.usdtValue, tasaRef: eq.tasaRef
-        });
 
         localStorage.setItem('bymo_contab', JSON.stringify(contabilidad));
         
@@ -1171,6 +1241,24 @@
         document.getElementById('cFrecuencia').value = "unico"; toggleAutoSettings();
         
         nav('libro');
+    }
+
+    function editarContab(id) {
+        let op = contabilidad.find(o => o.id === id);
+        if(!op) return;
+        document.getElementById('cConcepto').value = op.concepto;
+        document.getElementById('cTipo').value = op.tipo;
+        
+        updateCategoriaDropdown();
+        setTimeout(() => { document.getElementById('cCategoria').value = op.categoria || "Otros"; }, 50);
+
+        document.getElementById('cMoneda').value = op.moneda;
+        document.getElementById('cMonto').value = op.monto;
+        
+        editIdContab = id;
+        document.getElementById('btnRegistrarContab').innerText = "Actualizar Movimiento";
+        updatePreviewContab();
+        nav('operar');
     }
 
     function renderLibroContab() {
@@ -1190,6 +1278,7 @@
         mesSel = selectMes.value;
 
         let totalUsdt = 0; let ingMes = 0; let egMes = 0;
+        let catStats = {}; // Para estadísticas de egresos
 
         contabilidad.forEach(c => {
             if(c.tipo === 'ingreso') {
@@ -1197,7 +1286,11 @@
                 if(c.month === mesSel) ingMes += c.usdtValue;
             } else {
                 totalUsdt -= c.usdtValue;
-                if(c.month === mesSel) egMes += c.usdtValue;
+                if(c.month === mesSel) {
+                    egMes += c.usdtValue;
+                    let catName = c.categoria || 'Otros';
+                    catStats[catName] = (catStats[catName] || 0) + c.usdtValue;
+                }
             }
         });
 
@@ -1205,6 +1298,23 @@
         document.getElementById('cDashIngresos').innerText = "+" + ingMes.toFixed(2);
         document.getElementById('cDashEgresos').innerText = "-" + egMes.toFixed(2);
 
+        // Render Estadísticas
+        let statsHtml = "";
+        if(egMes > 0) {
+            let sortedCats = Object.entries(catStats).sort((a,b) => b[1] - a[1]);
+            sortedCats.forEach(([cat, val]) => {
+                let pct = ((val / egMes) * 100).toFixed(1);
+                statsHtml += `<div style="display:flex; justify-content:space-between; margin-bottom:5px; font-size:12px; color:var(--text-main);"><span>${cat}</span><b>${pct}% (${val.toFixed(2)}$)</b></div>`;
+                statsHtml += `<div style="width:100%; background:var(--card-border); height:6px; border-radius:3px; margin-bottom:12px; overflow:hidden;"><div style="width:${pct}%; background:var(--danger-red); height:100%; border-radius:3px;"></div></div>`;
+            });
+            document.getElementById('cardDesgloseEgresos').style.display = 'block';
+        } else {
+            statsHtml = "<p class='text-muted' style='text-align:center;'>No hay egresos este mes.</p>";
+            document.getElementById('cardDesgloseEgresos').style.display = 'none'; // Ocultar tarjeta si no hay egresos
+        }
+        document.getElementById('contabStatsList').innerHTML = statsHtml;
+
+        // Render lista reciente
         let contabMes = contabilidad.filter(c => c.month === mesSel).slice(0, 4);
         let listHtml = contabMes.length === 0 ? "<p class='text-muted' style='text-align:center; padding:20px;'>No hay movimientos contables.</p>" : "";
         
@@ -1212,7 +1322,7 @@
             let sym = c.tipo === 'ingreso' ? '+' : '-';
             let color = c.tipo === 'ingreso' ? 'text-green' : 'text-red';
             let curStr = c.moneda==='usdt'?'USDT':c.moneda==='usd_bcv'?'$ (Pagado en Bs)':c.moneda==='bs'?'Bs':'COP';
-            listHtml += `<div class="op-item"><div class="op-top"><span>${c.date} ${c.time}</span></div><div class="op-mid"><div class="op-title">${c.concepto}</div><div class="op-gain ${color}">${sym}${c.usdtValue.toFixed(2)} USDT</div></div><div class="op-bot"><span>Operado: ${c.monto} ${curStr}</span><div style="display:flex; align-items:center; gap:10px;"><span style="color:#ff4d4f; cursor:pointer; font-weight:bold;" onclick="borrarContab(${c.id})">Borrar</span></div></div></div>`;
+            listHtml += `<div class="op-item"><div class="op-top"><span>${c.date} ${c.time} • ${c.categoria||'Otros'}</span></div><div class="op-mid"><div class="op-title">${c.concepto}</div><div class="op-gain ${color}">${sym}${c.usdtValue.toFixed(2)} USDT</div></div><div class="op-bot"><span>Operado: ${c.monto} ${curStr}</span><div style="display:flex; align-items:center; gap:10px;"><span style="color:#007bff; cursor:pointer; font-weight:bold;" onclick="editarContab(${c.id})">Editar</span><span style="color:#ff4d4f; cursor:pointer; font-weight:bold;" onclick="borrarContab(${c.id})">Borrar</span></div></div></div>`;
         });
         document.getElementById('recentContabList').innerHTML = listHtml;
     }
@@ -1223,7 +1333,7 @@
             let sym = c.tipo === 'ingreso' ? '+' : '-';
             let color = c.tipo === 'ingreso' ? 'var(--primary-green)' : 'var(--danger-red)';
             let curStr = c.moneda==='usdt'?'USDT':c.moneda==='usd_bcv'?'$ a BCV':c.moneda==='bs'?'Bs':'COP';
-            html += `<div class="card" style="padding:12px; border-left:4px solid ${color}; margin-bottom:10px;"><div class="op-top"><span>${c.date} ${c.time} • ${curStr}</span></div><div class="op-mid"><div class="op-title">${c.concepto}</div><div class="op-gain" style="color:${color}">${sym}${c.usdtValue.toFixed(2)} USDT</div></div><div class="op-bot" style="margin-top:6px;"><span>Monto Original: ${c.monto}</span><div><span style="color:#ff4d4f; cursor:pointer; font-weight:bold;" onclick="borrarContab(${c.id})">Borrar</span></div></div></div>`;
+            html += `<div class="card" style="padding:12px; border-left:4px solid ${color}; margin-bottom:10px;"><div class="op-top"><span>${c.date} ${c.time} • ${curStr}</span></div><div class="op-mid"><div class="op-title">${c.concepto} <span style="font-size:10px; opacity:0.7;">(${c.categoria||'Otros'})</span></div><div class="op-gain" style="color:${color}">${sym}${c.usdtValue.toFixed(2)} USDT</div></div><div class="op-bot" style="margin-top:6px;"><span>Monto Original: ${c.monto}</span><div style="display:flex; align-items:center; gap:10px;"><span style="color:#007bff; cursor:pointer; font-weight:bold;" onclick="editarContab(${c.id})">Editar</span><span style="color:#ff4d4f; cursor:pointer; font-weight:bold;" onclick="borrarContab(${c.id})">Borrar</span></div></div></div>`;
         });
         if(contabilidad.length === 0) html = "<p class='text-muted' style='text-align:center;'>No hay registros contables.</p>";
         document.getElementById('fullContabList').innerHTML = html;
@@ -1233,7 +1343,8 @@
         if(confirm("¿Seguro que quieres borrar este registro contable?")) {
             contabilidad = contabilidad.filter(c => c.id !== id);
             localStorage.setItem('bymo_contab', JSON.stringify(contabilidad));
-            nav('historial');
+            renderLibroContab(); // Si borra desde el libro, que actualice allí
+            renderHistorialContab();
         }
     }
 </script>
