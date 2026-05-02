@@ -243,14 +243,24 @@
 
     <div id="sec-historial-ops" class="section">
         <div class="page-header">
-            <div class="back-btn" onclick="nav('libro')">←</div>
-            <h3 style="margin:0;">Historial de Operaciones</h3>
+            <div class="back-btn" id="histBackBtn" onclick="histGoBack()">←</div>
+            <h3 style="margin:0;" id="histTitle">Historial de Operaciones</h3>
         </div>
-        <div class="metrics-grid">
-            <div class="metric-box"><div class="label">Total Operaciones</div><div class="val" style="color:#fff;" id="histCountOps">0</div></div>
+
+        <!-- BREADCRUMB -->
+        <div id="histBreadcrumb" style="display:flex; align-items:center; gap:6px; margin-bottom:14px; flex-wrap:wrap; font-size:12px; color:var(--text-muted);"></div>
+
+        <!-- RESUMEN ESTADÍSTICO -->
+        <div class="metrics-grid" id="histStatsGrid">
+            <div class="metric-box"><div class="label">Operaciones</div><div class="val" style="color:#fff;" id="histCountOps">0</div></div>
             <div class="metric-box"><div class="label">Utilidad Neta</div><div class="val text-green" id="histNetOps">+0.00 USDT</div></div>
+            <div class="metric-box"><div class="label">Volumen</div><div class="val" style="color:#fff;" id="histVolOps">0.00</div><div class="sub">USDT</div></div>
+            <div class="metric-box"><div class="label">Margen Prom.</div><div class="val text-green" id="histMarginOps">0.00%</div></div>
         </div>
-        <div id="fullOpsList"></div>
+
+        <!-- LISTA DINÁMICA (meses / semanas / días / operaciones) -->
+        <div id="histListContainer"></div>
+
         <div class="fab" onclick="nav('operar')">+</div>
     </div>
 
@@ -967,7 +977,7 @@
             }
         }
         if(id === 'libro') { if(appMode === 'ops') renderLibroOps(); else renderLibroContab(); }
-        if(id === 'historial') { if(appMode === 'ops') renderHistorialOps(); else renderHistorialContab(); }
+        if(id === 'historial') { if(appMode === 'ops') { histNivel = 'mes'; histSelMes = null; histSelSemana = null; histSelDia = null; renderHistorialOps(); } else renderHistorialContab(); }
         if(id === 'stats-contab') renderStatsContab();
     }
 
@@ -1237,18 +1247,243 @@
         document.getElementById('recentOpsList').innerHTML = listHtml;
     }
 
-    function renderHistorialOps() {
-        let selectFecha = document.getElementById('filtroFechaOps');
-        let fechaSeleccionada = selectFecha ? selectFecha.value : getTodayStr();
-        let opsFiltradas = window.ops.filter(o => o.date === fechaSeleccionada);
-        let totalGain = 0; let html = "";
-        opsFiltradas.forEach(o => { totalGain += o.gain; html += `<div class="card" style="padding:12px; border-left:4px solid ${o.gain>=0?'var(--primary-green)':'var(--danger-red)'}; margin-bottom:10px;"><div class="op-top"><span>${o.time} • ${o.concepto}</span></div><div class="op-mid"><div class="op-title">${o.tipo}</div><div class="op-gain ${o.gain>=0?'text-green':'text-red'}">${o.gain>=0?'+':''}${o.gain.toFixed(2)} USDT</div></div><div class="op-bot" style="margin-top:6px;"><span>Base Inversión: ${o.monto||0}</span><div style="display:flex; align-items:center; gap:10px;"><span style="color:#25D366; cursor:pointer; font-weight:bold;" onclick="enviarWhatsAppOps(${o.id})">📲 WhatsApp</span><span style="color:#007bff; cursor:pointer; font-weight:bold;" onclick="editarOps(${o.id})">Editar</span><span style="color:#ff4d4f; cursor:pointer; font-weight:bold;" onclick="borrarOps(${o.id})">Borrar</span></div></div></div>`; });
-        if(opsFiltradas.length === 0) html = "<p class='text-muted' style='text-align:center;'>No hay operaciones en esta fecha.</p>";
-        document.getElementById('fullOpsList').innerHTML = html;
-        document.getElementById('histCountOps').innerText = opsFiltradas.length;
-        document.getElementById('histNetOps').innerText = (totalGain>=0?'+':'') + totalGain.toFixed(2) + " USDT";
-        document.getElementById('histNetOps').className = "val " + (totalGain>=0?"text-green":"text-red");
+    // ─── HISTORIAL JERÁRQUICO ───────────────────────────────────────────────
+    // Estados posibles: 'mes' | 'semana' | 'dia' | 'ops'
+    let histNivel = 'mes';
+    let histSelMes = null;
+    let histSelSemana = null;
+    let histSelDia = null;
+
+    // Obtiene la semana (Lun-Dom) de una fecha string "YYYY-MM-DD"
+    function getWeekRangeLabel(dateStr) {
+        let d = new Date(dateStr + 'T12:00:00');
+        let day = d.getDay() || 7; // lunes=1 ... domingo=7
+        let lun = new Date(d); lun.setDate(d.getDate() - day + 1);
+        let dom = new Date(lun); dom.setDate(lun.getDate() + 6);
+        let fmt = dt => `${String(dt.getDate()).padStart(2,'0')}/${String(dt.getMonth()+1).padStart(2,'0')}`;
+        return `${fmt(lun)} - ${fmt(dom)}`;
     }
+
+    // Clave única para la semana (lunes de esa semana)
+    function getWeekKey(dateStr) {
+        let d = new Date(dateStr + 'T12:00:00');
+        let day = d.getDay() || 7;
+        let lun = new Date(d); lun.setDate(d.getDate() - day + 1);
+        return `${lun.getFullYear()}-${String(lun.getMonth()+1).padStart(2,'0')}-${String(lun.getDate()).padStart(2,'0')}`;
+    }
+
+    function calcStats(ops) {
+        let gain = 0, vol = 0;
+        ops.forEach(o => { gain += o.gain; vol += (o.monto || 0); });
+        let margin = vol > 0 ? (gain / vol) * 100 : 0;
+        return { count: ops.length, gain, vol, margin };
+    }
+
+    function updateHistStats(ops) {
+        let s = calcStats(ops);
+        document.getElementById('histCountOps').innerText = s.count;
+        document.getElementById('histNetOps').innerText = (s.gain>=0?'+':'') + s.gain.toFixed(2) + " USDT";
+        document.getElementById('histNetOps').className = "val " + (s.gain>=0?"text-green":"text-red");
+        document.getElementById('histVolOps').innerText = s.vol.toFixed(2);
+        document.getElementById('histMarginOps').innerText = s.margin.toFixed(2) + "%";
+        document.getElementById('histMarginOps').className = "val " + (s.margin>=0?"text-green":"text-red");
+    }
+
+    function updateHistBreadcrumb() {
+        let bc = document.getElementById('histBreadcrumb');
+        let parts = [];
+        let spanStyle = `style="cursor:pointer; color:#5882ff;"`;
+
+        parts.push(`<span ${spanStyle} onclick="histGoLevel('mes')">📅 Meses</span>`);
+        if(histSelMes) {
+            parts.push(`<span style="color:var(--text-muted);">›</span>`);
+            let [y, m] = histSelMes.split('-');
+            let mName = new Date(y, m-1, 1).toLocaleString('es', {month:'long', year:'numeric'});
+            parts.push(`<span ${histNivel!=='mes'?spanStyle+' onclick="histGoLevel(\'semana\')"':''} style="${histNivel==='semana'?'color:var(--text-muted);':''}">${mName.charAt(0).toUpperCase()+mName.slice(1)}</span>`);
+        }
+        if(histSelSemana) {
+            parts.push(`<span style="color:var(--text-muted);">›</span>`);
+            parts.push(`<span ${histNivel!=='dia'?spanStyle+' onclick="histGoLevel(\'dia\')"':''}>Sem. ${getWeekRangeLabel(histSelSemana)}</span>`);
+        }
+        if(histSelDia) {
+            parts.push(`<span style="color:var(--text-muted);">›</span>`);
+            let [y,mo,d] = histSelDia.split('-');
+            parts.push(`<span style="color:var(--text-muted);">${d}/${mo}/${y}</span>`);
+        }
+        bc.innerHTML = parts.join(' ');
+    }
+
+    function histGoLevel(nivel) {
+        if(nivel === 'mes') { histSelMes = null; histSelSemana = null; histSelDia = null; }
+        else if(nivel === 'semana') { histSelSemana = null; histSelDia = null; }
+        else if(nivel === 'dia') { histSelDia = null; }
+        histNivel = nivel;
+        renderHistorialOps();
+    }
+
+    function histGoBack() {
+        if(histNivel === 'ops')     { histNivel = 'dia'; histSelDia = null; }
+        else if(histNivel === 'dia')    { histNivel = 'semana'; histSelSemana = null; }
+        else if(histNivel === 'semana') { histNivel = 'mes'; histSelMes = null; }
+        else { nav('libro'); return; }
+        renderHistorialOps();
+    }
+
+    function renderHistorialOps() {
+        updateHistBreadcrumb();
+        let container = document.getElementById('histListContainer');
+        let titles = { mes:'Historial de Operaciones', semana:'Semanas', dia:'Días', ops:'Operaciones' };
+        document.getElementById('histTitle').innerText = titles[histNivel];
+
+        // ── NIVEL MES ──
+        if(histNivel === 'mes') {
+            let mesesMap = {};
+            window.ops.forEach(o => {
+                let m = (o.month || o.date.slice(0,7));
+                if(!mesesMap[m]) mesesMap[m] = [];
+                mesesMap[m].push(o);
+            });
+            let meses = Object.keys(mesesMap).sort((a,b) => b.localeCompare(a));
+            updateHistStats(window.ops);
+
+            if(meses.length === 0) { container.innerHTML = "<p class='text-muted' style='text-align:center;padding:30px;'>No hay operaciones registradas.</p>"; return; }
+
+            let html = '';
+            meses.forEach(m => {
+                let ops = mesesMap[m];
+                let s = calcStats(ops);
+                let [y, mo] = m.split('-');
+                let mName = new Date(y, mo-1, 1).toLocaleString('es', {month:'long'});
+                mName = mName.charAt(0).toUpperCase() + mName.slice(1) + ' ' + y;
+                let gainColor = s.gain >= 0 ? 'var(--primary-green)' : 'var(--danger-red)';
+                html += `<div class="card" style="padding:14px; cursor:pointer; margin-bottom:10px;" onclick="histSelectMes('${m}')">
+                    <div style="display:flex; justify-content:space-between; align-items:center;">
+                        <div>
+                            <div style="font-weight:700; font-size:15px;">📅 ${mName}</div>
+                            <div style="font-size:11px; color:var(--text-muted); margin-top:4px;">${s.count} operaciones · Vol: ${s.vol.toFixed(2)} USDT</div>
+                        </div>
+                        <div style="text-align:right;">
+                            <div style="font-weight:bold; font-size:16px; color:${gainColor};">${s.gain>=0?'+':''}${s.gain.toFixed(2)}</div>
+                            <div style="font-size:10px; color:var(--text-muted);">USDT</div>
+                        </div>
+                    </div>
+                    <div style="margin-top:8px; height:4px; background:var(--card-border); border-radius:4px; overflow:hidden;">
+                        <div style="height:100%; width:${Math.min(Math.abs(s.margin),100)}%; background:${gainColor}; border-radius:4px;"></div>
+                    </div>
+                    <div style="font-size:10px; color:var(--text-muted); margin-top:3px;">Margen prom: ${s.margin.toFixed(2)}% · Toca para ver semanas ›</div>
+                </div>`;
+            });
+            container.innerHTML = html;
+        }
+
+        // ── NIVEL SEMANA ──
+        else if(histNivel === 'semana') {
+            let opsMes = window.ops.filter(o => (o.month || o.date.slice(0,7)) === histSelMes);
+            updateHistStats(opsMes);
+            let semanasMap = {};
+            opsMes.forEach(o => {
+                let wk = getWeekKey(o.date);
+                if(!semanasMap[wk]) semanasMap[wk] = [];
+                semanasMap[wk].push(o);
+            });
+            let semanas = Object.keys(semanasMap).sort((a,b) => b.localeCompare(a));
+
+            let html = '';
+            semanas.forEach(wk => {
+                let ops = semanasMap[wk];
+                let s = calcStats(ops);
+                let label = getWeekRangeLabel(wk);
+                let gainColor = s.gain >= 0 ? 'var(--primary-green)' : 'var(--danger-red)';
+                html += `<div class="card" style="padding:14px; cursor:pointer; margin-bottom:10px;" onclick="histSelectSemana('${wk}')">
+                    <div style="display:flex; justify-content:space-between; align-items:center;">
+                        <div>
+                            <div style="font-weight:700; font-size:14px;">📆 Semana ${label}</div>
+                            <div style="font-size:11px; color:var(--text-muted); margin-top:4px;">${s.count} ops · Vol: ${s.vol.toFixed(2)} USDT</div>
+                        </div>
+                        <div style="text-align:right;">
+                            <div style="font-weight:bold; font-size:16px; color:${gainColor};">${s.gain>=0?'+':''}${s.gain.toFixed(2)}</div>
+                            <div style="font-size:10px; color:var(--text-muted);">USDT</div>
+                        </div>
+                    </div>
+                    <div style="font-size:10px; color:var(--text-muted); margin-top:6px; text-align:right;">Toca para ver días ›</div>
+                </div>`;
+            });
+            if(!html) html = "<p class='text-muted' style='text-align:center;padding:30px;'>Sin operaciones este mes.</p>";
+            container.innerHTML = html;
+        }
+
+        // ── NIVEL DÍA ──
+        else if(histNivel === 'dia') {
+            let opsSem = window.ops.filter(o => getWeekKey(o.date) === histSelSemana);
+            updateHistStats(opsSem);
+            let diasMap = {};
+            opsSem.forEach(o => {
+                if(!diasMap[o.date]) diasMap[o.date] = [];
+                diasMap[o.date].push(o);
+            });
+            let dias = Object.keys(diasMap).sort((a,b) => b.localeCompare(a));
+            let today = getTodayStr();
+
+            let html = '';
+            dias.forEach(d => {
+                let ops = diasMap[d];
+                let s = calcStats(ops);
+                let [y,mo,dd] = d.split('-');
+                let dateObj = new Date(d + 'T12:00:00');
+                let dName = dateObj.toLocaleString('es', {weekday:'long'});
+                dName = dName.charAt(0).toUpperCase() + dName.slice(1);
+                let label = d === today ? '📍 Hoy' : `${dName} ${dd}/${mo}/${y}`;
+                let gainColor = s.gain >= 0 ? 'var(--primary-green)' : 'var(--danger-red)';
+                html += `<div class="card" style="padding:14px; cursor:pointer; margin-bottom:10px;" onclick="histSelectDia('${d}')">
+                    <div style="display:flex; justify-content:space-between; align-items:center;">
+                        <div>
+                            <div style="font-weight:700; font-size:14px;">${label}</div>
+                            <div style="font-size:11px; color:var(--text-muted); margin-top:4px;">${s.count} operaciones</div>
+                        </div>
+                        <div style="text-align:right;">
+                            <div style="font-weight:bold; font-size:16px; color:${gainColor};">${s.gain>=0?'+':''}${s.gain.toFixed(2)}</div>
+                            <div style="font-size:10px; color:var(--text-muted);">USDT</div>
+                        </div>
+                    </div>
+                    <div style="font-size:10px; color:var(--text-muted); margin-top:6px; text-align:right;">Toca para ver operaciones ›</div>
+                </div>`;
+            });
+            if(!html) html = "<p class='text-muted' style='text-align:center;padding:30px;'>Sin operaciones esta semana.</p>";
+            container.innerHTML = html;
+        }
+
+        // ── NIVEL OPS (detalle del día) ──
+        else if(histNivel === 'ops') {
+            let opsdia = window.ops.filter(o => o.date === histSelDia);
+            updateHistStats(opsdia);
+            let html = '';
+            opsdia.forEach(o => {
+                let gainColor = o.gain>=0 ? 'var(--primary-green)' : 'var(--danger-red)';
+                html += `<div class="card" style="padding:12px; border-left:4px solid ${gainColor}; margin-bottom:10px;">
+                    <div class="op-top"><span>${o.time} • ${o.concepto}</span></div>
+                    <div class="op-mid">
+                        <div class="op-title">${o.tipo}</div>
+                        <div class="op-gain ${o.gain>=0?'text-green':'text-red'}">${o.gain>=0?'+':''}${o.gain.toFixed(2)} USDT</div>
+                    </div>
+                    <div class="op-bot" style="margin-top:6px;">
+                        <span>Base: ${o.monto||0}</span>
+                        <div style="display:flex; align-items:center; gap:10px;">
+                            <span style="color:#25D366; cursor:pointer; font-weight:bold;" onclick="enviarWhatsAppOps(${o.id})">📲 WA</span>
+                            <span style="color:#007bff; cursor:pointer; font-weight:bold;" onclick="editarOps(${o.id})">Editar</span>
+                            <span style="color:#ff4d4f; cursor:pointer; font-weight:bold;" onclick="borrarOps(${o.id})">Borrar</span>
+                        </div>
+                    </div>
+                </div>`;
+            });
+            if(!html) html = "<p class='text-muted' style='text-align:center;padding:30px;'>No hay operaciones este día.</p>";
+            container.innerHTML = html;
+        }
+    }
+
+    function histSelectMes(mes) { histSelMes = mes; histNivel = 'semana'; renderHistorialOps(); }
+    function histSelectSemana(wk) { histSelSemana = wk; histNivel = 'dia'; renderHistorialOps(); }
+    function histSelectDia(dia) { histSelDia = dia; histNivel = 'ops'; renderHistorialOps(); }
+    // ─────────────────────────────────────────────────────────────────────────
 
     function editarOps(id) {
         let op = window.ops.find(o => o.id === id); if(!op) return;
