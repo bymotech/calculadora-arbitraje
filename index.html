@@ -135,9 +135,51 @@
         .pie-chart { width: 140px; height: 140px; border-radius: 50%; margin: 10px auto 20px auto; border: 2px solid var(--card-border); box-shadow: 0 4px 10px rgba(0,0,0,0.2); }
         .legend-item { display: flex; align-items: center; justify-content: space-between; font-size: 13px; margin-bottom: 8px; border-bottom: 1px solid var(--card-border); padding-bottom: 4px; }
         .legend-color { width: 12px; height: 12px; border-radius: 3px; margin-right: 8px; }
+
+    /* AUTH STYLES */
+    #authScreen { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: var(--bg-dark); z-index: 9999; display: flex; align-items: center; justify-content: center; padding: 20px; }
+    .auth-box { background: var(--card-bg); border: 1px solid var(--card-border); border-radius: 20px; padding: 30px 20px; width: 100%; max-width: 400px; text-align: center; }
+    .auth-box .logo-img { height: 60px; margin-bottom: 10px; }
+    .auth-box h2 { font-size: 20px; margin-bottom: 5px; }
+    .auth-box p { font-size: 13px; color: var(--text-muted); margin-bottom: 25px; }
+    .auth-tabs { display: flex; background: var(--input-bg); border-radius: 10px; padding: 4px; margin-bottom: 20px; }
+    .auth-tab { flex: 1; padding: 10px; font-size: 13px; font-weight: 600; color: var(--text-muted); cursor: pointer; border-radius: 8px; border: none; background: transparent; transition: 0.3s; }
+    .auth-tab.active { background: var(--primary-green); color: #000; }
+    .auth-error { color: var(--danger-red); font-size: 12px; margin-top: 10px; min-height: 18px; }
+    .user-badge { position: fixed; top: 15px; left: 15px; font-size: 11px; color: var(--text-muted); z-index: 50; cursor: pointer; display: none; }
+    .sync-indicator { position: fixed; top: 15px; left: 50%; transform: translateX(-50%); font-size: 11px; background: var(--card-bg); border: 1px solid var(--card-border); padding: 4px 12px; border-radius: 20px; z-index: 50; display: none; }
     </style>
 </head>
 <body>
+
+<!-- PANTALLA DE LOGIN -->
+<div id="authScreen">
+    <div class="auth-box">
+        <img src="logo_final.PNG" alt="CONTABLE BM" class="logo-img" onerror="this.style.display='none'">
+        <h2>CONTABLE BM</h2>
+        <p>Inicia sesión para acceder a tus datos</p>
+        <div class="auth-tabs">
+            <button class="auth-tab active" id="tabLogin" onclick="switchAuthTab('login')">Iniciar Sesión</button>
+            <button class="auth-tab" id="tabRegister" onclick="switchAuthTab('register')">Registrarse</button>
+        </div>
+        <div id="loginForm">
+            <div class="input-group"><input type="email" id="authEmail" placeholder="Correo electrónico"></div>
+            <div class="input-group"><input type="password" id="authPassword" placeholder="Contraseña"></div>
+            <button class="btn" onclick="loginUser()">Entrar</button>
+            <div style="margin-top:10px;"><span style="font-size:12px; color:#5882ff; cursor:pointer;" onclick="resetPassword()">¿Olvidaste tu contraseña?</span></div>
+        </div>
+        <div id="registerForm" style="display:none;">
+            <div class="input-group"><input type="email" id="regEmail" placeholder="Correo electrónico"></div>
+            <div class="input-group"><input type="password" id="regPassword" placeholder="Contraseña (mín. 6 caracteres)"></div>
+            <button class="btn" onclick="registerUser()">Crear Cuenta</button>
+        </div>
+        <div class="auth-error" id="authError"></div>
+    </div>
+</div>
+
+<!-- BADGE DE USUARIO -->
+<div class="user-badge" id="userBadge" onclick="logoutUser()">👤 <span id="userEmail"></span> · Salir</div>
+<div class="sync-indicator" id="syncIndicator">☁️ Sincronizando...</div>
 
 <div class="container">
     <div class="btn-refresh" onclick="location.reload()" title="Refrescar App">🔄</div>
@@ -651,27 +693,210 @@
     </div>
 </div>
 
+<script type="module">
+    // ==========================================
+    // FIREBASE CONFIGURATION
+    // ==========================================
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+    import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut, onAuthStateChanged, sendPasswordResetEmail } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
+    import { getFirestore, doc, setDoc, getDoc, onSnapshot } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+
+    const firebaseConfig = {
+        apiKey: "AIzaSyBqsgPcLU8S3twM6HtCfqOcREac5FvKUAY",
+        authDomain: "contablebm-14c9e.firebaseapp.com",
+        projectId: "contablebm-14c9e",
+        storageBucket: "contablebm-14c9e.firebasestorage.app",
+        messagingSenderId: "745611346056",
+        appId: "1:745611346056:web:927f92634981e86f64df3d"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const auth = getAuth(app);
+    const db = getFirestore(app);
+
+    let currentUser = null;
+    let saveTimeout = null;
+
+    // ==========================================
+    // AUTH FUNCTIONS (exposed globally)
+    // ==========================================
+    window.switchAuthTab = function(tab) {
+        document.getElementById('tabLogin').classList.toggle('active', tab === 'login');
+        document.getElementById('tabRegister').classList.toggle('active', tab === 'register');
+        document.getElementById('loginForm').style.display = tab === 'login' ? 'block' : 'none';
+        document.getElementById('registerForm').style.display = tab === 'register' ? 'block' : 'none';
+        document.getElementById('authError').innerText = '';
+    }
+
+    window.loginUser = async function() {
+        let email = document.getElementById('authEmail').value.trim();
+        let pass = document.getElementById('authPassword').value;
+        document.getElementById('authError').innerText = '';
+        try {
+            await signInWithEmailAndPassword(auth, email, pass);
+        } catch(e) {
+            document.getElementById('authError').innerText = tradError(e.code);
+        }
+    }
+
+    window.registerUser = async function() {
+        let email = document.getElementById('regEmail').value.trim();
+        let pass = document.getElementById('regPassword').value;
+        document.getElementById('authError').innerText = '';
+        try {
+            await createUserWithEmailAndPassword(auth, email, pass);
+        } catch(e) {
+            document.getElementById('authError').innerText = tradError(e.code);
+        }
+    }
+
+    window.logoutUser = async function() {
+        if(confirm('¿Cerrar sesión?')) await signOut(auth);
+    }
+
+    window.resetPassword = async function() {
+        let email = document.getElementById('authEmail').value.trim();
+        if(!email) { document.getElementById('authError').innerText = 'Escribe tu correo primero.'; return; }
+        try {
+            await sendPasswordResetEmail(auth, email);
+            document.getElementById('authError').style.color = 'var(--primary-green)';
+            document.getElementById('authError').innerText = '✅ Correo de recuperación enviado.';
+        } catch(e) {
+            document.getElementById('authError').innerText = tradError(e.code);
+        }
+    }
+
+    function tradError(code) {
+        if(code === 'auth/invalid-email') return 'Correo inválido.';
+        if(code === 'auth/user-not-found' || code === 'auth/invalid-credential') return 'Correo o contraseña incorrectos.';
+        if(code === 'auth/wrong-password') return 'Contraseña incorrecta.';
+        if(code === 'auth/email-already-in-use') return 'Este correo ya está registrado.';
+        if(code === 'auth/weak-password') return 'La contraseña debe tener al menos 6 caracteres.';
+        return 'Error: ' + code;
+    }
+
+    // ==========================================
+    // FIRESTORE SYNC
+    // ==========================================
+    async function loadUserData(uid) {
+        showSync(true);
+        try {
+            let docRef = doc(db, 'users', uid);
+            let snap = await getDoc(docRef);
+            if(snap.exists()) {
+                let data = snap.data();
+                if(data.ops) { window.ops = data.ops; localStorage.setItem('bymo_ops', JSON.stringify(data.ops)); }
+                if(data.contabilidad) { window.contabilidad = data.contabilidad; localStorage.setItem('bymo_contab', JSON.stringify(data.contabilidad)); }
+                if(data.catIngresos) { window.catIngresos = data.catIngresos; localStorage.setItem('bymo_cat_ingresos', JSON.stringify(data.catIngresos)); }
+                if(data.catEgresos) { window.catEgresos = data.catEgresos; localStorage.setItem('bymo_cat_egresos', JSON.stringify(data.catEgresos)); }
+                if(data.tasas) { Object.entries(data.tasas).forEach(([k,v]) => localStorage.setItem(k, v)); }
+                if(data.contabFijos) localStorage.setItem('bymo_contab_fijos', JSON.stringify(data.contabFijos));
+                if(data.appMode) localStorage.setItem('bymo_app_mode', data.appMode);
+            }
+        } catch(e) { console.log('Error cargando datos:', e); }
+        showSync(false);
+    }
+
+    window.saveToFirebase = async function() {
+        if(!currentUser) return;
+        clearTimeout(saveTimeout);
+        saveTimeout = setTimeout(async () => {
+            showSync(true);
+            try {
+                const tasaFields = ['tUsdtBs','tZelleCop','tZelleEf','tBcvUsd','tBcvEur','tZelleBs','tPaypalBs','tPaypalUsdtCom','tCapitalBase','tZelleUsdtCom','tBinanceCop','tCopComision','tBinanceClp','tClpComision','tDolarElecBs','comBancoElec','comBinanceElec','tEfUsdtCom','tUsdtEfCom'];
+                let tasas = {};
+                tasaFields.forEach(f => { let v = localStorage.getItem(f); if(v) tasas[f] = v; });
+
+                await setDoc(doc(db, 'users', currentUser.uid), {
+                    ops: window.ops || [],
+                    contabilidad: window.contabilidad || [],
+                    catIngresos: window.catIngresos || [],
+                    catEgresos: window.catEgresos || [],
+                    tasas: tasas,
+                    contabFijos: JSON.parse(localStorage.getItem('bymo_contab_fijos') || '[]'),
+                    appMode: localStorage.getItem('bymo_app_mode') || 'ops',
+                    lastSync: new Date().toISOString()
+                });
+            } catch(e) { console.log('Error guardando:', e); }
+            showSync(false);
+        }, 1500);
+    }
+
+    function showSync(show) {
+        document.getElementById('syncIndicator').style.display = show ? 'block' : 'none';
+    }
+
+    // ==========================================
+    // AUTH STATE LISTENER
+    // ==========================================
+    onAuthStateChanged(auth, async (user) => {
+        if(user) {
+            currentUser = user;
+            document.getElementById('authScreen').style.display = 'none';
+            document.getElementById('userBadge').style.display = 'block';
+            document.getElementById('userEmail').innerText = user.email;
+            await loadUserData(user.uid);
+            // Re-initialize app with loaded data
+            window.ops = JSON.parse(localStorage.getItem('bymo_ops')) || [];
+            window.contabilidad = JSON.parse(localStorage.getItem('bymo_contab')) || [];
+            window.catIngresos = JSON.parse(localStorage.getItem('bymo_cat_ingresos')) || ['Salario', 'Ventas', 'Otros'];
+            window.catEgresos = JSON.parse(localStorage.getItem('bymo_cat_egresos')) || ['Comida', 'Internet', 'Carro', 'Servicios', 'Entretenimiento', 'Otros'];
+            initApp();
+        } else {
+            currentUser = null;
+            document.getElementById('authScreen').style.display = 'flex';
+            document.getElementById('userBadge').style.display = 'none';
+        }
+    });
+
+    window.getCurrentUser = function() { return currentUser; }
+</script>
+
 <script>
+    // ==========================================
+    // APP VARIABLES (ahora son globales para Firebase)
+    // ==========================================
+    window.ops = JSON.parse(localStorage.getItem('bymo_ops')) || [];
+    window.contabilidad = JSON.parse(localStorage.getItem('bymo_contab')) || [];
+    window.catIngresos = JSON.parse(localStorage.getItem('bymo_cat_ingresos')) || ['Salario', 'Ventas', 'Otros'];
+    window.catEgresos = JSON.parse(localStorage.getItem('bymo_cat_egresos')) || ['Comida', 'Internet', 'Carro', 'Servicios', 'Entretenimiento', 'Otros'];
+    
     let appMode = localStorage.getItem('bymo_app_mode') || 'ops';
-    let ops = JSON.parse(localStorage.getItem('bymo_ops')) || [];
-    let contabilidad = JSON.parse(localStorage.getItem('bymo_contab')) || [];
-    let catIngresos = JSON.parse(localStorage.getItem('bymo_cat_ingresos')) || ['Salario', 'Ventas', 'Otros'];
-    let catEgresos = JSON.parse(localStorage.getItem('bymo_cat_egresos')) || ['Comida', 'Internet', 'Carro', 'Servicios', 'Entretenimiento', 'Otros'];
     let editId = null;
     let editIdContab = null;
-
     const pieColors = ['#20c974', '#5882ff', '#ffcc00', '#ff4d4f', '#a855f7', '#13c2c2', '#fa8c16', '#eb2f96'];
+
+    // Helper para guardar tanto en localStorage como en Firebase
+    function saveOps() {
+        localStorage.setItem('bymo_ops', JSON.stringify(window.ops));
+        if(window.saveToFirebase) window.saveToFirebase();
+    }
+    function saveContab() {
+        localStorage.setItem('bymo_contab', JSON.stringify(window.contabilidad));
+        if(window.saveToFirebase) window.saveToFirebase();
+    }
+    function saveCats() {
+        localStorage.setItem('bymo_cat_ingresos', JSON.stringify(window.catIngresos));
+        localStorage.setItem('bymo_cat_egresos', JSON.stringify(window.catEgresos));
+        if(window.saveToFirebase) window.saveToFirebase();
+    }
+
+    function initApp() {
+        initTheme();
+        loadTasas();
+        renderCategoriasUI();
+        procesarContabAuto();
+        switchAppMode(appMode, true);
+        calcularConversor();
+    }
 
     function initTheme() {
         let savedTheme = localStorage.getItem('bymo_theme') || 'auto';
         let themeSelect = document.getElementById('themeSelector');
         if(themeSelect) themeSelect.value = savedTheme;
         applyTheme(savedTheme);
-
         window.matchMedia('(prefers-color-scheme: light)').addEventListener('change', e => {
-            if(localStorage.getItem('bymo_theme') === 'auto' || !localStorage.getItem('bymo_theme')) {
-                applyTheme('auto');
-            }
+            if(localStorage.getItem('bymo_theme') === 'auto' || !localStorage.getItem('bymo_theme')) applyTheme('auto');
         });
     }
 
@@ -683,11 +908,8 @@
 
     function applyTheme(theme) {
         if (theme === 'auto') {
-            if (window.matchMedia && window.matchMedia('(prefers-color-scheme: light)').matches) {
-                document.documentElement.setAttribute('data-theme', 'light');
-            } else {
-                document.documentElement.removeAttribute('data-theme');
-            }
+            if (window.matchMedia && window.matchMedia('(prefers-color-scheme: light)').matches) document.documentElement.setAttribute('data-theme', 'light');
+            else document.documentElement.removeAttribute('data-theme');
         } else if (theme === 'light') {
             document.documentElement.setAttribute('data-theme', 'light');
         } else {
@@ -702,12 +924,8 @@
     }
 
     window.onload = () => {
-        initTheme();
-        loadTasas();
-        renderCategoriasUI();
-        procesarContabAuto(); 
-        switchAppMode(appMode, true);
-        calcularConversor();
+        // initApp() se llama desde onAuthStateChanged cuando el usuario inicia sesión
+        // Pero si no hay Firebase aún, mostramos pantalla de login
     };
 
     function switchAppMode(mode, initialLoad = false) {
@@ -715,22 +933,17 @@
         localStorage.setItem('bymo_app_mode', mode);
         document.getElementById('btnModeOps').classList.toggle('active', mode === 'ops');
         document.getElementById('btnModeContab').classList.toggle('active', mode === 'contab');
-        
         if(!initialLoad) { editId = null; editIdContab = null; nav('libro'); }
         else nav('libro');
+        if(window.saveToFirebase) window.saveToFirebase();
     }
 
-    // ==========================================
-    // NAVEGACION Y CARGA GLOBAL
-    // ==========================================
     function nav(id) {
         document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
         document.querySelectorAll('.nav-item').forEach(i => i.classList.remove('active'));
         
         let targetId = id;
-        if(id === 'libro' || id === 'operar' || id === 'historial') {
-            targetId = id + '-' + appMode;
-        }
+        if(id === 'libro' || id === 'operar' || id === 'historial') targetId = id + '-' + appMode;
 
         let sec = document.getElementById('sec-' + targetId);
         if(sec) sec.classList.add('active');
@@ -748,73 +961,36 @@
                 if(!editId) document.getElementById('btnRegistrarOp').innerText = "Registrar Operación";
                 updatePreviewOps();
             } else {
-                if(!editIdContab) {
-                    document.getElementById('btnRegistrarContab').innerText = "Guardar Movimiento";
-                    document.getElementById('wrapFreq').style.display = 'block';
-                } else {
-                    document.getElementById('wrapFreq').style.display = 'none';
-                }
+                if(!editIdContab) { document.getElementById('btnRegistrarContab').innerText = "Guardar Movimiento"; document.getElementById('wrapFreq').style.display = 'block'; }
+                else document.getElementById('wrapFreq').style.display = 'none';
                 updatePreviewContab();
             }
         }
-        
-        if(id === 'libro') {
-            if(appMode === 'ops') renderLibroOps();
-            else renderLibroContab();
-        }
-        
-        if(id === 'historial') {
-            if(appMode === 'ops') renderHistorialOps();
-            else renderHistorialContab();
-        }
-
-        if(id === 'stats-contab') {
-            renderStatsContab();
-        }
+        if(id === 'libro') { if(appMode === 'ops') renderLibroOps(); else renderLibroContab(); }
+        if(id === 'historial') { if(appMode === 'ops') renderHistorialOps(); else renderHistorialContab(); }
+        if(id === 'stats-contab') renderStatsContab();
     }
 
     function loadTasas() {
-        const fields = [
-            'tUsdtBs', 'tZelleCop', 'tZelleEf', 'tBcvUsd', 
-            'tBcvEur', 'tZelleBs', 'tPaypalBs', 'tPaypalUsdtCom', 
-            'tCapitalBase', 'tZelleUsdtCom',
-            'tBinanceCop', 'tCopComision',
-            'tBinanceClp', 'tClpComision',
-            'tDolarElecBs', 'comBancoElec', 'comBinanceElec',
-            'tEfUsdtCom', 'tUsdtEfCom'
-        ];
-        fields.forEach(f => {
-            let el = document.getElementById(f);
-            if(el && localStorage.getItem(f)) el.value = localStorage.getItem(f);
-        });
+        const fields = ['tUsdtBs','tZelleCop','tZelleEf','tBcvUsd','tBcvEur','tZelleBs','tPaypalBs','tPaypalUsdtCom','tCapitalBase','tZelleUsdtCom','tBinanceCop','tCopComision','tBinanceClp','tClpComision','tDolarElecBs','comBancoElec','comBinanceElec','tEfUsdtCom','tUsdtEfCom'];
+        fields.forEach(f => { let el = document.getElementById(f); if(el && localStorage.getItem(f)) el.value = localStorage.getItem(f); });
         if(localStorage.getItem('tBcvUsd')) document.getElementById('calcBcv').value = localStorage.getItem('tBcvUsd');
         if(localStorage.getItem('tUsdtBs')) document.getElementById('calcBin').value = localStorage.getItem('tUsdtBs');
     }
 
     function saveTasas(silent = false) {
-        const fields = [
-            'tUsdtBs', 'tZelleCop', 'tZelleEf', 'tBcvUsd', 
-            'tBcvEur', 'tZelleBs', 'tPaypalBs', 'tPaypalUsdtCom', 
-            'tCapitalBase', 'tZelleUsdtCom',
-            'tBinanceCop', 'tCopComision',
-            'tBinanceClp', 'tClpComision',
-            'tDolarElecBs', 'comBancoElec', 'comBinanceElec',
-            'tEfUsdtCom', 'tUsdtEfCom'
-        ];
-        fields.forEach(f => {
-            let el = document.getElementById(f);
-            if(el) localStorage.setItem(f, el.value);
-        });
+        const fields = ['tUsdtBs','tZelleCop','tZelleEf','tBcvUsd','tBcvEur','tZelleBs','tPaypalBs','tPaypalUsdtCom','tCapitalBase','tZelleUsdtCom','tBinanceCop','tCopComision','tBinanceClp','tClpComision','tDolarElecBs','comBancoElec','comBinanceElec','tEfUsdtCom','tUsdtEfCom'];
+        fields.forEach(f => { let el = document.getElementById(f); if(el) localStorage.setItem(f, el.value); });
         calcularConversor();
         if(appMode === 'ops') renderLibroOps(); else renderLibroContab();
+        if(window.saveToFirebase) window.saveToFirebase();
         if(!silent) alert("Ajustes Guardados ✅");
     }
 
     async function sincronizarTasasAPI() {
         const btn = document.getElementById('btnSync');
         const originalText = btn.innerText;
-        btn.innerText = "Sincronizando... ⏳";
-        btn.disabled = true;
+        btn.innerText = "Sincronizando... ⏳"; btn.disabled = true;
         let bcvUsd = 0, bcvEur = 0, binanceUsdt = 0;
         try {
             let resBcv1 = await fetch('https://pydolarvenezuela-api.vercel.app/api/v1/dollar?page=bcv');
@@ -833,15 +1009,10 @@
             let dataBin1 = await resBin1.json();
             if(dataBin1 && dataBin1.monitors && dataBin1.monitors.binance) binanceUsdt = dataBin1.monitors.binance.price;
         } catch (e) {
-            try {
-                let resBin2 = await fetch('https://ve.dolarapi.com/v1/dolares/paralelo');
-                let dataBin2 = await resBin2.json(); binanceUsdt = dataBin2.promedio;
-            } catch (err2) {}
+            try { let resBin2 = await fetch('https://ve.dolarapi.com/v1/dolares/paralelo'); let dataBin2 = await resBin2.json(); binanceUsdt = dataBin2.promedio; } catch (err2) {}
         }
-
         try {
-            let resInt = await fetch('/api/binance');
-            let dataInt = await resInt.json();
+            let resInt = await fetch('/api/binance'); let dataInt = await resInt.json();
             if(dataInt.cop) document.getElementById('tBinanceCop').value = dataInt.cop;
             if(dataInt.clp) document.getElementById('tBinanceClp').value = dataInt.clp;
         } catch (e) {}
@@ -854,12 +1025,10 @@
         btn.innerText = originalText; btn.disabled = false;
     }
 
-    // ==========================================
-    // GESTION DE CATEGORIAS
-    // ==========================================
+    // CATEGORIAS
     function renderCategoriasUI() {
-        document.getElementById('listCatIng').innerHTML = catIngresos.map((c, i) => `<div class="tag-item">${c} <span onclick="delCat('ingreso', ${i})">x</span></div>`).join('');
-        document.getElementById('listCatEg').innerHTML = catEgresos.map((c, i) => `<div class="tag-item">${c} <span onclick="delCat('egreso', ${i})">x</span></div>`).join('');
+        document.getElementById('listCatIng').innerHTML = window.catIngresos.map((c, i) => `<div class="tag-item">${c} <span onclick="delCat('ingreso', ${i})">x</span></div>`).join('');
+        document.getElementById('listCatEg').innerHTML = window.catEgresos.map((c, i) => `<div class="tag-item">${c} <span onclick="delCat('egreso', ${i})">x</span></div>`).join('');
         updateCategoriaDropdown();
     }
 
@@ -867,33 +1036,25 @@
         let input = document.getElementById(tipo === 'ingreso' ? 'newCatIng' : 'newCatEg');
         let val = input.value.trim();
         if(val) {
-            if(tipo === 'ingreso') catIngresos.push(val); else catEgresos.push(val);
-            localStorage.setItem('bymo_cat_' + tipo + 's', JSON.stringify(tipo === 'ingreso' ? catIngresos : catEgresos));
-            input.value = "";
-            renderCategoriasUI();
+            if(tipo === 'ingreso') window.catIngresos.push(val); else window.catEgresos.push(val);
+            saveCats(); input.value = ""; renderCategoriasUI();
         }
     }
 
     function delCat(tipo, idx) {
-        if(tipo === 'ingreso') { catIngresos.splice(idx, 1); localStorage.setItem('bymo_cat_ingresos', JSON.stringify(catIngresos)); }
-        else { catEgresos.splice(idx, 1); localStorage.setItem('bymo_cat_egresos', JSON.stringify(catEgresos)); }
-        renderCategoriasUI();
+        if(tipo === 'ingreso') window.catIngresos.splice(idx, 1); else window.catEgresos.splice(idx, 1);
+        saveCats(); renderCategoriasUI();
     }
 
     function updateCategoriaDropdown() {
-        let tipo = document.getElementById('cTipo');
-        let select = document.getElementById('cCategoria');
+        let tipo = document.getElementById('cTipo'); let select = document.getElementById('cCategoria');
         if(!select || !tipo) return;
         select.innerHTML = '';
-        let arr = tipo.value === 'ingreso' ? catIngresos : catEgresos;
-        arr.forEach(c => {
-            let opt = document.createElement('option'); opt.value = c; opt.innerText = c; select.appendChild(opt);
-        });
+        let arr = tipo.value === 'ingreso' ? window.catIngresos : window.catEgresos;
+        arr.forEach(c => { let opt = document.createElement('option'); opt.value = c; opt.innerText = c; select.appendChild(opt); });
     }
 
-    // ==========================================
-    // LOGICA CALCULADORA
-    // ==========================================
+    // CALCULADORA
     function switchCalcTab(tabId) {
         document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
         document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
@@ -902,10 +1063,8 @@
     }
 
     function calcularConversor() {
-        let monto = num('convMonto');
-        let modo = document.getElementById('convModo').value;
+        let monto = num('convMonto'); let modo = document.getElementById('convModo').value;
         let tBcvUsd = num('tBcvUsd') || 1; let tBcvEur = num('tBcvEur') || 1; let tUsdt = num('tUsdtBs') || 1;
-
         if (modo === 'div_bs') {
             document.getElementById('resConvBcv').innerText = (monto * tBcvUsd).toLocaleString('es-VE', {minimumFractionDigits: 2}) + " Bs";
             document.getElementById('resConvEur').innerText = (monto * tBcvEur).toLocaleString('es-VE', {minimumFractionDigits: 2}) + " Bs";
@@ -937,27 +1096,21 @@
         let bcv = document.getElementById('resConvBcv').innerText;
         let eur = document.getElementById('resConvEur').innerText;
         let usdt = document.getElementById('resConvUsdt').innerText;
-
         let texto = `*CONTABLE BM - Cálculo Rápido* 🧮\n\n*Monto:* ${monto} ${modo === 'div_bs' ? 'USD/EUR' : 'Bs'}\n\n*Equivalencias:*\n🇺🇸 Dólar BCV: ${bcv}\n🇪🇺 Euro BCV: ${eur}\n🟢 USDT Binance: ${usdt}\n\n_Calculado con la tasa del momento._`;
         window.open(`https://wa.me/?text=${encodeURIComponent(texto)}`, '_blank');
     }
 
-    // ==========================================
-    // UTILS FECHAS
-    // ==========================================
+    // FECHAS
     function getTodayStr() { let d = new Date(); return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`; }
     function getMonthStr() { let d = new Date(); return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}`; }
     function getWeekNumber(d) {
         d = new Date(Date.UTC(d.getFullYear(), d.getMonth(), d.getDate()));
         d.setUTCDate(d.getUTCDate() + 4 - (d.getUTCDay()||7));
         var yearStart = new Date(Date.UTC(d.getUTCFullYear(),0,1));
-        var weekNo = Math.ceil(( ( (d - yearStart) / 86400000) + 1)/7);
-        return d.getUTCFullYear() + "-W" + weekNo;
+        return d.getUTCFullYear() + "-W" + Math.ceil(( ( (d - yearStart) / 86400000) + 1)/7);
     }
 
-    // ==========================================
-    // LOGICA MODO OPERACIONES
-    // ==========================================
+    // OPERACIONES
     function getCurrencyStr(tipo) {
         let cur = 'USDT';
         if(tipo.endsWith('_bs')) cur = 'Bs';
@@ -973,7 +1126,6 @@
     function calculateLogicOps(tipo, monto) {
         let tUsdt = num('tUsdtBs') || 1; let tZelleBs = num('tZelleBs') || 1;
         let gain = 0; let recibe = 0; let tasaApli = "1.00"; let comiStr = "-0.00";
-
         if (tipo === 'zelle_usdt') { let com = num('tZelleUsdtCom') || 0; gain = monto * (com / 100); recibe = monto - gain; comiStr = `-${gain.toFixed(2)} USDT`; }
         else if (tipo === 'zelle_ef') { let com = num('tZelleEf') || 0; gain = monto * (com / 100); recibe = monto - gain; comiStr = `-${gain.toFixed(2)} USD`; }
         else if (tipo === 'zelle_bs') { gain = monto - ((monto * tZelleBs) / tUsdt); recibe = monto * tZelleBs; tasaApli = tZelleBs.toFixed(2); comiStr = "Dif. Tasa"; }
@@ -989,7 +1141,6 @@
         else if (tipo === 'zelle_cop') { let tZelleCop = num('tZelleCop') || 3500; gain = monto * 0.02; recibe = monto * tZelleCop; tasaApli = tZelleCop; comiStr = "-"; }
         else if (tipo === 'ciclo_calle') { let tBsEfCompra = num('opTasaCompra') || 1; let comEfUsdt = num('tEfUsdtCom') || 0; let bsObtenidos = monto * tUsdt; let efectivoComprado = bsObtenidos / tBsEfCompra; let usdtFinal = efectivoComprado * (1 - (comEfUsdt / 100)); gain = usdtFinal - monto; recibe = usdtFinal; tasaApli = `Calle: ${tBsEfCompra}`; comiStr = `Com: ${comEfUsdt}%`; }
         else if (tipo === 'usdt_bcv_usdt') { let tDolarElecBs = num('tDolarElecBs') || 1; let comBancoElec = num('comBancoElec') || 0; let comBinanceElec = num('comBinanceElec') || 0; let bsObtenidos = monto * tUsdt; let costoPorUsdBanco = tDolarElecBs * (1 + (comBancoElec / 100)); let usdBancoComprados = bsObtenidos / costoPorUsdBanco; let usdtFinal = usdBancoComprados * (1 - (comBinanceElec / 100)); gain = usdtFinal - monto; recibe = usdtFinal; tasaApli = "Ciclo"; comiStr = "Bco+Bin"; }
-        
         let margin = 0;
         if(monto > 0) {
             if(tipo === 'clp_usdt' || tipo === 'cop_usdt') { margin = (gain / (monto / num(tipo === 'clp_usdt' ? 'tBinanceClp' : 'tBinanceCop'))) * 100; }
@@ -1008,26 +1159,20 @@
         else if(tipo.startsWith('usdt_') && tipo !== 'usdt_bcv_usdt') monedaEntrada = "USDT";
         else if(tipo.startsWith('clp_')) monedaEntrada = "Pesos Chilenos (CLP)";
         else if(tipo.startsWith('cop_')) monedaEntrada = "Pesos Colombianos (COP)";
-
         if(tipo === 'compra_venta_ef') lbl.innerText = "Monto de Efectivo (Capital operado)";
         else if(tipo === 'ciclo_calle' || tipo === 'usdt_bcv_usdt') lbl.innerText = "Capital Inicial (USDT)";
         else lbl.innerText = `Monto en ${monedaEntrada} (EL CLIENTE ENTREGA)`;
-
         document.getElementById('dynamicRatesOps').style.display = (tipo === 'compra_venta_ef' || tipo === 'ciclo_calle') ? 'flex' : 'none';
         document.getElementById('wrapTasaVenta').style.display = (tipo === 'ciclo_calle') ? 'none' : 'block';
         document.getElementById('lblTasaCompra').innerText = (tipo === 'ciclo_calle') ? "Tasa Calle (Bs/$)" : "Tasa Compra (Bs/$)";
-        
         let monto = num('opMonto');
         let res = calculateLogicOps(tipo, monto);
-        
         document.getElementById('prevTasaOps').innerText = res.tasaApli;
         document.getElementById('prevComOps').innerText = res.comiStr;
-        
         let cur = getCurrencyStr(tipo);
         let labelRecibe = document.getElementById('labelRecibeOps');
         if(tipo === 'compra_venta_ef' || tipo === 'ciclo_calle' || tipo === 'usdt_bcv_usdt') labelRecibe.innerText = "Resultado (YO RECIBO)";
         else labelRecibe.innerText = "Monto a Transferir (YO ENTREGO)";
-
         document.getElementById('prevRecibeOps').innerText = res.recibe.toLocaleString('es-VE', {minimumFractionDigits: 2, maximumFractionDigits:2}) + " " + cur;
         document.getElementById('prevGainOps').innerText = (res.gain >= 0 ? '+' : '') + res.gain.toFixed(2) + " USDT";
         document.getElementById('prevGainOps').className = res.gain >= 0 ? "text-green" : "text-red";
@@ -1041,23 +1186,17 @@
         let tipoText = document.getElementById('opTipo').options[document.getElementById('opTipo').selectedIndex].text;
         let monto = num('opMonto');
         if(monto <= 0) return alert("Ingresa un monto válido");
-
         let res = calculateLogicOps(tipoVal, monto);
         let cur = getCurrencyStr(tipoVal);
-
         if(editId) {
-            let index = ops.findIndex(o => o.id === editId);
-            if(index !== -1) { ops[index].concepto = concepto; ops[index].tipo = tipoText; ops[index].monto = monto; ops[index].gain = res.gain; ops[index].recibe = res.recibe; ops[index].tasaApli = res.tasaApli; ops[index].cur = cur; }
+            let index = window.ops.findIndex(o => o.id === editId);
+            if(index !== -1) { window.ops[index].concepto = concepto; window.ops[index].tipo = tipoText; window.ops[index].monto = monto; window.ops[index].gain = res.gain; window.ops[index].recibe = res.recibe; window.ops[index].tasaApli = res.tasaApli; window.ops[index].cur = cur; }
             editId = null;
         } else {
             let d = new Date();
-            ops.unshift({
-                id: Date.now(), date: getTodayStr(), month: getMonthStr(), time: d.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'}),
-                concepto: concepto, tipo: tipoText, monto: monto, gain: res.gain, recibe: res.recibe, tasaApli: res.tasaApli, cur: cur
-            });
+            window.ops.unshift({ id: Date.now(), date: getTodayStr(), month: getMonthStr(), time: d.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'}), concepto, tipo: tipoText, monto, gain: res.gain, recibe: res.recibe, tasaApli: res.tasaApli, cur });
         }
-        localStorage.setItem('bymo_ops', JSON.stringify(ops));
-        
+        saveOps();
         document.getElementById('opConcepto').value = ""; document.getElementById('opMonto').value = ""; document.getElementById('opTasaCompra').value = ""; document.getElementById('opTasaVenta').value = "";
         nav('libro');
     }
@@ -1065,71 +1204,45 @@
     function renderLibroOps() {
         let selectFecha = document.getElementById('filtroFechaOps');
         let today = getTodayStr(); let currentMonth = getMonthStr();
-        
-        let fechasUnicas = [...new Set(ops.map(o => o.date))];
+        let fechasUnicas = [...new Set(window.ops.map(o => o.date))];
         if (!fechasUnicas.includes(today)) fechasUnicas.unshift(today);
         fechasUnicas.sort((a, b) => new Date(b) - new Date(a));
-
         let fechaSeleccionada = selectFecha.value || today;
         selectFecha.innerHTML = "";
-        fechasUnicas.forEach(f => {
-            let opt = document.createElement('option');
-            opt.value = f; opt.innerText = (f === today) ? "Hoy" : f;
-            if(f === fechaSeleccionada) opt.selected = true;
-            selectFecha.appendChild(opt);
-        });
+        fechasUnicas.forEach(f => { let opt = document.createElement('option'); opt.value = f; opt.innerText = (f === today) ? "Hoy" : f; if(f === fechaSeleccionada) opt.selected = true; selectFecha.appendChild(opt); });
         fechaSeleccionada = selectFecha.value;
-        
         document.getElementById('tituloDashboardOps').innerText = (fechaSeleccionada === today) ? "UTILIDAD DEL DÍA" : "UTILIDAD (FECHA)";
-
         let dayGain = 0; let dayCount = 0; let monthGain = 0; let totalVol = 0; let allGain = 0;
-
-        ops.forEach(o => {
-            if(!o.date) o.date = today;
-            if(!o.month) o.month = currentMonth;
-            
+        window.ops.forEach(o => {
+            if(!o.date) o.date = today; if(!o.month) o.month = currentMonth;
             if(o.date === fechaSeleccionada) { dayGain += o.gain; dayCount++; }
             if(o.month === currentMonth) monthGain += o.gain;
-            
             let montoReal = o.monto || 0;
-            if (o.tipo && (o.tipo.includes('COP ⮕ 🟢 USDT') || o.tipo.includes('CLP ⮕ 🟢 USDT'))) {
-                let tasa = parseFloat(o.tasaApli);
-                if (tasa > 0) montoReal = montoReal / tasa;
-            }
-            totalVol += montoReal; 
-            allGain += o.gain;
+            if (o.tipo && (o.tipo.includes('COP ⮕ 🟢 USDT') || o.tipo.includes('CLP ⮕ 🟢 USDT'))) { let tasa = parseFloat(o.tasaApli); if (tasa > 0) montoReal = montoReal / tasa; }
+            totalVol += montoReal; allGain += o.gain;
         });
-
         document.getElementById('dashDayValOps').innerText = (dayGain>=0?'+':'') + dayGain.toFixed(2) + " USDT";
         document.getElementById('dashDayValOps').className = "amount " + (dayGain>=0?"text-green":"text-red");
         document.getElementById('dashDayCountOps').innerText = dayCount + " operaciones";
-
         document.getElementById('dashMonthValOps').innerText = (monthGain>=0?'+':'') + monthGain.toFixed(2);
         document.getElementById('dashMonthValOps').className = "val " + (monthGain>=0?"text-green":"text-red");
-        
         let capBase = num('tCapitalBase') || 0;
         document.getElementById('dashCapValOps').innerText = (capBase + allGain).toFixed(2);
         document.getElementById('dashVolValOps').innerText = totalVol.toFixed(2);
         let avgMargin = totalVol > 0 ? (allGain / totalVol) * 100 : 0;
         document.getElementById('dashMarginValOps').innerText = avgMargin.toFixed(2) + "%";
-
-        let opsFiltradas = ops.filter(o => o.date === fechaSeleccionada).slice(0, 3);
+        let opsFiltradas = window.ops.filter(o => o.date === fechaSeleccionada).slice(0, 3);
         let listHtml = opsFiltradas.length === 0 ? "<p class='text-muted' style='text-align:center; padding:20px;'>No hay operaciones.</p>" : "";
-        opsFiltradas.forEach(o => {
-            listHtml += `<div class="op-item"><div class="op-top"><span>${o.time} • ${o.concepto}</span></div><div class="op-mid"><div class="op-title">${o.tipo.split(' ⮕ ')[0]} ⮕ ${o.tipo.split(' ⮕ ')[1]||o.tipo}</div><div class="op-gain ${o.gain>=0?'text-green':'text-red'}">${o.gain>=0?'+':''}${o.gain.toFixed(2)}</div></div><div class="op-bot"><span>Base: ${o.monto||0}</span><div style="display:flex; align-items:center; gap:10px;"><span style="color:#25D366; cursor:pointer; font-weight:bold;" onclick="enviarWhatsAppOps(${o.id})">📲 WA</span><span style="color:#007bff; cursor:pointer; font-weight:bold;" onclick="editarOps(${o.id})">Editar</span><span style="color:#ff4d4f; cursor:pointer; font-weight:bold;" onclick="borrarOps(${o.id})">Borrar</span></div></div></div>`;
-        });
+        opsFiltradas.forEach(o => { listHtml += `<div class="op-item"><div class="op-top"><span>${o.time} • ${o.concepto}</span></div><div class="op-mid"><div class="op-title">${o.tipo.split(' ⮕ ')[0]} ⮕ ${o.tipo.split(' ⮕ ')[1]||o.tipo}</div><div class="op-gain ${o.gain>=0?'text-green':'text-red'}">${o.gain>=0?'+':''}${o.gain.toFixed(2)}</div></div><div class="op-bot"><span>Base: ${o.monto||0}</span><div style="display:flex; align-items:center; gap:10px;"><span style="color:#25D366; cursor:pointer; font-weight:bold;" onclick="enviarWhatsAppOps(${o.id})">📲 WA</span><span style="color:#007bff; cursor:pointer; font-weight:bold;" onclick="editarOps(${o.id})">Editar</span><span style="color:#ff4d4f; cursor:pointer; font-weight:bold;" onclick="borrarOps(${o.id})">Borrar</span></div></div></div>`; });
         document.getElementById('recentOpsList').innerHTML = listHtml;
     }
 
     function renderHistorialOps() {
         let selectFecha = document.getElementById('filtroFechaOps');
         let fechaSeleccionada = selectFecha ? selectFecha.value : getTodayStr();
-        let opsFiltradas = ops.filter(o => o.date === fechaSeleccionada);
+        let opsFiltradas = window.ops.filter(o => o.date === fechaSeleccionada);
         let totalGain = 0; let html = "";
-        opsFiltradas.forEach(o => {
-            totalGain += o.gain;
-            html += `<div class="card" style="padding:12px; border-left:4px solid ${o.gain>=0?'var(--primary-green)':'var(--danger-red)'}; margin-bottom:10px;"><div class="op-top"><span>${o.time} • ${o.concepto}</span></div><div class="op-mid"><div class="op-title">${o.tipo}</div><div class="op-gain ${o.gain>=0?'text-green':'text-red'}">${o.gain>=0?'+':''}${o.gain.toFixed(2)} USDT</div></div><div class="op-bot" style="margin-top:6px;"><span>Base Inversión: ${o.monto||0}</span><div style="display:flex; align-items:center; gap:10px;"><span style="color:#25D366; cursor:pointer; font-weight:bold;" onclick="enviarWhatsAppOps(${o.id})">📲 WhatsApp</span><span style="color:#007bff; cursor:pointer; font-weight:bold;" onclick="editarOps(${o.id})">Editar</span><span style="color:#ff4d4f; cursor:pointer; font-weight:bold;" onclick="borrarOps(${o.id})">Borrar</span></div></div></div>`;
-        });
+        opsFiltradas.forEach(o => { totalGain += o.gain; html += `<div class="card" style="padding:12px; border-left:4px solid ${o.gain>=0?'var(--primary-green)':'var(--danger-red)'}; margin-bottom:10px;"><div class="op-top"><span>${o.time} • ${o.concepto}</span></div><div class="op-mid"><div class="op-title">${o.tipo}</div><div class="op-gain ${o.gain>=0?'text-green':'text-red'}">${o.gain>=0?'+':''}${o.gain.toFixed(2)} USDT</div></div><div class="op-bot" style="margin-top:6px;"><span>Base Inversión: ${o.monto||0}</span><div style="display:flex; align-items:center; gap:10px;"><span style="color:#25D366; cursor:pointer; font-weight:bold;" onclick="enviarWhatsAppOps(${o.id})">📲 WhatsApp</span><span style="color:#007bff; cursor:pointer; font-weight:bold;" onclick="editarOps(${o.id})">Editar</span><span style="color:#ff4d4f; cursor:pointer; font-weight:bold;" onclick="borrarOps(${o.id})">Borrar</span></div></div></div>`; });
         if(opsFiltradas.length === 0) html = "<p class='text-muted' style='text-align:center;'>No hay operaciones en esta fecha.</p>";
         document.getElementById('fullOpsList').innerHTML = html;
         document.getElementById('histCountOps').innerText = opsFiltradas.length;
@@ -1138,10 +1251,8 @@
     }
 
     function editarOps(id) {
-        let op = ops.find(o => o.id === id);
-        if(!op) return;
-        document.getElementById('opConcepto').value = op.concepto;
-        document.getElementById('opMonto').value = op.monto;
+        let op = window.ops.find(o => o.id === id); if(!op) return;
+        document.getElementById('opConcepto').value = op.concepto; document.getElementById('opMonto').value = op.monto;
         let select = document.getElementById('opTipo');
         for(let i=0; i<select.options.length; i++){ if(select.options[i].text === op.tipo) select.selectedIndex = i; }
         editId = id; document.getElementById('btnRegistrarOp').innerText = "Actualizar Operación"; nav('operar');
@@ -1149,22 +1260,19 @@
 
     function borrarOps(id) {
         if(confirm("¿Seguro que quieres borrar este registro?")) {
-            ops = ops.filter(o => o.id !== id); localStorage.setItem('bymo_ops', JSON.stringify(ops));
-            nav('historial');
+            window.ops = window.ops.filter(o => o.id !== id); saveOps(); nav('historial');
         }
     }
 
     function enviarWhatsAppOps(id) {
-        let op = ops.find(o => o.id === id); if(!op) return;
+        let op = window.ops.find(o => o.id === id); if(!op) return;
         let recibeStr = op.recibe !== undefined ? op.recibe.toLocaleString('es-VE', {minimumFractionDigits: 2, maximumFractionDigits:2}) : "N/D";
         let tasaStr = op.tasaApli !== undefined ? op.tasaApli : "N/D";
         let texto = `*CONTABLE BM - Recibo de Operación* 📄\n\n*Concepto:* ${op.concepto}\n*Operación:* ${op.tipo}\n*Monto Base:* ${op.monto}\n*Tasa Aplicada:* ${tasaStr}\n*Monto a Recibir:* ${recibeStr} ${op.cur||""}\n\n_¡Gracias por tu confianza!_`;
         window.open(`https://wa.me/?text=${encodeURIComponent(texto)}`, '_blank');
     }
 
-    // ==========================================
-    // LOGICA MODO CONTABLE Y ESTADISTICAS
-    // ==========================================
+    // CONTABILIDAD
     function procesarContabAuto() {
         let fijos = JSON.parse(localStorage.getItem('bymo_contab_fijos')) || [];
         let now = new Date(); let changed = false;
@@ -1173,18 +1281,12 @@
             let currentTarget = new Date(f.nextRun);
             while(now >= currentTarget) {
                 let eq = calcularEquivUsdtContab(f.moneda, f.monto);
-                contabilidad.unshift({
-                    id: Date.now() + Math.random(), date: currentTarget.toISOString().split('T')[0],
-                    month: `${currentTarget.getFullYear()}-${String(currentTarget.getMonth()+1).padStart(2,'0')}`,
-                    time: currentTarget.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'}),
-                    concepto: f.concepto + ' (Auto)', tipo: f.tipo, categoria: f.categoria || 'Otros',
-                    moneda: f.moneda, monto: f.monto, usdtValue: eq.usdtValue, tasaRef: eq.tasaRef
-                });
+                window.contabilidad.unshift({ id: Date.now() + Math.random(), date: currentTarget.toISOString().split('T')[0], month: `${currentTarget.getFullYear()}-${String(currentTarget.getMonth()+1).padStart(2,'0')}`, time: currentTarget.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'}), concepto: f.concepto + ' (Auto)', tipo: f.tipo, categoria: f.categoria || 'Otros', moneda: f.moneda, monto: f.monto, usdtValue: eq.usdtValue, tasaRef: eq.tasaRef });
                 currentTarget.setMonth(currentTarget.getMonth() + 1); changed = true;
             }
             f.nextRun = currentTarget.getTime();
         });
-        if(changed) { localStorage.setItem('bymo_contab', JSON.stringify(contabilidad)); localStorage.setItem('bymo_contab_fijos', JSON.stringify(fijos)); }
+        if(changed) { saveContab(); localStorage.setItem('bymo_contab_fijos', JSON.stringify(fijos)); }
     }
 
     function calcularEquivUsdtContab(moneda, monto) {
@@ -1197,8 +1299,7 @@
     }
 
     function toggleAutoSettings() {
-        let f = document.getElementById('cFrecuencia').value;
-        document.getElementById('wrapAutoSettings').style.display = (f === 'mensual') ? 'flex' : 'none';
+        document.getElementById('wrapAutoSettings').style.display = (document.getElementById('cFrecuencia').value === 'mensual') ? 'flex' : 'none';
     }
 
     function updatePreviewContab() {
@@ -1216,17 +1317,11 @@
         let moneda = document.getElementById('cMoneda').value;
         let monto = num('cMonto');
         let freq = document.getElementById('cFrecuencia').value;
-
         if(monto <= 0) return alert("Ingresa un monto válido");
-
         let eq = calcularEquivUsdtContab(moneda, monto);
-
         if(editIdContab) {
-            let index = contabilidad.findIndex(c => c.id === editIdContab);
-            if(index !== -1) {
-                contabilidad[index].concepto = concepto; contabilidad[index].tipo = tipo; contabilidad[index].categoria = categoria;
-                contabilidad[index].moneda = moneda; contabilidad[index].monto = monto; contabilidad[index].usdtValue = eq.usdtValue; contabilidad[index].tasaRef = eq.tasaRef;
-            }
+            let index = window.contabilidad.findIndex(c => c.id === editIdContab);
+            if(index !== -1) { window.contabilidad[index].concepto = concepto; window.contabilidad[index].tipo = tipo; window.contabilidad[index].categoria = categoria; window.contabilidad[index].moneda = moneda; window.contabilidad[index].monto = monto; window.contabilidad[index].usdtValue = eq.usdtValue; window.contabilidad[index].tasaRef = eq.tasaRef; }
             editIdContab = null;
         } else {
             if(freq === 'mensual') {
@@ -1236,142 +1331,96 @@
                 let now = new Date();
                 let nextR = new Date(now.getFullYear(), now.getMonth(), dia, hora.split(':')[0], hora.split(':')[1]);
                 if(now > nextR) nextR.setMonth(nextR.getMonth() + 1);
-
                 fijos.push({ concepto, tipo, categoria, moneda, monto, dia, hora, nextRun: nextR.getTime() });
                 localStorage.setItem('bymo_contab_fijos', JSON.stringify(fijos));
                 alert("✅ Movimiento automático programado.");
             }
             let d = new Date();
-            contabilidad.unshift({
-                id: Date.now(), date: getTodayStr(), month: getMonthStr(), time: d.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'}),
-                concepto: concepto, tipo: tipo, categoria: categoria, moneda: moneda, monto: monto, usdtValue: eq.usdtValue, tasaRef: eq.tasaRef
-            });
+            window.contabilidad.unshift({ id: Date.now(), date: getTodayStr(), month: getMonthStr(), time: d.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'}), concepto, tipo, categoria, moneda, monto, usdtValue: eq.usdtValue, tasaRef: eq.tasaRef });
         }
-        localStorage.setItem('bymo_contab', JSON.stringify(contabilidad));
+        saveContab();
         document.getElementById('cConcepto').value = ""; document.getElementById('cMonto').value = "";
         document.getElementById('cFrecuencia').value = "unico"; toggleAutoSettings();
         nav('libro');
     }
 
     function editarContab(id) {
-        let op = contabilidad.find(o => o.id === id); if(!op) return;
-        document.getElementById('cConcepto').value = op.concepto;
-        document.getElementById('cTipo').value = op.tipo;
+        let op = window.contabilidad.find(o => o.id === id); if(!op) return;
+        document.getElementById('cConcepto').value = op.concepto; document.getElementById('cTipo').value = op.tipo;
         updateCategoriaDropdown();
         setTimeout(() => { document.getElementById('cCategoria').value = op.categoria || "Otros"; }, 50);
-        document.getElementById('cMoneda').value = op.moneda;
-        document.getElementById('cMonto').value = op.monto;
-        editIdContab = id;
-        document.getElementById('btnRegistrarContab').innerText = "Actualizar Movimiento";
+        document.getElementById('cMoneda').value = op.moneda; document.getElementById('cMonto').value = op.monto;
+        editIdContab = id; document.getElementById('btnRegistrarContab').innerText = "Actualizar Movimiento";
         updatePreviewContab(); nav('operar');
     }
 
     function renderLibroContab() {
-        let selectMes = document.getElementById('filtroMesContab');
-        let currentMonth = getMonthStr();
-        let mesesUnicos = [...new Set(contabilidad.map(c => c.month))];
+        let selectMes = document.getElementById('filtroMesContab'); let currentMonth = getMonthStr();
+        let mesesUnicos = [...new Set(window.contabilidad.map(c => c.month))];
         if (!mesesUnicos.includes(currentMonth)) mesesUnicos.unshift(currentMonth);
         mesesUnicos.sort((a, b) => new Date(b) - new Date(a));
-
         let mesSel = selectMes.value || currentMonth;
         selectMes.innerHTML = "";
-        mesesUnicos.forEach(m => {
-            let opt = document.createElement('option'); opt.value = m; opt.innerText = (m === currentMonth) ? "Este Mes" : m;
-            if(m === mesSel) opt.selected = true; selectMes.appendChild(opt);
-        });
+        mesesUnicos.forEach(m => { let opt = document.createElement('option'); opt.value = m; opt.innerText = (m === currentMonth) ? "Este Mes" : m; if(m === mesSel) opt.selected = true; selectMes.appendChild(opt); });
         mesSel = selectMes.value;
-
         let totalUsdt = 0; let ingMes = 0; let egMes = 0;
-
-        contabilidad.forEach(c => {
-            if(c.tipo === 'ingreso') { totalUsdt += c.usdtValue; if(c.month === mesSel) ingMes += c.usdtValue; } 
+        window.contabilidad.forEach(c => {
+            if(c.tipo === 'ingreso') { totalUsdt += c.usdtValue; if(c.month === mesSel) ingMes += c.usdtValue; }
             else { totalUsdt -= c.usdtValue; if(c.month === mesSel) egMes += c.usdtValue; }
         });
-
         document.getElementById('cDashTotal').innerText = totalUsdt.toFixed(2) + " USDT";
         document.getElementById('cDashIngresos').innerText = "+" + ingMes.toFixed(2);
         document.getElementById('cDashEgresos').innerText = "-" + egMes.toFixed(2);
-
-        let contabMes = contabilidad.filter(c => c.month === mesSel).slice(0, 4);
+        let contabMes = window.contabilidad.filter(c => c.month === mesSel).slice(0, 4);
         let listHtml = contabMes.length === 0 ? "<p class='text-muted' style='text-align:center; padding:20px;'>No hay movimientos contables.</p>" : "";
-        
-        contabMes.forEach(c => {
-            let sym = c.tipo === 'ingreso' ? '+' : '-';
-            let color = c.tipo === 'ingreso' ? 'text-green' : 'text-red';
-            let curStr = c.moneda==='usdt'?'USDT':c.moneda==='usd_bcv'?'$ (Pagado en Bs)':c.moneda==='bs'?'Bs':'COP';
-            listHtml += `<div class="op-item"><div class="op-top"><span>${c.date} ${c.time} • ${c.categoria||'Otros'}</span></div><div class="op-mid"><div class="op-title">${c.concepto}</div><div class="op-gain ${color}">${sym}${c.usdtValue.toFixed(2)} USDT</div></div><div class="op-bot"><span>Operado: ${c.monto} ${curStr}</span><div style="display:flex; align-items:center; gap:10px;"><span style="color:#007bff; cursor:pointer; font-weight:bold;" onclick="editarContab(${c.id})">Editar</span><span style="color:#ff4d4f; cursor:pointer; font-weight:bold;" onclick="borrarContab(${c.id})">Borrar</span></div></div></div>`;
-        });
+        contabMes.forEach(c => { let sym = c.tipo === 'ingreso' ? '+' : '-'; let color = c.tipo === 'ingreso' ? 'text-green' : 'text-red'; let curStr = c.moneda==='usdt'?'USDT':c.moneda==='usd_bcv'?'$ (Pagado en Bs)':c.moneda==='bs'?'Bs':'COP'; listHtml += `<div class="op-item"><div class="op-top"><span>${c.date} ${c.time} • ${c.categoria||'Otros'}</span></div><div class="op-mid"><div class="op-title">${c.concepto}</div><div class="op-gain ${color}">${sym}${c.usdtValue.toFixed(2)} USDT</div></div><div class="op-bot"><span>Operado: ${c.monto} ${curStr}</span><div style="display:flex; align-items:center; gap:10px;"><span style="color:#007bff; cursor:pointer; font-weight:bold;" onclick="editarContab(${c.id})">Editar</span><span style="color:#ff4d4f; cursor:pointer; font-weight:bold;" onclick="borrarContab(${c.id})">Borrar</span></div></div></div>`; });
         document.getElementById('recentContabList').innerHTML = listHtml;
     }
 
     function renderHistorialContab() {
         let html = "";
-        contabilidad.forEach(c => {
-            let sym = c.tipo === 'ingreso' ? '+' : '-';
-            let color = c.tipo === 'ingreso' ? 'var(--primary-green)' : 'var(--danger-red)';
-            let curStr = c.moneda==='usdt'?'USDT':c.moneda==='usd_bcv'?'$ a BCV':c.moneda==='bs'?'Bs':'COP';
-            html += `<div class="card" style="padding:12px; border-left:4px solid ${color}; margin-bottom:10px;"><div class="op-top"><span>${c.date} ${c.time} • ${curStr}</span></div><div class="op-mid"><div class="op-title">${c.concepto} <span style="font-size:10px; opacity:0.7;">(${c.categoria||'Otros'})</span></div><div class="op-gain" style="color:${color}">${sym}${c.usdtValue.toFixed(2)} USDT</div></div><div class="op-bot" style="margin-top:6px;"><span>Monto Original: ${c.monto}</span><div style="display:flex; align-items:center; gap:10px;"><span style="color:#007bff; cursor:pointer; font-weight:bold;" onclick="editarContab(${c.id})">Editar</span><span style="color:#ff4d4f; cursor:pointer; font-weight:bold;" onclick="borrarContab(${c.id})">Borrar</span></div></div></div>`;
-        });
-        if(contabilidad.length === 0) html = "<p class='text-muted' style='text-align:center;'>No hay registros contables.</p>";
+        window.contabilidad.forEach(c => { let sym = c.tipo === 'ingreso' ? '+' : '-'; let color = c.tipo === 'ingreso' ? 'var(--primary-green)' : 'var(--danger-red)'; let curStr = c.moneda==='usdt'?'USDT':c.moneda==='usd_bcv'?'$ a BCV':c.moneda==='bs'?'Bs':'COP'; html += `<div class="card" style="padding:12px; border-left:4px solid ${color}; margin-bottom:10px;"><div class="op-top"><span>${c.date} ${c.time} • ${curStr}</span></div><div class="op-mid"><div class="op-title">${c.concepto} <span style="font-size:10px; opacity:0.7;">(${c.categoria||'Otros'})</span></div><div class="op-gain" style="color:${color}">${sym}${c.usdtValue.toFixed(2)} USDT</div></div><div class="op-bot" style="margin-top:6px;"><span>Monto Original: ${c.monto}</span><div style="display:flex; align-items:center; gap:10px;"><span style="color:#007bff; cursor:pointer; font-weight:bold;" onclick="editarContab(${c.id})">Editar</span><span style="color:#ff4d4f; cursor:pointer; font-weight:bold;" onclick="borrarContab(${c.id})">Borrar</span></div></div></div>`; });
+        if(window.contabilidad.length === 0) html = "<p class='text-muted' style='text-align:center;'>No hay registros contables.</p>";
         document.getElementById('fullContabList').innerHTML = html;
     }
 
     function borrarContab(id) {
         if(confirm("¿Seguro que quieres borrar este registro contable?")) {
-            contabilidad = contabilidad.filter(c => c.id !== id);
-            localStorage.setItem('bymo_contab', JSON.stringify(contabilidad));
-            renderLibroContab(); renderHistorialContab();
+            window.contabilidad = window.contabilidad.filter(c => c.id !== id);
+            saveContab(); renderLibroContab(); renderHistorialContab();
         }
     }
 
-    // STATS
     function drawPieChart(data, tipo, pieId, legendId, cardId) {
         let subset = data.filter(d => d.tipo === tipo);
         let total = subset.reduce((sum, d) => sum + d.usdtValue, 0);
-        
         if(total === 0) { document.getElementById(cardId).style.display = 'none'; return; }
         document.getElementById(cardId).style.display = 'block';
-
         let stats = {};
         subset.forEach(d => { let cat = d.categoria || 'Otros'; stats[cat] = (stats[cat] || 0) + d.usdtValue; });
-        let sortedCats = Object.entries(stats).sort((a,b) => b[1] - a[1]);
-        
+        let sortedCats = Object.entries(stats).sort((a,b) => b[1]-a[1]);
         let conicStr = []; let legendHtml = ""; let currentAngle = 0;
-
         sortedCats.forEach(([cat, val], index) => {
-            let color = pieColors[index % pieColors.length];
-            let pct = (val / total) * 100;
-            let angle = (pct / 100) * 360;
-            conicStr.push(`${color} ${currentAngle}deg ${currentAngle + angle}deg`);
-            currentAngle += angle;
+            let color = pieColors[index % pieColors.length]; let pct = (val / total) * 100; let angle = (pct / 100) * 360;
+            conicStr.push(`${color} ${currentAngle}deg ${currentAngle + angle}deg`); currentAngle += angle;
             legendHtml += `<div class="legend-item"><div style="display:flex; align-items:center;"><div class="legend-color" style="background:${color};"></div><span style="color:var(--text-main);">${cat}</span></div><div><b style="color:var(--text-main);">${pct.toFixed(1)}%</b> <span class="text-muted">(${val.toFixed(2)}$)</span></div></div>`;
         });
-
         document.getElementById(pieId).style.background = `conic-gradient(${conicStr.join(', ')})`;
         document.getElementById(legendId).innerHTML = legendHtml;
     }
 
     function renderStatsContab() {
         let periodo = document.getElementById('filtroPeriodoStats').value;
-        let now = new Date();
-        let currentWeek = getWeekNumber(now);
-        let currentMonth = getMonthStr();
-        let currentYear = now.getFullYear().toString();
-
-        let filtered = contabilidad.filter(c => {
+        let now = new Date(); let currentWeek = getWeekNumber(now); let currentMonth = getMonthStr(); let currentYear = now.getFullYear().toString();
+        let filtered = window.contabilidad.filter(c => {
             if(periodo === 'semana') return getWeekNumber(new Date(c.date)) === currentWeek;
             if(periodo === 'mes') return c.month === currentMonth;
             if(periodo === 'año') return c.date.startsWith(currentYear);
             return true;
         });
-
         drawPieChart(filtered, 'ingreso', 'pieIngresos', 'legendIngresos', 'statsIngresosCard');
         drawPieChart(filtered, 'egreso', 'pieEgresos', 'legendEgresos', 'statsEgresosCard');
-        
-        if (filtered.length === 0) {
-            document.getElementById('statsIngresosCard').style.display = 'none';
-            document.getElementById('statsEgresosCard').style.display = 'none';
-        }
+        if (filtered.length === 0) { document.getElementById('statsIngresosCard').style.display = 'none'; document.getElementById('statsEgresosCard').style.display = 'none'; }
     }
 </script>
 
