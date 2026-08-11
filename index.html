@@ -46,7 +46,7 @@
         [data-theme="light"] .btn { color: #ffffff; }
         [data-theme="light"] .fab { color: #ffffff; }
 
-        body { background-color: var(--bg-dark); color: var(--text-main); padding-bottom: calc(80px + env(safe-area-inset-bottom)); overflow-x: hidden; }
+        body { background-color: var(--bg-dark); color: var(--text-main); padding-bottom: calc(88px + env(safe-area-inset-bottom)); overflow-x: hidden; }
         .container { max-width: 500px; margin: 0 auto; padding: 15px; width: 100%; min-height: 100vh; position: relative; }
         
         .btn-refresh { position: absolute; top: 15px; right: 15px; font-size: 20px; cursor: pointer; z-index: 50; opacity: 0.8; transition: 0.2s; }
@@ -90,7 +90,7 @@
         .btn:active { background: var(--primary-green-hover); transform: scale(0.98); }
         .btn-secondary { background: var(--card-border); color: var(--text-main); }
         
-        .fab { position: fixed; bottom: calc(90px + env(safe-area-inset-bottom)); right: 20px; width: 56px; height: 56px; background: var(--primary-green); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 28px; color: #000; box-shadow: 0 4px 12px rgba(32,201,116,0.4); cursor: pointer; z-index: 90; transition: 0.2s; }
+        .fab { position: fixed; bottom: calc(98px + env(safe-area-inset-bottom)); right: 20px; width: 56px; height: 56px; background: var(--primary-green); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 28px; color: #000; box-shadow: 0 4px 12px rgba(32,201,116,0.4); cursor: pointer; z-index: 90; transition: 0.2s; }
         .fab:active { transform: scale(0.9); }
 
         .header-list { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; }
@@ -117,7 +117,7 @@
         .section.active { display: block; }
         @keyframes fadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
 
-        .nav-bar { position: fixed; bottom: 0; left: 0; width: 100%; background: var(--nav-bg); display: flex; border-top: 1px solid var(--card-border); z-index: 100; padding-bottom: calc(14px + env(safe-area-inset-bottom)); }
+        .nav-bar { position: fixed; bottom: 0; left: 0; width: 100%; background: var(--nav-bg); display: flex; border-top: 1px solid var(--card-border); z-index: 100; padding-bottom: calc(22px + env(safe-area-inset-bottom)); }
         .nav-item { flex: 1; text-align: center; padding: 12px 0; font-size: 10px; font-weight: 600; cursor: pointer; color: var(--text-muted); display: flex; flex-direction: column; align-items: center; gap: 4px; transition: 0.2s; }
         .nav-item svg { width: 20px; height: 20px; fill: currentColor; }
         .nav-item.active { color: var(--primary-green); }
@@ -129,7 +129,7 @@
         details[open] summary::after { content: '▲'; }
         .manual-body { padding: 15px; font-size: 13px; color: var(--text-muted); line-height: 1.5; border-top: 1px solid var(--card-border); background: var(--bg-dark); }
 
-        .page-header { display: flex; align-items: center; gap: 15px; margin-bottom: 20px; }
+        .page-header { display: flex; align-items: center; gap: 15px; margin-top: 32px; margin-bottom: 20px; }
         .back-btn { font-size: 20px; cursor: pointer; padding: 5px; }
 
         .conv-row { display: flex; justify-content: space-between; border-bottom: 1px solid var(--card-border); padding: 8px 0; font-size: 14px; }
@@ -553,8 +553,8 @@
     <!-- CONFIGURACIÓN REESTRUCTURADA -->
     <div id="sec-tasas" class="section">
         <div class="page-header"><h3 style="margin:0; text-align:center; width:100%;">Configuración General</h3></div>
-        
-        <button id="btnSync" class="btn" style="background:#007bff; color:#fff; margin-bottom:20px;" onclick="sincronizarTasasAPI()">🔄 Sincronizar Tasas Online</button>
+
+        <div class="text-muted" style="text-align:center; margin-bottom:20px;">☁️ Las tasas se sincronizan solas automáticamente</div>
 
         <details>
             <summary>Categorías Contables</summary>
