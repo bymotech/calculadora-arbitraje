@@ -617,6 +617,10 @@
                     <input type="text" id="tZelleBs" inputmode="decimal">
                 </div>
                 <div class="input-group">
+                    <label>🇺🇸 Zelle ⮕ Pesos COP (Tasa)</label>
+                    <input type="text" id="tZelleCop" placeholder="Ej: 3850" inputmode="decimal">
+                </div>
+                <div class="input-group">
                     <label>🅿️ PayPal ⮕ Bs Ref</label>
                     <input type="text" id="tPaypalBs" inputmode="decimal">
                 </div>
@@ -891,6 +895,8 @@
         if(window.saveToFirebase) window.saveToFirebase();
     }
 
+    let autoSyncInterval = null;
+
     function initApp() {
         initTheme();
         loadTasas();
@@ -898,6 +904,15 @@
         procesarContabAuto();
         switchAppMode(appMode, true);
         calcularConversor();
+        iniciarAutoSyncTasas();
+    }
+
+    // Sincroniza las tasas automáticamente al abrir la app y luego cada 30 min,
+    // sin bloquear la UI ni mostrar alertas (modo silencioso).
+    function iniciarAutoSyncTasas() {
+        sincronizarTasasAPI(true);
+        if(autoSyncInterval) clearInterval(autoSyncInterval);
+        autoSyncInterval = setInterval(() => sincronizarTasasAPI(true), 30 * 60 * 1000);
     }
 
     function initTheme() {
@@ -928,9 +943,9 @@
     }
 
     function num(id) {
-        let val = document.getElementById(id).value;
-        if(!val) return 0;
-        return parseFloat(val.replace(/,/g, '.')) || 0;
+        let el = document.getElementById(id);
+        if(!el || !el.value) return 0;
+        return parseFloat(el.value.replace(/,/g, '.')) || 0;
     }
 
     window.onload = () => {
@@ -997,10 +1012,10 @@
         if(!silent) alert("Ajustes Guardados ✅");
     }
 
-    async function sincronizarTasasAPI() {
+    async function sincronizarTasasAPI(silent = false) {
         const btn = document.getElementById('btnSync');
-        const originalText = btn.innerText;
-        btn.innerText = "Sincronizando... ⏳"; btn.disabled = true;
+        const originalText = btn ? btn.innerText : '';
+        if(btn) { btn.innerText = "Sincronizando... ⏳"; btn.disabled = true; }
         let bcvUsd = 0, bcvEur = 0, binanceUsdt = 0;
         try {
             let resBcv1 = await fetch('https://pydolarvenezuela-api.vercel.app/api/v1/dollar?page=bcv');
@@ -1031,8 +1046,13 @@
         if(bcvEur > 0) document.getElementById('tBcvEur').value = bcvEur;
         if(binanceUsdt > 0) { document.getElementById('tUsdtBs').value = binanceUsdt; document.getElementById('calcBin').value = binanceUsdt; }
 
-        if(bcvUsd > 0 || binanceUsdt > 0) { saveTasas(true); alert("✅ Tasas sincronizadas."); } else { alert("❌ Error de conexión principal."); }
-        btn.innerText = originalText; btn.disabled = false;
+        if(bcvUsd > 0 || binanceUsdt > 0) {
+            saveTasas(true);
+            if(!silent) alert("✅ Tasas sincronizadas.");
+        } else if(!silent) {
+            alert("❌ Error de conexión principal.");
+        }
+        if(btn) { btn.innerText = originalText; btn.disabled = false; }
     }
 
     // CATEGORIAS
